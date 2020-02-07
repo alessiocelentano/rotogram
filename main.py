@@ -8,13 +8,44 @@ import json
 user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
 headers = {'User-Agent': user_agent}
 base_url = 'https://bulbapedia.bulbagarden.net/wiki/{}_(Pok%C3%A9mon)'
-name = (re.sub('[\s]', '_', input('Nome Pokemon: ').title()))
+name = re.sub('[\s]', '_', input('Nome Pokemon: ').title())
 url = base_url.format(name)
 request = urllib.request.Request(url, None, headers)
 response = urllib.request.urlopen(request)
 data = response.read()
 soup = BeautifulSoup(data, 'html.parser')
 # ---formal stuff---
+
+table = soup.find('table', {'class': 'roundy'})
+
+# DEX NUM
+dex = table.find('a', {'title': 'List of Pokémon by National Pokédex number'}).span.text
+print(dex)
+
+# TYPE(S)
+type_table = soup.find('table', {'class': 'roundy', 'width': '100%', 'style': 'background: #FFF; padding-top: 3px;'})
+types_list = type_table.find_all('table', {'style': 'margin:auto; background:none;'})
+form_list = type_table.find_all('small')
+for typee, form in zip(types_list, form_list):
+    index = 0
+    a = typee.find_all('a')
+    for i in a:
+        if i.text != 'Unknown':
+            index += 1
+    if index == 1:
+        if form.text:
+            print('Type: ' + a[0].text + ' (' + form.text + ')')
+        else:
+            print('Type: ' + a[0].text)
+    elif index == 2:
+        if form.text:
+            print('Type: ' + a[0].text + ' / ' + a[1].text + ' (' + form.text + ')')
+        else:
+            print('Type: ' + a[0].text + ' / ' + a[1].text)
+
+
+gender_ratio = table.find('title', {'title': 'List of Pokémon by gender ratio'})
+print(gender_ratio)
 
 # STATS
 ref1 = soup.find('span', {'id': 'Base_stats'})
