@@ -72,12 +72,15 @@ for form_data, form in zip(forms_data, forms_list):
                     # Pt is the correct abbreviation
                     game = 'pt'
                 data[name][form][key][game] = local
+        elif key == 'type':
+            value = value.text[1:-1]
+            types = re.split(' ', value)
+            data[name][form][key] = {}
+            data[name][form][key]['type1'] = types[0]
+            if len(types) > 1:
+                data[name][form][key]['type2'] = types[1]
         else:
-            if ' ' == value.text[-1]:
-                value = value.text[:-1]
-            else:
-                value = value.text
-            data[name][form][key] = re.sub('\n', '', value)
+            data[name][form][key] = re.sub('\n', '', value.text)
 
 
 # STATS
