@@ -71,6 +71,9 @@ for form_data, form in zip(forms_data, forms_list):
                 elif game == 'p':
                     # Pt is the correct abbreviation
                     game = 'pt'
+                elif game == 'ss':
+                    # SwSh is the correct abbreviation
+                    game = 'swsh'
                 data[name][form][key][game] = local
         elif key == 'type':
             value = value.text[1:-1]
