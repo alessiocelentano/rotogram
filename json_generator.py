@@ -73,7 +73,11 @@ for form_data, form in zip(forms_data, forms_list):
                     game = 'pt'
                 data[name][form][key][game] = local
         else:
-            data[name][form][key] = re.sub('\n', '', value.text)
+            if ' ' == value.text[-1]:
+                value = value.text[:-1]
+            else:
+                value = value.text
+            data[name][form][key] = re.sub('\n', '', value)
 
 
 # STATS
