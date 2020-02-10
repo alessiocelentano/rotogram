@@ -79,6 +79,12 @@ for form_data, form in zip(forms_data, forms_list):
             data[name][form][key]['type1'] = types[0]
             if len(types) > 1:
                 data[name][form][key]['type2'] = types[1]
+        elif key == 'height' or key == 'weight':
+            values = re.split(' ', value.text)
+            data[name][form][key] = {}
+            data[name][form][key]['si'] = values[0]
+            data[name][form][key]['usc'] = values[1]
+
         else:
             data[name][form][key] = re.sub('\n', '', value.text)
 
