@@ -24,6 +24,7 @@ dataa = response.read()
 soup = BeautifulSoup(dataa, 'html.parser')
 
 
+name = re.sub(' ', '_', name.lower())
 data[name] = {}
 
 
@@ -36,7 +37,6 @@ forms_list = [i.text for i in forms_table.find_all('a')]
 forms_data = soup.find_all('div', {'class': 'grid-col span-md-6 span-lg-4'})
 del forms_data[0]
 for form_data, form in zip(forms_data, forms_list):
-    name = re.sub(' ', '_', name.lower())
     form = re.sub(' ', '_', form.lower())
     data[name][form] = {}
     keys_list = form_data.find_all('th')
