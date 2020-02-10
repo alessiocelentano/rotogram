@@ -45,12 +45,13 @@ for form_data, form in zip(forms_data, forms_list):
         if key == 'abilities':
             data[name][form][key] = {}
             index = 1
-            for ab in value.span.find_all('a'):
-                data[name][form][key]['ability' + str(index)] = ab.text
-                index += 1
-            if value.small:
-                for ab in value.small.find('a'):
-                    data[name][form][key]['hidden_ability'] = value.small.a.text
+            if value.text != '—': # For Partner Pikachu/Eevee
+                for ab in value.span.find_all('a'):
+                    data[name][form][key]['ability' + str(index)] = ab.text
+                    index += 1
+                if value.small:
+                    for ab in value.small.find('a'):
+                        data[name][form][key]['hidden_ability'] = value.small.a.text
         elif key == 'local':
             data[name][form][key] = {}
             local_list = re.findall('[0-9][0-9][0-9]', value.text)
