@@ -117,5 +117,28 @@ for form in forms_list:
     data[name][form]['base_stats']['total'] = total_list.pop(0)
 
 
+# EV yield, cath rate, base friendship, base exp and growth rate
+# Egg groups, gender and egg cycles
+data_list = soup.find_all('div', {'class': 'grid-col span-md-6 span-lg-12'})
+index = 0
+count = 0
+for i in data_list:
+    if count == 2:
+        index += 1
+        count = 0
+    key_list = i.find_all('th')
+    value_list = i.find_all('td')
+    for key, value in zip(key_list, value_list):
+        form = re.sub(' ', '_', forms_list[index].lower())
+        key = re.sub(' ', '_', key.text.lower()).replace('.', '')
+        if key == 'ev_yield':
+            data[name][form][key] = []
+            for stat in re.split(', ', value.text.replace('\n', '')):
+                data[name][form][key].append(stat)
+        else:
+            data[name][form][key] = re.split(' ', value.text.replace('\n', ''))[0]
+    count += 1
+
+
 with open('pkmn.json', 'w') as filee:
-    data = json.dump(data, filee, indent=4)
+    json.dump(data, filee, indent=4)
