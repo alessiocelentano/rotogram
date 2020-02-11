@@ -131,10 +131,16 @@ for i in data_list:
     for key, value in zip(key_list, value_list):
         form = re.sub(' ', '_', forms_list[index].lower())
         key = re.sub(' ', '_', key.text.lower()).replace('.', '')
-        if key == 'ev_yield':
-            data[name][form][key] = []
-            for stat in re.split(', ', value.text.replace('\n', '')):
-                data[name][form][key].append(stat)
+        if key in ['ev_yield', 'growth_rate', 'egg_groups']:
+            if key == 'growth_rate':
+                data[name][form][key] = value.text
+            else:
+                if '—' not in value.text:  # For Partner Pikachu/Eevee
+                    data[name][form][key] = []
+                    for stat in re.split(', ', value.text[1:-1]):
+                        data[name][form][key].append(stat)
+        elif key == 'gender':
+            data[name][form][key] = value.text
         else:
             data[name][form][key] = re.split(' ', value.text.replace('\n', ''))[0]
     count += 1
