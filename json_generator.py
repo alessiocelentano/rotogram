@@ -150,6 +150,8 @@ for i in data_list:
 for form in forms_list:
     form = re.sub(' ', '_', form.lower())
     evo_lines_list = soup.find_all('div', {'class': 'infocard-list-evo'})
+    split_lines_list = evo_lines_list[0].find_all('div', {'class': 'infocard-list-evo'})
+    evo_lines_list = [i for i in evo_lines_list if i not in split_lines_list]
     for line in evo_lines_list:
         pkmns = line.find_all('div')
         family = []
