@@ -146,5 +146,42 @@ for i in data_list:
     count += 1
 
 
+# Evolutions
+for form in forms_list:
+    form = re.sub(' ', '_', form.lower())
+    evo_lines_list = soup.find_all('div', {'class': 'infocard-list-evo'})
+    for line in evo_lines_list:
+        pkmns = line.find_all('div')
+        family = []
+        for pkmn in pkmns:
+            infos = pkmn.find('span', {'class': 'infocard-lg-data text-muted'})
+            infos_list = infos.find_all('small')
+            if len(infos_list) == 3:
+                pkmn_name = infos_list[1]
+                pkmn_name = re.sub(' ', '_', pkmn_name.text.lower())
+            else:
+                pkmn_name = infos.find('a').text
+                pkmn_name = re.sub(' ', '_', pkmn_name.lower())
+            if pkmn_name not in family:
+                family.append(pkmn_name)
+        if form in family:
+            break
+    data[name][form]['preevos'] = []
+    data[name][form]['evos'] = []
+    data[name][form]['family'] = []
+    preevo = True
+    for i in family:
+        if form == i:
+            preevo = False
+            i = re.sub('_', ' ', i.title())
+        else:
+            i = re.sub('_', ' ', i.title())
+            if preevo:
+                data[name][form]['preevos'].append(i)
+            else:
+                data[name][form]['evos'].append(i)
+        data[name][form]['family'].append(i)
+
+
 with open('pkmn.json', 'w') as filee:
     json.dump(data, filee, indent=4)
