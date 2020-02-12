@@ -153,45 +153,54 @@ for form in forms_list:
     split_lines_list = evo_lines_list[0].find_all('div', {'class': 'infocard-list-evo'})
     evo_lines_list = [i for i in evo_lines_list if i not in split_lines_list]
     eevee = ['eevee', 'partner_eevee']
-    for line in evo_lines_list:
-        pkmns = line.find_all('div')
-        if form in eevee:
-            if line == evo_lines_list[0]:
+    eeveelutions = [
+        'flareon', 'vaporeon', 'jolteon',
+        'glaceon', 'leafeon', 'umbreon',
+        'espeon', 'sylveon'
+    ]
+    if name in eeveelutions:
+        data[name][name]['preevos'] = ['Eevee']
+        data[name][name]['evos'] = {}
+        data[name][name]['family'] = eeveelutions
+    else:
+        for line in evo_lines_list:
+            pkmns = line.find_all('div')
+            if form in eevee:
+                if line == evo_lines_list[0]:
+                    family = []
+            else:
                 family = []
-        else:
-            family = []
-        for pkmn in pkmns:
-            infos = pkmn.find('span', {'class': 'infocard-lg-data text-muted'})
-            infos_list = infos.find_all('small')
-            if len(infos_list) == 3:
-                pkmn_name = infos_list[1]
-                pkmn_name = re.sub(' ', '_', pkmn_name.text.lower())
+            for pkmn in pkmns:
+                infos = pkmn.find('span', {'class': 'infocard-lg-data text-muted'})
+                infos_list = infos.find_all('small')
+                if len(infos_list) == 3:
+                    pkmn_name = infos_list[1]
+                    pkmn_name = re.sub(' ', '_', pkmn_name.text.lower())
+                else:
+                    pkmn_name = infos.find('a').text
+                    pkmn_name = re.sub(' ', '_', pkmn_name.lower())
+                if pkmn_name not in family:
+                    family.append(pkmn_name)
+                if form not in eevee:
+                    if form in family:
+                        break
+        data[name][form]['preevos'] = []
+        data[name][form]['evos'] = []
+        data[name][form]['family'] = []
+        preevo = True
+        if form == 'partner_eevee':
+            family[0] = form
+        for i in family:
+            if form == i:
+                preevo = False
+                i = re.sub('_', ' ', i.title())
             else:
-                pkmn_name = infos.find('a').text
-                pkmn_name = re.sub(' ', '_', pkmn_name.lower())
-            if pkmn_name not in family:
-                family.append(pkmn_name)
-            if form not in eevee:
-                if form in family:
-                    break
-    data[name][form]['preevos'] = []
-    data[name][form]['evos'] = []
-    data[name][form]['family'] = []
-    preevo = True
-    for i in family:
-        if i == 'eevee':
-            if form == 'partner_eevee':
-                i = 'partner_eevee'
-        if form == i:
-            preevo = False
-            i = re.sub('_', ' ', i.title())
-        else:
-            i = re.sub('_', ' ', i.title())
-            if preevo:
-                data[name][form]['preevos'].append(i)
-            else:
-                data[name][form]['evos'].append(i)
-        data[name][form]['family'].append(i)
+                i = re.sub('_', ' ', i.title())
+                if preevo:
+                    data[name][form]['preevos'].append(i)
+                else:
+                    data[name][form]['evos'].append(i)
+            data[name][form]['family'].append(i)
 
 
 with open('pkmn.json', 'w') as filee:
