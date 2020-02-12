@@ -181,9 +181,9 @@ for form in forms_list:
                     pkmn_name = re.sub(' ', '_', pkmn_name.lower())
                 if pkmn_name not in family:
                     family.append(pkmn_name)
-                if form not in eevee:
-                    if form in family:
-                        break
+            if form not in eevee:
+                if form in family:
+                    break
         data[name][form]['preevos'] = []
         data[name][form]['evos'] = []
         data[name][form]['family'] = []
