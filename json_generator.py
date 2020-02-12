@@ -190,6 +190,8 @@ for form in forms_list:
         preevo = True
         if form == 'partner_eevee':
             family[0] = form
+        if form == 'partner_pikachu':
+            family[1] = form
         for i in family:
             if form == i:
                 preevo = False
