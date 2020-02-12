@@ -152,9 +152,14 @@ for form in forms_list:
     evo_lines_list = soup.find_all('div', {'class': 'infocard-list-evo'})
     split_lines_list = evo_lines_list[0].find_all('div', {'class': 'infocard-list-evo'})
     evo_lines_list = [i for i in evo_lines_list if i not in split_lines_list]
+    eevee = ['eevee', 'partner_eevee']
     for line in evo_lines_list:
         pkmns = line.find_all('div')
-        family = []
+        if form in eevee:
+            if line == evo_lines_list[0]:
+                family = []
+        else:
+            family = []
         for pkmn in pkmns:
             infos = pkmn.find('span', {'class': 'infocard-lg-data text-muted'})
             infos_list = infos.find_all('small')
@@ -166,13 +171,17 @@ for form in forms_list:
                 pkmn_name = re.sub(' ', '_', pkmn_name.lower())
             if pkmn_name not in family:
                 family.append(pkmn_name)
-        if form in family:
-            break
+            if form not in eevee:
+                if form in family:
+                    break
     data[name][form]['preevos'] = []
     data[name][form]['evos'] = []
     data[name][form]['family'] = []
     preevo = True
     for i in family:
+        if i == 'eevee':
+            if form == 'partner_eevee':
+                i = 'partner_eevee'
         if form == i:
             preevo = False
             i = re.sub('_', ' ', i.title())
