@@ -149,6 +149,7 @@ for i in data_list:
 # Evolutions
 for form in forms_list:
     form = re.sub(' ', '_', form.lower())
+    data[name][form]['evo_methods'] = {'from': None, 'to': None}
     evo_lines_list = soup.find_all('div', {'class': 'infocard-list-evo'})
     split_lines_list = evo_lines_list[0].find_all('div', {'class': 'infocard-list-evo'})
     evo_lines_list = [i for i in evo_lines_list if i not in split_lines_list]
@@ -181,6 +182,19 @@ for form in forms_list:
                     pkmn_name = re.sub(' ', '_', pkmn_name.lower())
                 if pkmn_name not in family:
                     family.append(pkmn_name)
+            evo_methods = line.find_all('span', {'class': 'infocard infocard-arrow'})
+            for evo_method in evo_methods:
+                method_text = re.sub('[()]', '', evo_method.small.text)
+                fromm = evo_method.findPrevious('div', {'class': 'infocard'})
+                fromm = fromm.find('a', {'class': 'ent-name'}).text
+                fromm = re.sub(' ', '_', fromm.lower())
+                to = evo_method.findNext('div', {'class': 'infocard'})
+                to = to.find('a', {'class': 'ent-name'}).text
+                to = re.sub(' ', '_', to.lower())
+                if form == fromm:
+                    data[name][form]['evo_methods']['from'] = method_text
+                if form == to:
+                    data[name][form]['evo_methods']['to'] = method_text
             if form not in eevee:
                 if form in family:
                     break
