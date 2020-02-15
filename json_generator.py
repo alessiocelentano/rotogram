@@ -182,7 +182,9 @@ for form in forms_list:
                     pkmn_name = re.sub(' ', '_', pkmn_name.lower())
                 if pkmn_name not in family:
                     family.append(pkmn_name)
+            evo_split = line.find_all('span', {'class': 'infocard-evo-split'})
             evo_methods = line.find_all('span', {'class': 'infocard infocard-arrow'})
+            evo_methods = [i for i in evo_methods if i not in evo_split]
             for evo_method in evo_methods:
                 method_text = re.sub('[()]', '', evo_method.small.text)
                 fromm = evo_method.findPrevious('div', {'class': 'infocard'})
