@@ -193,9 +193,9 @@ for form in forms_list:
                 to = evo_method.findNext('div', {'class': 'infocard'})
                 to = to.find('a', {'class': 'ent-name'}).text
                 to = re.sub(' ', '_', to.lower())
-                if form == fromm:
+                if form == fromm or ('partner' in form and fromm in form):
                     data[name][form]['evo_methods']['from'] = method_text
-                if form == to:
+                if form == to or ('partner' in form and to in form):
                     data[name][form]['evo_methods']['to'] = method_text
             if form not in eevee:
                 if form in family:
