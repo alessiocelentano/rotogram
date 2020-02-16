@@ -268,9 +268,13 @@ for form in forms_list:
                 ).text
                 into = re.sub(' ', '_', into.lower())
                 if form == fromm or ('partner' in form and fromm in form):
-                    data[name][form]['evo_methods']['from'] = method_text
+                    data[name][form]['evo_methods']['from'] = {
+                        into: method_text
+                    }
                 if form == into or ('partner' in form and into in form):
-                    data[name][form]['evo_methods']['into'] = method_text
+                    data[name][form]['evo_methods']['into'] = {
+                        fromm: method_text
+                    }
             if form not in eevee:
                 if form in family:
                     break
