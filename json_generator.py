@@ -216,19 +216,22 @@ for form in forms_list:
                 continue
         if str(infocard) not in str(split):
             pre_evo = infocard.find_previous_sibling('div')
-            if len(pre_evo.find_all('small')) == 3:
-                pre_evo_text = pre_evo.find_all('small')[-2].text
-            else:
-                pre_evo_text = pre_evo.find_all('a')[1].text
-            pre_evo_method = infocard.find_previous_sibling('span')
-            pre_evo_method_text = re.sub('[()]', '', pre_evo_method.small.text)
+            try:
+                if len(pre_evo.find_all('small')) == 3:
+                    pre_evo_text = pre_evo.find_all('small')[-2].text
+                else:
+                    pre_evo_text = pre_evo.find_all('a')[1].text
+                pre_evo_method = infocard.find_previous_sibling('span')
+                pre_evo_method_text = re.sub('[()]', '', pre_evo_method.small.text)
+            except AttributeError:
+                pre_evo_text, pre_evo_method_text = None, None
             next_span = infocard.find_next_sibling('span')
             if next_span.attrs == {'class':['infocard', 'infocard-arrow']}:
                 evo = infocard.find_next_sibling('div')
                 if len(evo.find_all('small')) == 3:
                     evo_text = evo.find_all('small')[-2].text
                 else:
-                    evo_text = evo.find('a').text
+                    evo_text = evo.find_all('a')[1].text
                 evo_method = infocard.find_next_sibling('span')
                 evo_method_text = re.sub('[()]', '', evo_method.small.text)
                 data[pkmn][form]['evo_methods'] = {
