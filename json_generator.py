@@ -186,15 +186,16 @@ for form in forms_list:
             'class': 'infocard-list-evo'
         }
     )
-    split_evo_list = evo_lines_list[0].find_all(
-        'div', {
-            'class': 'infocard-list-evo'
-        }
-    )
+    split_evo_list = []
+    for line in evo_lines_list:
+        for i in line.find_all('div', {'class': 'infocard-list-evo'}):
+            if i:
+                split_evo_list.append(i)
     # split_evo_list points the mons that have multiple evolutions
     # Its elements are evo_lines_list children
     # So to avoid useless iterations they will delete in the following line
     evo_lines_list = [i for i in evo_lines_list if i not in split_evo_list]
+    evo_list, method_list = [], []
     for line in evo_lines_list:
         pkmn_list = line.find_all(
             name='div',
@@ -226,7 +227,7 @@ for form in forms_list:
             except AttributeError:
                 pre_evo_text, pre_evo_method_text = None, None
             next_span = infocard.find_next_sibling('span')
-            if next_span.attrs == {'class':['infocard', 'infocard-arrow']}:
+            if next_span.attrs == {'class': ['infocard', 'infocard-arrow']}:
                 evo = infocard.find_next_sibling('div')
                 if len(evo.find_all('small')) == 3:
                     evo_text = evo.find_all('small')[-2].text
@@ -234,18 +235,31 @@ for form in forms_list:
                     evo_text = evo.find_all('a')[1].text
                 evo_method = infocard.find_next_sibling('span')
                 evo_method_text = re.sub('[()]', '', evo_method.small.text)
-                data[pkmn][form]['evo_methods'] = {
-                    'from': {
-                        'name': pre_evo_text,
-                        'method': pre_evo_method_text
-                    },
-                    'into': {
-                        'name': evo_text,
-                        'method': evo_method_text
+                if evo_list:
+                    evo_list.append(evo_text)
+                    method_list.append(evo_method_text)
+                    data[pkmn][form]['evo_methods'] = {
+                        'from': {
+                            'name': pre_evo_text,
+                            'method': pre_evo_method_text
+                        },
+                        'into': {
+                            'name': evo_list,
+                            'method': method_list
+                        }
                     }
-                }
+                else:
+                    data[pkmn][form]['evo_methods'] = {
+                        'from': {
+                            'name': pre_evo_text,
+                            'method': pre_evo_method_text
+                        },
+                        'into': {
+                            'name': evo_text,
+                            'method': evo_method_text
+                        }
+                    }
             else:
-                evo_list, method_list = [], []
                 for split_line in split:
                     evo = split_line.find(
                         'div', {
