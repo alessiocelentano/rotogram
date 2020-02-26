@@ -206,12 +206,19 @@ for line in lines:
     for pkmnn in pkmns:
         pkmn_name = find_name(pkmnn)
         if pkmn_name in forms_list:
+            if target_list:
+                if pkmnn == target_list[-1]:
+                    target_list[-1] = pkmnn
+                elif pkmnn == pkmns[0]:
+                    target_list = []
             if pkmnn not in target_list:
                 next_methods_list = []
                 next_pkmns_list = []
+                target_list.append(pkmnn)
                 form = re.sub(' ', '_', find_name(pkmnn).lower())
                 data[pkmn][form]['evo'] = {}
-            target_list.append(pkmnn)
+    if len(target_list) == 1:
+        target_list[0]
     for target in target_list:
         pre_method = target.find_previous_sibling(
             'span', {
@@ -283,21 +290,25 @@ for line in lines:
             next_methods_list.append(next_method)
             next_pkmns_list.append(next_pkmn)
         if not next_methods_list:
-            next_methods_list = None
+            next_method = None
         elif len(next_methods_list) == 1:
-            next_methods_list = next_methods_list[0]
+            next_method = next_methods_list[0]
+        else:
+            next_method = next_methods_list
         if not next_pkmns_list:
-            next_pkmns_list = None
+            next_pkmn = None
         elif len(next_pkmns_list) == 1:
-            next_pkmns_list = next_pkmns_list[0]
+            next_pkmn = next_pkmns_list[0]
+        else:
+            next_pkmn = next_pkmns_list
         target_text = re.sub(' ', '_', find_name(target).lower())
         data[pkmn][target_text]['evo']['from'] = {
             'evo': pre_evo,
             'method': pre_method
         }
         data[pkmn][target_text]['evo']['into'] = {
-            'evo': next_pkmns_list,
-            'method': next_methods_list
+            'evo': next_pkmn,
+            'method': next_method
         }
 
 
