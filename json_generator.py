@@ -301,5 +301,14 @@ for line in lines:
         }
 
 
+# Changes
+for form in forms_list:
+    form = re.sub(' ', '_', form.lower())
+    data[pkmn][form]['changes'] = []
+    changes_list = target.find_next('ul').find_all('li')
+    for change in changes_list:
+        data[pkmn][form]['changes'].append(change.text)
+
+
 with open('pkmn.json', 'w') as filee:
     json.dump(data, filee, indent=4)
