@@ -310,5 +310,22 @@ for form in forms_list:
         data[pkmn][form]['changes'].append(change.text)
 
 
+# Pokédex entries
+data[pkmn][form]['dex_entries'] = {}
+tmp = soup.find(
+    'div', {
+        'id': 'dex-flavor'
+    }
+)
+table = tmp.find_next('table')
+entries_list = table.find_all('tr')
+for entry in entries_list:
+    games = entry.find_all('span')
+    for game in games:
+        game = re.sub(' ', '', game.text.lower())
+        entry_text = entry.find('td').text
+        data[pkmn][form]['dex_entries'][game] = entry_text
+
+
 with open('pkmn.json', 'w') as filee:
     json.dump(data, filee, indent=4)
