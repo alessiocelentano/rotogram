@@ -84,24 +84,24 @@ for pokedex_data, form in zip(pokedex_data_list, forms_list):
                     game = 'pt'
                 elif game == 'ss':
                     game = 'swsh'
-                data[name][form][key][game] = num
+                data[pkmn][form][key][game] = num
 
         elif key == 'type':
             value = value.text[1:-1]  # Delete useless characters
             types_list = re.split(' ', value)
-            data[name][form][key] = {}
-            data[name][form][key]['type1'] = types_list[0]
+            data[pkmn][form][key] = {}
+            data[pkmn][form][key]['type1'] = types_list[0]
             if len(types_list) > 1:
-                data[name][form][key]['type2'] = types_list[1]
+                data[pkmn][form][key]['type2'] = types_list[1]
 
         elif key == 'height' or key == 'weight':
             values = re.split(' ', value.text)
-            data[name][form][key] = {}
-            data[name][form][key]['si'] = values[0]
-            data[name][form][key]['usc'] = re.sub('[()]', '', values[1])
+            data[pkmn][form][key] = {}
+            data[pkmn][form][key]['si'] = values[0]
+            data[pkmn][form][key]['usc'] = re.sub('[()]', '', values[1])
 
         else:
-            data[name][form][key] = re.sub('\n', '', value.text)
+            data[pkmn][form][key] = re.sub('\n', '', value.text)
 
 
 # STATS
@@ -131,16 +131,16 @@ for stats in all_stats:
         )
 for form in forms_list:
     form = re.sub(' ', '_', form).lower()
-    data[name][form]['base_stats'] = {}
-    data[name][form]['min_stats'] = {}
-    data[name][form]['max_stats'] = {}
+    data[pkmn][form]['base_stats'] = {}
+    data[pkmn][form]['min_stats'] = {}
+    data[pkmn][form]['max_stats'] = {}
     stats = key_list.copy()
     while values_list[0]:
-        data[name][form]['base_stats'][stats[0]] = values_list[0].pop(0)
-        data[name][form]['min_stats'][stats[0]] = values_list[0].pop(0)
-        data[name][form]['max_stats'][stats.pop(0)] = values_list[0].pop(0)
+        data[pkmn][form]['base_stats'][stats[0]] = values_list[0].pop(0)
+        data[pkmn][form]['min_stats'][stats[0]] = values_list[0].pop(0)
+        data[pkmn][form]['max_stats'][stats.pop(0)] = values_list[0].pop(0)
     del values_list[0]
-    data[name][form]['base_stats']['total'] = total_list.pop(0)
+    data[pkmn][form]['base_stats']['total'] = total_list.pop(0)
 
 
 # EV yield, cath rate, base friendship, base exp and growth rate
@@ -163,17 +163,17 @@ for i in data_list:
         key = re.sub(' ', '_', key.text.lower()).replace('.', '')
         if key in ['ev_yield', 'growth_rate', 'egg_groups']:
             if key == 'growth_rate':
-                data[name][form][key] = value.text
+                data[pkmn][form][key] = value.text
             else:
                 if '—' not in value.text:  # For Partner Pikachu/Eevee
-                    data[name][form][key] = []
+                    data[pkmn][form][key] = []
                     for stat in re.split(', ', value.text[1:-1]):
-                        data[name][form][key].append(stat)
+                        data[pkmn][form][key].append(stat)
         elif key == 'gender':
-            data[name][form][key] = value.text
+            data[pkmn][form][key] = value.text
         else:
             value = value.text.replace('\n', '')
-            data[name][form][key] = re.split(' ', value)[0]
+            data[pkmn][form][key] = re.split(' ', value)[0]
     count += 1
 
 
