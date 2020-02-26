@@ -322,20 +322,32 @@ for form in forms_list:
 
 
 # Pokédex entries
-data[pkmn][form]['dex_entries'] = {}
 tmp = soup.find(
     'div', {
         'id': 'dex-flavor'
     }
 )
-table = tmp.find_next('table')
-entries_list = table.find_all('tr')
-for entry in entries_list:
-    games = entry.find_all('span')
-    for game in games:
-        game = re.sub(' ', '', game.text.lower())
-        entry_text = entry.find('td').text
-        data[pkmn][form]['dex_entries'][game] = entry_text
+div_list = tmp.find_next_siblings(
+    'div', {
+        'class': 'resp-scroll'
+    }
+)
+for div in div_list:
+    table = div.find('table')
+    if table.attrs == {'class': ['vitals-table']}:
+        form = div.find_previous('h3')
+        form = re.sub(' ', '_', form.text.lower())
+        if form != 'gigantamax':
+            data[pkmn][form]['dex_entries'] = {}
+            entries_list = table.find_all('tr')
+            for entry in entries_list:
+                games = entry.find_all('span')
+                for game in games:
+                    game = re.sub(' ', '', game.text.lower())
+                    entry_text = entry.find('td').text
+                    data[pkmn][form]['dex_entries'][game] = entry_text
+    else:
+        break
 
 
 with open('pkmn.json', 'w') as filee:
