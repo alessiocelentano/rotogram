@@ -23,12 +23,12 @@ dataa = response.read()
 soup = BeautifulSoup(dataa, 'html.parser')
 
 
-# NAME
+# Name
 pkmn = re.sub(' ', '_', name.lower())
 data[pkmn] = {}
 
 
-# FORMS
+# Forms
 forms_table = soup.find(
     'div', {
         'class': 'tabs-tab-list'
@@ -37,7 +37,7 @@ forms_table = soup.find(
 forms_list = [i.text for i in forms_table.find_all('a')]
 
 
-# DEX, TYPING, SPECIES, HEIGHT, WEIGHT AND ABILITIES
+# Dex, Typing, Species, Height, Weight and abilities
 pokedex_data_list = soup.find_all(
     'div', {
         'class': 'grid-col span-md-6 span-lg-4'
@@ -337,7 +337,9 @@ for div in div_list:
     if table.attrs == {'class': ['vitals-table']}:
         form = div.find_previous('h3')
         form = re.sub(' ', '_', form.text.lower())
-        if form != 'gigantamax':
+        if form not in ['gigantamax', 'cap_pikachu', 'partner_cap',
+            'original_cap', 'sinnoh_cap', 'kalos_cap',
+            'hoenn_cap', 'unova_cap', 'alola_cap']:
             data[pkmn][form]['dex_entries'] = {}
             entries_list = table.find_all('tr')
             for entry in entries_list:
@@ -348,6 +350,22 @@ for div in div_list:
                     data[pkmn][form]['dex_entries'][game] = entry_text
     else:
         break
+
+
+# Location
+data[pkmn][pkmn]['location'] = {}
+div = soup.find_all(
+    'div', {
+        'class': 'grid-col span-md-12 span-lg-8'
+    }
+)[-1]
+lines = div.find_all('tr')
+for line in lines:
+    games_list = line.find_all('span')
+    location = line.find('td')
+    for game in games_list:
+        game = re.sub(' ', '', game.text.lower())
+        data[pkmn][pkmn]['location'][game] = location.text
 
 
 with open('pkmn.json', 'w') as filee:
