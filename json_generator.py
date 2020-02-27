@@ -382,5 +382,22 @@ for line in lines:
     data[pkmn][pkmn]['other_lang'][lang] = translation
 
 
+# Name origin
+data[pkmn][pkmn]['name_origin'] = {}
+div = soup.find_all(
+    'div', {
+        'class': 'grid-col span-md-12 span-lg-6'
+    }
+)[-1]
+origin_list = div.find_all('dt')
+descrip_list = div.find_all('dd')
+for origin, descrip in zip(origin_list, descrip_list):
+    origin = origin.text.lower()
+    descrip = descrip.text
+    data[pkmn][pkmn]['name_origin'][origin] = descrip
+
+
+
+
 with open('pkmn.json', 'w') as filee:
     json.dump(data, filee, indent=4)
