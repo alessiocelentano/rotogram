@@ -345,7 +345,7 @@ for div in div_list:
             for entry in entries_list:
                 games = entry.find_all('span')
                 for game in games:
-                    game = re.sub(' ', '', game.text.lower())
+                    game = re.sub('[ \']', '', game.text.lower())
                     entry_text = entry.find('td').text
                     data[pkmn][form]['dex_entries'][game] = entry_text
     else:
@@ -364,7 +364,7 @@ for line in lines:
     games_list = line.find_all('span')
     location = line.find('td')
     for game in games_list:
-        game = re.sub(' ', '', game.text.lower())
+        game = re.sub('[ \']', '', game.text.lower())
         data[pkmn][pkmn]['location'][game] = location.text
 
 
