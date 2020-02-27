@@ -368,5 +368,19 @@ for line in lines:
         data[pkmn][pkmn]['location'][game] = location.text
 
 
+# Name in other languages
+data[pkmn][pkmn]['other_lang'] = {}
+div = soup.find_all(
+    'div', {
+        'class': 'grid-col span-md-12 span-lg-6'
+    }
+)[-2]
+lines = div.find_all('tr')
+for line in lines:
+    lang = line.find('th').text.lower()
+    translation = line.find('td').text
+    data[pkmn][pkmn]['other_lang'][lang] = translation
+
+
 with open('pkmn.json', 'w') as filee:
     json.dump(data, filee, indent=4)
