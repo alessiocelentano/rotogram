@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from bs4 import BeautifulSoup
-import urllib.request
+import urllib
 import re
 import json
 
@@ -397,6 +397,122 @@ for origin, descrip in zip(origin_list, descrip_list):
     data[pkmn][pkmn]['name_origin'][origin] = descrip
 
 
+# Moveset
+data[pkmn][pkmn]['moveset'] = {}
+tmp = soup.find('h3', text='Moves learnt by level up')
+moveset = tmp.find_next(
+    'ul', {
+        'class': 'list-nav panel panel-nav'
+    }
+)
+gens = moveset.find_all('li')
+gens = [i for i in gens if not i.attrs]
+base_url = 'https://pokemondb.net{}'
+for gen in gens:
+    href = gen.find('a').attrs['href']
+    moves_url = base_url.format(href)
+    request = urllib.request.Request(moves_url, None, headers)
+    response = urllib.request.urlopen(request)
+    dataa = response.read()
+    soup = BeautifulSoup(dataa, 'html.parser')
+    games_tabs = soup.find_all(
+        'a', {
+            'class': 'tabs-tab'
+        }
+    )
+    data_tabs = soup.find_all(
+        'div', {
+            'class': 'tabs-panel'
+        }
+    )
+    for game, dataa in zip(games_tabs, data_tabs):
+        games = re.split('/', re.sub('[ \']', '', game.text.lower()))
+        lines = dataa.find_all('tr')
+        for game in games:
+            data[pkmn][pkmn]['moveset'][game] = {}
+        for line in lines:
+            method = line.find_previous('h3')
+            if method.text == 'Moves learnt by level up':
+                method = 'level_up'
+                first_col = 'level'
+            elif method.text == 'Egg moves':
+                method = 'egg_moves'
+                first_col = None
+            elif method.text == 'Move Tutor moves':
+                method = 'move_tutor'
+                first_col = None
+            elif method.text == 'Pre-evolution moves':
+                method = 'pre_evo_moves'
+                first_col = None
+            elif method.text == 'Moves learnt by TM':
+                method = 'tm'
+                first_col = 'number'
+            elif method.text == 'Special moves':
+                method = 'special_moves'
+                first_col = None
+            elif method.text == 'Transfer-only moves':
+                method = 'transfer_only'
+                first_col = None
+            elif method.text == 'Moves learnt by TR':
+                method = 'tr'
+                first_col = 'number'
+            elif method.text == 'Moves learnt by HM':
+                method = 'hm'
+                first_col = 'number'
+            cols = line.find_all('td')
+            try:
+                if first_col:
+                    number = cols[0].text
+                    name = cols[1].text
+                    typee = cols[2].text
+                    power = cols[4].text
+                    accuracy = cols[5].entry_text        
+                    for game in games:
+                        name_ = re.sub(' ', '_', name.lower())
+                        try:
+                            data[pkmn][pkmn]['moveset'][game][method][name_] = {
+                                first_col: number,
+                                'name': name,
+                                'type': typee,
+                                'power': power,
+                                'accuracy': accuracy
+                            }
+                        except KeyError:
+                            data[pkmn][pkmn]['moveset'][game][method] = {}
+                            data[pkmn][pkmn]['moveset'][game][method][name_] = {
+                                first_col: number,
+                                'name': name,
+                                'type': typee,
+                                'power': power,
+                                'accuracy': accuracy
+                            }
+                else:
+                    name = cols[0].text
+                    typee = cols[1].text
+                    power = cols[3].text
+                    accuracy = cols[4].text
+                    for game in games:
+                        name_ = re.sub(' ', '_', name.lower())
+                        try:
+                            data[pkmn][pkmn]['moveset'][game][method] = {
+                                first_col: number,
+                                'name': name,
+                                'type': typee,
+                                'power': power,
+                                'accuracy': accuracy
+                            }
+                        except KeyError:
+                            data[pkmn][pkmn]['moveset'][game][method][name_] = {}
+                            data[pkmn][pkmn]['moveset'][game][method][name_] = {
+                                first_col: number,
+                                'name': name,
+                                'type': typee,
+                                'power': power,
+                                'accuracy': accuracy
+                            }
+
+            except IndexError:
+                continue
 
 
 with open('pkmn.json', 'w') as filee:
