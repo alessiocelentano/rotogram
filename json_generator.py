@@ -336,18 +336,19 @@ for div in div_list:
     table = div.find('table')
     if table.attrs == {'class': ['vitals-table']}:
         form = div.find_previous('h3')
-        form = re.sub(' ', '_', form.text.lower())
-        if form not in ['gigantamax', 'cap_pikachu', 'partner_cap',
-            'original_cap', 'sinnoh_cap', 'kalos_cap',
-            'hoenn_cap', 'unova_cap', 'alola_cap']:
-            data[pkmn][form]['dex_entries'] = {}
-            entries_list = table.find_all('tr')
-            for entry in entries_list:
-                games = entry.find_all('span')
-                for game in games:
-                    game = re.sub('[ \']', '', game.text.lower())
-                    entry_text = entry.find('td').text
-                    data[pkmn][form]['dex_entries'][game] = entry_text
+        if form:
+            form = re.sub(' ', '_', form.text.lower())
+            if form not in ['gigantamax', 'cap_pikachu', 'partner_cap',
+                'original_cap', 'sinnoh_cap', 'kalos_cap',
+                'hoenn_cap', 'unova_cap', 'alola_cap']:
+                data[pkmn][form]['dex_entries'] = {}
+                entries_list = table.find_all('tr')
+                for entry in entries_list:
+                    games = entry.find_all('span')
+                    for game in games:
+                        game = re.sub('[ \']', '', game.text.lower())
+                        entry_text = entry.find('td').text
+                        data[pkmn][form]['dex_entries'][game] = entry_text
     else:
         break
 
@@ -370,11 +371,11 @@ for line in lines:
 
 # Name in other languages
 data[pkmn][pkmn]['other_lang'] = {}
-div = soup.find_all(
+div = soup.find(
     'div', {
         'class': 'grid-col span-md-12 span-lg-6'
     }
-)[-2]
+)
 lines = div.find_all('tr')
 for line in lines:
     lang = line.find('th').text.lower()
@@ -406,8 +407,11 @@ moveset = tmp.find_next(
     }
 )
 gens = moveset.find_all('li')
-gens = [i for i in gens if not i.attrs]
-base_url = 'https://pokemondb.net{}'
+if gens:
+    gens = [i for i in gens if not i.attrs]
+    base_url = 'https://pokemondb.net{}'
+else:
+    gens = []
 for gen in gens:
     href = gen.find('a').attrs['href']
     moves_url = base_url.format(href)
