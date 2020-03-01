@@ -355,11 +355,13 @@ for line in lines:
 
 
 # Changes
-for form in form_list:
+changes_list = soup.find_all('h3')
+changes_list = [i for i in changes_list if 'changes' in i.text]
+for form, changes in zip(form_list, changes_list):
 	form = re.sub(' ', '_', form.lower())
 	data[pkmn][form]['changes'] = []
-	changes_list = target.find_next('ul').find_all('li')
-	for change in changes_list:
+	changes = changes.find_next('ul').find_all('li')
+	for change in changes:
 		data[pkmn][form]['changes'].append(change.text)
 
 
