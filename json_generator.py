@@ -17,6 +17,42 @@ def find_name(pkmn):
 	return pkmn_name
 
 
+def find_acronym(game):
+	game = re.sub('[^A-Z0-9]', '', game.text).lower()
+	# Delete the area of Kalos
+	# e.g. Central, Coustal and Mountain
+	if 'xy' in game:
+		game = 'xy'
+	# Delete the "Alola dex" part
+	elif 'sm' in game or 'usum' in game:
+		if game != 'sm' and game != 'usum':
+			game = game[:-1]
+	# Just edit it in the right acronym
+	elif game == 'rb':
+		game = 'redblue'
+	elif game == 'y':
+		game = 'yellow'
+	elif game == 'gs':
+		game = 'goldsilver'
+	elif game == 'c':
+		game = 'crystal'
+	elif game == 'rs':
+		game = 'rubysapphire'
+	elif game == 'e':
+		game = 'emerald'
+	elif game == 'dp':
+		game = 'diamondpearl'
+	elif game == 'p':
+		game = 'platinum'
+	elif game == 'lgplge':
+		game = 'lgpe'
+	elif game == 'ss':
+		game = 'swsh'
+
+	return game
+
+
+
 with open('pkmn.json', 'r') as filee:
 	data = json.load(filee)
 
@@ -91,21 +127,7 @@ for pokedex_data, form in zip(pokedex_data_list, form_list):
 			local_list = re.findall('[0-9][0-9][0-9]', value.text)
 			game_list = value.find_all('small')
 			for game, local in zip(game_list, local_list):
-				game = re.sub('[^A-Z0-9]', '', game.text).lower()
-				# Delete the area of Kalos
-				# e.g. Central, Coustal and Mountain
-				if 'xy' in game:
-					game = 'xy'
-				# Delete the "Alola dex" part
-				elif 'sm' in game or 'usum' in game:
-					game = game[:-1]
-				# Just edit it in the right acronym
-				elif game == 'p':
-					game = 'pt'
-				elif game == 'lgplge':
-					game = 'lgpe'
-				elif game == 'ss':
-					game = 'swsh'
+				game = find_acronym(game)
 				data[pkmn][form][key][game] = local
 
 		elif key == 'type':
@@ -453,10 +475,9 @@ for gen in gens:
 		}
 	)
 	for game, dataa in zip(games_tabs, data_tabs):
-		games = re.split('/', re.sub('[ \']', '', game.text.lower()))
+		game = find_acronym(game)
 		lines = dataa.find_all('tr')
-		for game in games:
-			data[pkmn][pkmn]['moveset'][game] = {}
+		data[pkmn][pkmn]['moveset'][game] = {}
 		for line in lines:
 			method = line.find_previous('h3')
 			if method.text == 'Moves learnt by level up':
@@ -498,49 +519,47 @@ for gen in gens:
 					accuracy = cols[5].text
 					if accuracy == '\u2014':
 						accuracy = None
-					for game in games:
-						name_ = re.sub(' ', '_', name.lower())
-						try:
-							data[pkmn][pkmn]['moveset'][game][method][name_] = {
-								first_col: number,
-								'name': name,
-								'type': typee,
-								'power': power,
-								'accuracy': accuracy
-							}
-						except KeyError:
-							data[pkmn][pkmn]['moveset'][game][method] = {}
-							data[pkmn][pkmn]['moveset'][game][method][name_] = {
-								first_col: number,
-								'name': name,
-								'type': typee,
-								'power': power,
-								'accuracy': accuracy
-							}
+					name_ = re.sub(' ', '_', name.lower())
+					try:
+						data[pkmn][pkmn]['moveset'][game][method][name_] = {
+							first_col: number,
+							'name': name,
+							'type': typee,
+							'power': power,
+							'accuracy': accuracy
+						}
+					except KeyError:
+						data[pkmn][pkmn]['moveset'][game][method] = {}
+						data[pkmn][pkmn]['moveset'][game][method][name_] = {
+							first_col: number,
+							'name': name,
+							'type': typee,
+							'power': power,
+							'accuracy': accuracy
+						}
 				else:
 					name = cols[0].text
 					typee = cols[1].text
 					power = cols[3].text
 					accuracy = cols[4].text
-					for game in games:
-						name_ = re.sub(' ', '_', name.lower())
-						try:
-							data[pkmn][pkmn]['moveset'][game][method] = {
-								first_col: number,
-								'name': name,
-								'type': typee,
-								'power': power,
-								'accuracy': accuracy
-							}
-						except KeyError:
-							data[pkmn][pkmn]['moveset'][game][method][name_] = {}
-							data[pkmn][pkmn]['moveset'][game][method][name_] = {
-								first_col: number,
-								'name': name,
-								'type': typee,
-								'power': power,
-								'accuracy': accuracy
-							}
+					name_ = re.sub(' ', '_', name.lower())
+					try:
+						data[pkmn][pkmn]['moveset'][game][method] = {
+							first_col: number,
+							'name': name,
+							'type': typee,
+							'power': power,
+							'accuracy': accuracy
+						}
+					except KeyError:
+						data[pkmn][pkmn]['moveset'][game][method][name_] = {}
+						data[pkmn][pkmn]['moveset'][game][method][name_] = {
+							first_col: number,
+							'name': name,
+							'type': typee,
+							'power': power,
+							'accuracy': accuracy
+						}
 
 			except IndexError:
 				continue
