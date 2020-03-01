@@ -493,6 +493,8 @@ for gen in gens:
 					name = cols[1].text
 					typee = cols[2].text
 					power = cols[4].text
+					if power == '\u2014':
+						power = None
 					accuracy = cols[5].entry_text		
 					for game in games:
 						name_ = re.sub(' ', '_', name.lower())
