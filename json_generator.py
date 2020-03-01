@@ -495,7 +495,9 @@ for gen in gens:
 					power = cols[4].text
 					if power == '\u2014':
 						power = None
-					accuracy = cols[5].entry_text		
+					accuracy = cols[5].text
+					if accuracy == '\u2014':
+						accuracy = None
 					for game in games:
 						name_ = re.sub(' ', '_', name.lower())
 						try:
