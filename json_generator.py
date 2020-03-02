@@ -426,7 +426,7 @@ for div in div_list:
 
 
 # Location
-data[pkmn][pkmn]['location'] = {}
+data[pkmn]['location'] = {}
 div = soup.find_all(
 	'div', {
 		'class': 'grid-col span-md-12 span-lg-8'
@@ -442,7 +442,7 @@ for line in lines:
 
 
 # Name in other languages
-data[pkmn][pkmn]['other_lang'] = {}
+data[pkmn]['other_lang'] = {}
 div = soup.find(
 	'div', {
 		'class': 'grid-col span-md-12 span-lg-6'
@@ -456,7 +456,7 @@ for line in lines:
 
 
 # Name origin
-data[pkmn][pkmn]['name_origin'] = {}
+data[pkmn]['name_origin'] = {}
 div = soup.find_all(
 	'div', {
 		'class': 'grid-col span-md-12 span-lg-6'
