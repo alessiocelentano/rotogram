@@ -87,8 +87,9 @@ form_tab = soup.find(
 form_text = form_tab.find_all('a')
 form_list = [re.sub(' ', '_', i.text.lower()) for i in form_text]
 if len(form_list) > 1:
+	data[pkmn]['forms'] = {}
 	for form in form_list:
-		data[pkmn][form] = {}
+		data[pkmn]['forms'][form] = {}
 
 
 
@@ -109,17 +110,17 @@ for pokedex_data, form in zip(pokedex_data_list, form_list):
 		key = re.sub('[\u2116 ]', '', key.text.lower())
 
 		if key == 'abilities':
-			data[pkmn][form][key] = {}
+			data[pkmn]['forms'][form][key] = {}
 			index = 1  # To number the abilities
 			if value.text != '—':  # For Partner Pikachu/Eevee
 				ability_list = value.span.find_all('a')
 				for ability in ability_list:
 					ability = ability.text
-					data[pkmn][form][key]['ability' + str(index)] = ability
+					data[pkmn]['forms'][form][key]['ability' + str(index)] = ability
 					index += 1
 				if value.small:
 					ha = value.small.a.text
-					data[pkmn][form][key]['hidden_ability'] = ha
+					data[pkmn]['forms'][form][key]['hidden_ability'] = ha
 
 		# Dex number of each region
 		elif key == 'local':
@@ -133,16 +134,16 @@ for pokedex_data, form in zip(pokedex_data_list, form_list):
 		elif key == 'type':
 			value = value.text[1:-1]  # Delete useless characters
 			type_list = re.split(' ', value)
-			data[pkmn][form][key] = {}
-			data[pkmn][form][key]['type1'] = type_list[0]
+			data[pkmn]['forms'][form][key] = {}
+			data[pkmn]['forms'][form][key]['type1'] = type_list[0]
 			if len(type_list) > 1:
-				data[pkmn][form][key]['type2'] = type_list[1]
+				data[pkmn]['forms'][form][key]['type2'] = type_list[1]
 
 		elif key == 'height' or key == 'weight':
 			value = re.split(' ', value.text)
-			data[pkmn][form][key] = {}
-			data[pkmn][form][key]['si'] = value[0]
-			data[pkmn][form][key]['usc'] = re.sub('[()]', '', value[1])
+			data[pkmn]['forms'][form][key] = {}
+			data[pkmn]['forms'][form][key]['si'] = value[0]
+			data[pkmn]['forms'][form][key]['usc'] = re.sub('[()]', '', value[1])
 
 		else:
 			value = re.sub('\n', '', value.text)
@@ -172,15 +173,15 @@ for dataa in data_list:
 		form = re.sub(' ', '_', form_list[index].lower())
 
 		if key == 'ev_yield':
-			data[pkmn][form][key] = []
+			data[pkmn]['forms'][form][key] = []
 			value = re.split(', ', value)
 			for stat in value:
-				data[pkmn][form][key].append(stat)
+				data[pkmn]['forms'][form][key].append(stat)
 
 		elif key == 'base_exp':
-			data[pkmn][form][key] = []
+			data[pkmn]['forms'][form][key] = []
 			for stat in value:
-				data[pkmn][form][key].append(stat)
+				data[pkmn]['forms'][form][key].append(stat)
 	
 		else:
 			if key not in data[pkmn]:
@@ -238,15 +239,15 @@ for i in tmp:
 for form, value in zip(form_list, value_list):
 	form = re.sub(' ', '_', form).lower()
 	stats = key_list.copy()
-	data[pkmn][form]['base_stats'] = {}
-	data[pkmn][form]['min_stats'] = {}
-	data[pkmn][form]['max_stats'] = {}
+	data[pkmn]['forms'][form]['base_stats'] = {}
+	data[pkmn]['forms'][form]['min_stats'] = {}
+	data[pkmn]['forms'][form]['max_stats'] = {}
 	while value:
-		data[pkmn][form]['base_stats'][stats[0]] = value[0].pop(0)
-		data[pkmn][form]['min_stats'][stats[0]] = value[0].pop(0)
-		data[pkmn][form]['max_stats'][stats.pop(0)] = value[0].pop(0)
+		data[pkmn]['forms'][form]['base_stats'][stats[0]] = value[0].pop(0)
+		data[pkmn]['forms'][form]['min_stats'][stats[0]] = value[0].pop(0)
+		data[pkmn]['forms'][form]['max_stats'][stats.pop(0)] = value[0].pop(0)
 		del value[0]
-	data[pkmn][form]['base_stats']['total'] = total_list.pop(0)
+	data[pkmn]['forms'][form]['base_stats']['total'] = total_list.pop(0)
 
 
 # Evolutions
@@ -281,7 +282,7 @@ for line in lines:
 				next_pkmns_list = []
 				target_list.append(pkmnn)
 				form = re.sub(' ', '_', find_name(pkmnn).lower())
-				data[pkmn][form]['evo'] = {}
+				data[pkmn]['forms'][form]['evo'] = {}
 	if len(target_list) == 1:
 		target_list[0]
 	for target in target_list:
@@ -409,15 +410,15 @@ for div in div_list:
 		if form:
 			form = re.sub(' ', '_', form.text.lower())
 			if form not in data[pkmn]:
-				data[pkmn][form] = {}
-			data[pkmn][form]['dex_entries'] = {}
+				data[pkmn]['forms'][form] = {}
+			data[pkmn]['forms'][form]['dex_entries'] = {}
 			entries_list = table.find_all('tr')
 			for entry in entries_list:
 				games = entry.find_all('span')
 				for game in games:
 					game = re.sub('[ \']', '', game.text.lower())
 					entry_text = entry.find('td').text
-					data[pkmn][form]['dex_entries'][game] = entry_text
+					data[pkmn]['forms'][form]['dex_entries'][game] = entry_text
 	else:
 		break
 
@@ -468,7 +469,7 @@ for origin, descrip in zip(origin_list, descrip_list):
 
 
 # Moveset
-data[pkmn][pkmn]['moveset'] = {}
+data[pkmn]['forms'][pkmn]['moveset'] = {}
 tmp = soup.find('h3', text='Moves learnt by level up')
 moveset = tmp.find_next(
 	'ul', {
@@ -501,7 +502,7 @@ for gen in gens:
 	for game, dataa in zip(games_tabs, data_tabs):
 		game = find_acronym(game)
 		lines = dataa.find_all('tr')
-		data[pkmn][pkmn]['moveset'][game] = {}
+		data[pkmn]['forms'][pkmn]['moveset'][game] = {}
 		for line in lines:
 			method = line.find_previous('h3')
 			if method.text == 'Moves learnt by level up':
@@ -545,7 +546,7 @@ for gen in gens:
 						accuracy = None
 					name_ = re.sub(' ', '_', name.lower())
 					try:
-						data[pkmn][pkmn]['moveset'][game][method][name_] = {
+						data[pkmn]['forms'][pkmn]['moveset'][game][method][name_] = {
 							first_col: number,
 							'name': name,
 							'type': typee,
@@ -553,8 +554,8 @@ for gen in gens:
 							'accuracy': accuracy
 						}
 					except KeyError:
-						data[pkmn][pkmn]['moveset'][game][method] = {}
-						data[pkmn][pkmn]['moveset'][game][method][name_] = {
+						data[pkmn]['forms'][pkmn]['moveset'][game][method] = {}
+						data[pkmn]['forms'][pkmn]['moveset'][game][method][name_] = {
 							first_col: number,
 							'name': name,
 							'type': typee,
@@ -568,7 +569,7 @@ for gen in gens:
 					accuracy = cols[4].text
 					name_ = re.sub(' ', '_', name.lower())
 					try:
-						data[pkmn][pkmn]['moveset'][game][method] = {
+						data[pkmn]['forms'][pkmn]['moveset'][game][method] = {
 							first_col: number,
 							'name': name,
 							'type': typee,
@@ -576,8 +577,8 @@ for gen in gens:
 							'accuracy': accuracy
 						}
 					except KeyError:
-						data[pkmn][pkmn]['moveset'][game][method][name_] = {}
-						data[pkmn][pkmn]['moveset'][game][method][name_] = {
+						data[pkmn]['forms'][pkmn]['moveset'][game][method][name_] = {}
+						data[pkmn]['forms'][pkmn]['moveset'][game][method][name_] = {
 							first_col: number,
 							'name': name,
 							'type': typee,
