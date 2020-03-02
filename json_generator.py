@@ -408,19 +408,16 @@ for div in div_list:
 		form = div.find_previous('h3')
 		if form:
 			form = re.sub(' ', '_', form.text.lower())
-			if form not in [
-				'gigantamax', 'cap_pikachu', 'partner_cap',
-				'original_cap', 'sinnoh_cap', 'kalos_cap',
-				'hoenn_cap', 'unova_cap', 'alola_cap'
-			]:
-				data[pkmn][form]['dex_entries'] = {}
-				entries_list = table.find_all('tr')
-				for entry in entries_list:
-					games = entry.find_all('span')
-					for game in games:
-						game = re.sub('[ \']', '', game.text.lower())
-						entry_text = entry.find('td').text
-						data[pkmn][form]['dex_entries'][game] = entry_text
+			if form not in data[pkmn]:
+				data[pkmn][form] = {}
+			data[pkmn][form]['dex_entries'] = {}
+			entries_list = table.find_all('tr')
+			for entry in entries_list:
+				games = entry.find_all('span')
+				for game in games:
+					game = re.sub('[ \']', '', game.text.lower())
+					entry_text = entry.find('td').text
+					data[pkmn][form]['dex_entries'][game] = entry_text
 	else:
 		break
 
