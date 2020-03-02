@@ -438,7 +438,7 @@ for line in lines:
 	location = line.find('td')
 	for game in games_list:
 		game = re.sub('[ \']', '', game.text.lower())
-		data[pkmn][pkmn]['location'][game] = location.text
+		data[pkmn]['location'][game] = location.text
 
 
 # Name in other languages
@@ -452,7 +452,7 @@ lines = div.find_all('tr')
 for line in lines:
 	lang = line.find('th').text.lower()
 	translation = line.find('td').text
-	data[pkmn][pkmn]['other_lang'][lang] = translation
+	data[pkmn]['other_lang'][lang] = translation
 
 
 # Name origin
@@ -467,7 +467,7 @@ descrip_list = div.find_all('dd')
 for origin, descrip in zip(origin_list, descrip_list):
 	origin = origin.text.lower()
 	descrip = descrip.text
-	data[pkmn][pkmn]['name_origin'][origin] = descrip
+	data[pkmn]['name_origin'][origin] = descrip
 
 
 # Moveset
