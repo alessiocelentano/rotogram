@@ -85,11 +85,11 @@ form_tab = soup.find(
 	}
 )
 form_text = form_tab.find_all('a')
-form_list = [i.text for i in form_text]
-if form_list[0] == pkmn:
-	main_form = True
-else:
-	main_form = False
+form_list = [re.sub(' ', '_', i.text.lower()) for i in form_text]
+if len(form_list) > 1:
+	for form in form_list:
+		data[pkmn][form] = {}
+
 
 
 # Dex, Typing, Species, Height, Weight and abilities
@@ -102,8 +102,8 @@ del pokedex_data_list[0]  # Ads space, no data
 
 for pokedex_data, form in zip(pokedex_data_list, form_list):
 	form = re.sub(' ', '_', form.lower())
-	data[pkmn][form] = {}
 	keys_list = pokedex_data.find_all('th')
+
 	for key in keys_list:
 		value = key.findNext('td')
 		key = re.sub('[\u2116 ]', '', key.text.lower())
@@ -123,12 +123,12 @@ for pokedex_data, form in zip(pokedex_data_list, form_list):
 
 		# Dex number of each region
 		elif key == 'local':
-			data[pkmn][form][key] = {}
+			data[pkmn][key] = {}
 			local_list = re.findall('[0-9][0-9][0-9]', value.text)
 			game_list = value.find_all('small')
 			for game, local in zip(game_list, local_list):
 				game = find_acronym(game)
-				data[pkmn][form][key][game] = local
+				data[pkmn][key][game] = local
 
 		elif key == 'type':
 			value = value.text[1:-1]  # Delete useless characters
@@ -146,7 +146,66 @@ for pokedex_data, form in zip(pokedex_data_list, form_list):
 
 		else:
 			value = re.sub('\n', '', value.text)
-			data[pkmn][form][key] = value
+			data[pkmn][key] = value
+
+
+# EV yield, cath rate, base friendship, base exp and growth rate
+# Egg groups, gender and egg cycles
+data_list = soup.find_all(
+	'div', {
+		'class': 'grid-col span-md-6 span-lg-12'
+	}
+)
+index = 0  # For iterate form_list
+count = 0  # For increment index
+
+for dataa in data_list:
+	if count == 2:
+		index += 1
+		count = 0
+
+	line_list = dataa.find_all('tr')
+	for line in line_list:
+		key = line.find('th').text
+		key = re.sub(' ', '_', key.lower())
+		value = line.find('td').text
+		form = re.sub(' ', '_', form_list[index].lower())
+
+		if key == 'ev_yield':
+			data[pkmn][form][key] = []
+			value = re.split(', ', value)
+			for stat in value:
+				data[pkmn][form][key].append(stat)
+
+		elif key == 'base_exp':
+			data[pkmn][form][key] = []
+			for stat in value:
+				data[pkmn][form][key].append(stat)
+	
+		else:
+			if key not in data[pkmn]:
+				if key in ['egg_groups']:
+					if value == '—':  # For Partner Pikachu/Eevee
+						data[pkmn][key] = None
+					else:
+						data[pkmn][key] = []
+						value = re.split(', ', value[1:-1])
+						for stat in value:
+							data[pkmn][key].append(stat)
+				
+				elif key == 'gender':
+					data[pkmn][key] = []
+					value = re.split(', ', value)
+					for stat in value:
+						data[pkmn][key].append(stat)
+
+				elif key in [
+					'catch_rate', 'base_friendship',
+					'growth_rate', 'egg_cycles'
+				]:
+					data[pkmn][key] = value
+
+	count += 1
 
 
 # Stats
@@ -188,40 +247,6 @@ for form, value in zip(form_list, value_list):
 		data[pkmn][form]['max_stats'][stats.pop(0)] = value[0].pop(0)
 		del value[0]
 	data[pkmn][form]['base_stats']['total'] = total_list.pop(0)
-
-
-# EV yield, cath rate, base friendship, base exp and growth rate
-# Egg groups, gender and egg cycles
-data_list = soup.find_all(
-	'div', {
-		'class': 'grid-col span-md-6 span-lg-12'
-	}
-)
-index = 0  # For iterate form_list
-count = 0  # For increment index
-
-for dataa in data_list:
-	if count == 2:
-		index += 1
-		count = 0
-
-	line_list = dataa.find_all('tr')
-	for line in line_list:
-		key = line.find('th').text
-		key = re.sub(' ', '_', key.lower())
-		value = line.find('td').text
-		form = re.sub(' ', '_', form_list[index].lower())
-		if key in ['ev_yield', 'egg_groups', 'gender']:
-			if '—' not in value:  # For Partner Pikachu/Eevee
-				data[pkmn][form][key] = []
-				if key != 'gender':
-					value = value[1:-1]
-				value = re.split(', ', value)
-				for stat in value:
-					data[pkmn][form][key].append(stat)
-		else:
-			data[pkmn][form][key] = value
-	count += 1
 
 
 # Evolutions
