@@ -173,7 +173,7 @@ for dataa in data_list:
 
         if key == 'ev_yield':
             forms[form][key] = []
-            value = re.split(', ', value)
+            value = re.split(', ', value[1:-1])
             for stat in value:
                 forms[form][key].append(stat)
 
