@@ -105,7 +105,10 @@ for pokemon in pokemon_list:
         }
     )
     for artwork, form in zip(artwork_list, form_list):
-        artwork = artwork.find('img').attrs['src']
+        if artwork.find('img'):
+            artwork = artwork.find('img').attrs['src']
+        else:
+            continue
         forms[form]['artwork'] = artwork
 
     # Dex, Typing, Species, Height, Weight and abilities
