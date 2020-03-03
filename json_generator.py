@@ -581,7 +581,14 @@ for gen in gens:
                     value_list = line.find_all('td')
                     for col, value in zip(cols, value_list):
                         key = re.sub('\.', '', col.text.lower())
-                        value = value.text if value != '\u2014' else None
+                        if value.find('img'):
+                            value = value.img.attrs['title']
+                        elif value.find('span'):
+                            value = value.span.attrs['title']
+                        elif value.text == '\u2014':
+                            value = None
+                        else:
+                            value = value.text
                         if method_text not in forms[form]['moveset'][game]:
                             forms[form]['moveset'][game][method_text] = {}
                         if move not in forms[form]['moveset'][game][method_text]:
