@@ -91,9 +91,12 @@ for pokemon in pokemon_list:
     form_text = form_tab.find_all('a')
     form_list = [re.sub(' ', '_', i.text.lower()) for i in form_text]
     if len(form_list) > 1:
-        forms = {}
-        for form in form_list:
-            forms[form] = {}
+        have_forms = True
+    else:
+        have_forms = False
+    forms = {}
+    for form in form_list:
+        forms[form] = {}
 
     # Artwork
     artwork_list = soup.find_all(
@@ -604,7 +607,11 @@ for pokemon in pokemon_list:
 
     # Add forms dictionary at the end of the JSON
     # for more readibility
-    data[pkmn]['forms'] = forms
+    if have_forms:
+        data[pkmn]['forms'] = forms
+    else:
+        for key, value in forms[pkmn].items():
+            data[pkmn][key] = value
 
     with open('pkmn.json', 'w') as filee:
         json.dump(data, filee, indent=4)
