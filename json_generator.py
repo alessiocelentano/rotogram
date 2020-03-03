@@ -66,6 +66,7 @@ for pokemon in pokemon_list:
     # Get Pokémon page HTML
     # Credits: PokémonDB (https://pokemondb.net)
     pokemon = re.sub(' ', '-', pokemon[:-1])
+    pokemon = re.sub('[\'\.]', '', pokemon)
     headers = {'User-Agent': 'Mozilla/5.0'}
     base_url = 'https://pokemondb.net/pokedex/{}'
     url = base_url.format(pokemon)
@@ -241,7 +242,10 @@ for pokemon in pokemon_list:
 
         for stat in stats_list:
             if stat == stats_list[-1]:
-                total_list.append(stat.b.text)
+                try:
+                    total_list.append(stat.b.text)
+                except AttributeError:
+                    continue
             else:
                 stat_list = stat.find_all(
                     'td', {
@@ -253,17 +257,20 @@ for pokemon in pokemon_list:
         value_list.append(values)
 
     for form, value in zip(form_list, value_list):
-        form = re.sub(' ', '_', form).lower()
-        stats = key_list.copy()
-        forms[form]['base_stats'] = {}
-        forms[form]['min_stats'] = {}
-        forms[form]['max_stats'] = {}
-        while value:
-            forms[form]['base_stats'][stats[0]] = value[0].pop(0)
-            forms[form]['min_stats'][stats[0]] = value[0].pop(0)
-            forms[form]['max_stats'][stats.pop(0)] = value[0].pop(0)
-            del value[0]
-        forms[form]['base_stats']['total'] = total_list.pop(0)
+        try:
+            form = re.sub(' ', '_', form).lower()
+            stats = key_list.copy()
+            forms[form]['base_stats'] = {}
+            forms[form]['min_stats'] = {}
+            forms[form]['max_stats'] = {}
+            while value:
+                forms[form]['base_stats'][stats[0]] = value[0].pop(0)
+                forms[form]['min_stats'][stats[0]] = value[0].pop(0)
+                forms[form]['max_stats'][stats.pop(0)] = value[0].pop(0)
+                del value[0]
+            forms[form]['base_stats']['total'] = total_list.pop(0)
+        except IndexError:
+            continue
 
     # Evolutions
     tmp = soup.find(
