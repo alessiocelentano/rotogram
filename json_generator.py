@@ -289,6 +289,7 @@ for pokemon in pokemon_list:
         forms[form]['evolutions'] = {}
 
     for line in lines:
+        in_this_line = False
         pkmns = line.find_all(
             'div', {
                 'class': 'infocard'
@@ -297,6 +298,7 @@ for pokemon in pokemon_list:
         for pkmnn in pkmns:
             pkmn_name = find_name(pkmnn)
             if pkmn_name in form_list:
+                in_this_line = True
                 if target_list:
                     if pkmnn == target_list[-1]:
                         target_list[-1] = pkmnn
@@ -307,105 +309,107 @@ for pokemon in pokemon_list:
                     next_pkmns_list = []
                     target_list.append(pkmnn)
                     form = re.sub(' ', '_', find_name(pkmnn).lower())
-        for target in target_list:
-            pre_method = target.find_previous_sibling(
-                'span', {
-                    'class': 'infocard-arrow'
-                }
-            )
-            if pre_method:
-                pre_evo = target.find_previous_sibling(
-                    'div', {
-                        'class': 'infocard'
-                    }
-                )
-                if not pre_evo:
-                    tmp = line.find(
-                        'span', {
-                            'class': 'infocard-evo-split'
-                        }
-                    )
-                    pre_evo = tmp.find_previous_sibling(
-                        'div', {
-                            'class': 'infocard'
-                        }
-                    )
-                pre_method = re.sub('[()]', '', pre_method.small.text)
-                pre_method = re.sub('_', ' ', pre_method.title())
-                pre_evo = find_name(pre_evo)
-                pre_evo = re.sub('_', ' ', pre_evo.title())
-            else:
-                pre_method, pre_evo = None, None
-            next_method = target.find_next_sibling(
-                'span', {
-                    'class': 'infocard-arrow'
-                }
-            )
-            if not next_method:
-                tmp = target.find_next_sibling()
-                if tmp:
-                    branches = tmp.find_all(
-                        'div', {
-                            'class': 'infocard-list-evo'
-                        }
-                    )
-                    for branch in branches:
-                        next_method = branch.find(
-                            'span', {
-                                'class': 'infocard-arrow'
-                            }
-                        )
-                        next_pkmn = branch.find(
-                            'div', {
-                                'class': 'infocard'
-                            }
-                        )
-                        next_method = next_method.small.text
-                        next_method = re.sub('[()]', '', next_method)
-                        next_pkmn = find_name(next_pkmn)
-                        next_pkmn = re.sub('_', ' ', next_pkmn.title())
-                        next_methods_list.append(next_method)
-                        next_pkmns_list.append(next_pkmn)
-            else:
-                next_method = target.find_next(
+
+        if in_this_line:
+            for target in target_list:
+                pre_method = target.find_previous_sibling(
                     'span', {
                         'class': 'infocard-arrow'
                     }
                 )
-                next_pkmn = target.find_next(
-                    'div', {
-                        'class': 'infocard'
+                if pre_method:
+                    pre_evo = target.find_previous_sibling(
+                        'div', {
+                            'class': 'infocard'
+                        }
+                    )
+                    if not pre_evo:
+                        tmp = line.find(
+                            'span', {
+                                'class': 'infocard-evo-split'
+                            }
+                        )
+                        pre_evo = tmp.find_previous_sibling(
+                            'div', {
+                                'class': 'infocard'
+                            }
+                        )
+                    pre_method = re.sub('[()]', '', pre_method.small.text)
+                    pre_method = re.sub('_', ' ', pre_method.title())
+                    pre_evo = find_name(pre_evo)
+                    pre_evo = re.sub('_', ' ', pre_evo.title())
+                else:
+                    pre_method, pre_evo = None, None
+                next_method = target.find_next_sibling(
+                    'span', {
+                        'class': 'infocard-arrow'
                     }
                 )
-                next_method = re.sub('[()]', '', next_method.small.text)
-                next_pkmn = find_name(next_pkmn)
-                next_pkmn = re.sub('_', ' ', next_pkmn.title())
-                next_methods_list.append(next_method)
-                next_pkmns_list.append(next_pkmn)
+                if not next_method:
+                    tmp = target.find_next_sibling()
+                    if tmp:
+                        branches = tmp.find_all(
+                            'div', {
+                                'class': 'infocard-list-evo'
+                            }
+                        )
+                        for branch in branches:
+                            next_method = branch.find(
+                                'span', {
+                                    'class': 'infocard-arrow'
+                                }
+                            )
+                            next_pkmn = branch.find(
+                                'div', {
+                                    'class': 'infocard'
+                                }
+                            )
+                            next_method = next_method.small.text
+                            next_method = re.sub('[()]', '', next_method)
+                            next_pkmn = find_name(next_pkmn)
+                            next_pkmn = re.sub('_', ' ', next_pkmn.title())
+                            next_methods_list.append(next_method)
+                            next_pkmns_list.append(next_pkmn)
+                else:
+                    next_method = target.find_next(
+                        'span', {
+                            'class': 'infocard-arrow'
+                        }
+                    )
+                    next_pkmn = target.find_next(
+                        'div', {
+                            'class': 'infocard'
+                        }
+                    )
+                    next_method = re.sub('[()]', '', next_method.small.text)
+                    next_pkmn = find_name(next_pkmn)
+                    next_pkmn = re.sub('_', ' ', next_pkmn.title())
+                    next_methods_list.append(next_method)
+                    next_pkmns_list.append(next_pkmn)
 
-            if not next_methods_list:
-                next_method = None
-            elif len(next_methods_list) == 1:
-                next_method = next_methods_list[0].title()
-            else:
-                next_method = [i.title() for i in next_methods_list]
-            if not next_pkmns_list:
-                next_pkmn = None
-            elif len(next_pkmns_list) == 1:
-                next_pkmn = next_pkmns_list[0].title()
+                if not next_methods_list:
+                    next_method = None
+                elif len(next_methods_list) == 1:
+                    next_method = next_methods_list[0].title()
+                else:
+                    next_method = [i.title() for i in next_methods_list]
+                if not next_pkmns_list:
+                    next_pkmn = None
+                elif len(next_pkmns_list) == 1:
+                    next_pkmn = next_pkmns_list[0].title()
 
-            else:
-                next_pkmn = next_pkmns_list
-            target_text = re.sub(' ', '_', find_name(target).lower())
+                else:
+                    next_pkmn = next_pkmns_list
+                target_text = re.sub(' ', '_', find_name(target).lower())
 
-            forms[target_text]['evolutions']['from'] = {
-                'name': pre_evo,
-                'method': pre_method
-            }
-            forms[target_text]['evolutions']['into'] = {
-                'name': next_pkmn,
-                'method': next_method
-            }
+                forms[target_text]['evolutions']['from'] = {
+                    'name': pre_evo,
+                    'method': pre_method
+                }
+                forms[target_text]['evolutions']['into'] = {
+                    'name': next_pkmn,
+                    'method': next_method
+                }
 
     # Changes
     changes_list = soup.find_all('h3')
