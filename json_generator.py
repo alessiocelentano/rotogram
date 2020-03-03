@@ -622,4 +622,4 @@ for pokemon in pokemon_list:
             data[pkmn][key] = value
 
     with open('pkmn.json', 'w') as filee:
-        json.dump(data, filee, indent=4)
+        json.dump(data, filee, skipkeys=True, indent=4)
