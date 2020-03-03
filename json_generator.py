@@ -68,10 +68,11 @@ for pokemon in pokemon_list:
     headers = {'User-Agent': 'Mozilla/5.0'}
     base_url = 'https://pokemondb.net/pokedex/{}'
     url = base_url.format(
-        re.sub('[ \n]', '-', pokemon)
+        re.sub(' ', '-', pokemon[:-1])
     )
     url = re.sub('♀', '-f', url)  # For Nidoran♀
     url = re.sub('♂', '-m', url)  # For Nidoran♂
+    print(url)
     request = urllib.request.Request(url, None, headers)
     response = urllib.request.urlopen(request)
     html = response.read()
