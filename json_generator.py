@@ -308,7 +308,9 @@ for line in lines:
                     }
                 )
             pre_method = re.sub('[()]', '', pre_method.small.text)
+            pre_method = re.sub('_', ' ', pre_method.title())
             pre_evo = find_name(pre_evo)
+            pre_evo = re.sub('_', ' ', pre_evo.title())
         else:
             pre_method, pre_evo = None, None
         next_method = target.find_next_sibling(
@@ -337,6 +339,7 @@ for line in lines:
                     )
                     next_method = re.sub('[()]', '', next_method.small.text)
                     next_pkmn = find_name(next_pkmn)
+                    next_pkmn = re.sub('_', ' ', next_pkmn.title())
                     next_methods_list.append(next_method)
                     next_pkmns_list.append(next_pkmn)
         else:
@@ -352,23 +355,25 @@ for line in lines:
             )
             next_method = re.sub('[()]', '', next_method.small.text)
             next_pkmn = find_name(next_pkmn)
+            next_pkmn = re.sub('_', ' ', next_pkmn.title())
             next_methods_list.append(next_method)
             next_pkmns_list.append(next_pkmn)
 
         if not next_methods_list:
             next_method = None
         elif len(next_methods_list) == 1:
-            next_method = next_methods_list[0]
+            next_method = next_methods_list[0].title()
         else:
-            next_method = next_methods_list
+            next_method = [i.title() for i in next_methods_list]
         if not next_pkmns_list:
             next_pkmn = None
         elif len(next_pkmns_list) == 1:
-            next_pkmn = next_pkmns_list[0]
+            next_pkmn = next_pkmns_list[0].title()
 
         else:
             next_pkmn = next_pkmns_list
         target_text = re.sub(' ', '_', find_name(target).lower())
+
         forms[target_text]['evolutions']['from'] = {
             'name': pre_evo,
             'method': pre_method
