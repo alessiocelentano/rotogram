@@ -481,20 +481,21 @@ moveset = tmp.find_next(
         'class': 'list-nav panel panel-nav'
     }
 )
-gens = moveset.find_all('li')
-if gens:
+try:
+    gens = moveset.find_all('li')
     gens = [i for i in gens if not i.attrs]
     base_url = 'https://pokemondb.net{}'
-else:
-    gens = []
+except AttributeError:
+    gens = [True]
 
 for gen in gens:
-    href = gen.find('a').attrs['href']
-    moves_url = base_url.format(href)
-    request = urllib.request.Request(moves_url, None, headers)
-    response = urllib.request.urlopen(request)
-    dataa = response.read()
-    soup = BeautifulSoup(dataa, 'html.parser')
+    if gen is not True:
+        href = gen.find('a').attrs['href']
+        moves_url = base_url.format(href)
+        request = urllib.request.Request(moves_url, None, headers)
+        response = urllib.request.urlopen(request)
+        dataa = response.read()
+        soup = BeautifulSoup(dataa, 'html.parser')
 
     tmp = soup.find_all(
             'div', {
