@@ -284,7 +284,6 @@ for line in lines:
                 next_pkmns_list = []
                 target_list.append(pkmnn)
                 form = re.sub(' ', '_', find_name(pkmnn).lower())
-                forms[form]['evo'] = {}
     for target in target_list:
         pre_method = target.find_previous_sibling(
             'span', {
@@ -370,12 +369,12 @@ for line in lines:
         else:
             next_pkmn = next_pkmns_list
         target_text = re.sub(' ', '_', find_name(target).lower())
-        data[pkmn][target_text]['evo']['from'] = {
-            'evo': pre_evo,
+        forms[target_text]['evolutions']['from'] = {
+            'name': pre_evo,
             'method': pre_method
         }
-        data[pkmn][target_text]['evo']['into'] = {
-            'evo': next_pkmn,
+        forms[target_text]['evolutions']['into'] = {
+            'name': next_pkmn,
             'method': next_method
         }
 
