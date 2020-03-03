@@ -14,7 +14,7 @@ def find_name(pkmn):
         pkmn_name = pkmn.find_all('small')[-2].text
     else:
         pkmn_name = pkmn.find_all('a')[1].text
-    re.sub(' ', '_', pkmn_name.lower())
+    pkmn_name = re.sub(' ', '_', pkmn_name.lower())
     return pkmn_name
 
 
