@@ -156,8 +156,12 @@ for pokemon in pokemon_list:
             elif key == 'height' or key == 'weight':
                 value = re.split(' ', value.text)
                 forms[form][key] = {}
-                forms[form][key]['si'] = value[0]
-                forms[form][key]['usc'] = re.sub('[()]', '', value[1])
+                try:
+                    forms[form][key]['si'] = value[0]
+                    forms[form][key]['usc'] = re.sub('[()]', '', value[1])
+                except IndexError:
+                    forms[form][key]['si'] = None
+                    forms[form][key]['usc'] = None
 
             else:
                 value = re.sub('\n', '', value.text)
