@@ -78,11 +78,9 @@ for pokemon in pokemon_list:
     html = response.read()
     soup = BeautifulSoup(html, 'html.parser')
 
-
     # Name
     pkmn = re.sub(' ', '_', pokemon.lower())
     data[pkmn] = {}
-
 
     # Forms
     form_tab = soup.find(
@@ -97,7 +95,6 @@ for pokemon in pokemon_list:
         for form in form_list:
             forms[form] = {}
 
-
     # Artwork
     artwork_list = soup.find_all(
         'div', {
@@ -107,7 +104,6 @@ for pokemon in pokemon_list:
     for artwork, form in zip(artwork_list, form_list):
         artwork = artwork.find('img').attrs['src']
         forms[form]['artwork'] = artwork
-
 
     # Dex, Typing, Species, Height, Weight and abilities
     pokedex_data_list = soup.find_all(
@@ -164,7 +160,6 @@ for pokemon in pokemon_list:
             else:
                 value = re.sub('\n', '', value.text)
                 data[pkmn][key] = value
-
 
     # EV yield, cath rate, base friendship, base exp and growth rate
     # Egg groups, gender and egg cycles
@@ -224,7 +219,6 @@ for pokemon in pokemon_list:
 
         count += 1
 
-
     # Stats
     tmp = soup.find_all(
         'div', {
@@ -264,7 +258,6 @@ for pokemon in pokemon_list:
             forms[form]['max_stats'][stats.pop(0)] = value[0].pop(0)
             del value[0]
         forms[form]['base_stats']['total'] = total_list.pop(0)
-
 
     # Evolutions
     tmp = soup.find(
@@ -354,7 +347,8 @@ for pokemon in pokemon_list:
                                 'class': 'infocard'
                             }
                         )
-                        next_method = re.sub('[()]', '', next_method.small.text)
+                        next_method = next_method.small.text
+                        next_method = re.sub('[()]', '', next_method)
                         next_pkmn = find_name(next_pkmn)
                         next_pkmn = re.sub('_', ' ', next_pkmn.title())
                         next_methods_list.append(next_method)
@@ -400,7 +394,6 @@ for pokemon in pokemon_list:
                 'method': next_method
             }
 
-
     # Changes
     changes_list = soup.find_all('h3')
     changes_list = [i for i in changes_list if 'changes' in i.text]
@@ -410,7 +403,6 @@ for pokemon in pokemon_list:
         changes = changes.find_next('ul').find_all('li')
         for change in changes:
             data[pkmn]['changes'].append(change.text)
-
 
     # Pokédex entries
     tmp = soup.find(
@@ -445,7 +437,6 @@ for pokemon in pokemon_list:
         else:
             break
 
-
     # Location
     data[pkmn]['location'] = {}
     div = soup.find_all(
@@ -461,7 +452,6 @@ for pokemon in pokemon_list:
             game = re.sub('[ \']', '', game.text.lower())
             data[pkmn]['location'][game] = location.text
 
-
     # Name in other languages
     data[pkmn]['other_lang'] = {}
     div = soup.find(
@@ -474,7 +464,6 @@ for pokemon in pokemon_list:
         lang = line.find('th').text.lower()
         translation = line.find('td').text
         data[pkmn]['other_lang'][lang] = translation
-
 
     # Name origin
     data[pkmn]['name_origin'] = {}
@@ -489,7 +478,6 @@ for pokemon in pokemon_list:
         origin = origin.text.lower()
         descrip = descrip.text
         data[pkmn]['name_origin'][origin] = descrip
-
 
     # Moveset
     moveset = tmp.find_next(
@@ -614,11 +602,9 @@ for pokemon in pokemon_list:
                                 forms[form]['moveset'][game][method_text][move] = {}
                             forms[form]['moveset'][game][method_text][move][key] = value
 
-
     # Add forms dictionary at the end of the JSON
     # for more readibility
     data[pkmn]['forms'] = forms
-
 
     with open('pkmn.json', 'w') as filee:
         json.dump(data, filee, indent=4)
