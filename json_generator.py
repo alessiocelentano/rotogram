@@ -13,7 +13,10 @@ def find_name(pkmn):
     if len(pkmn.find_all('small')) == 3:
         pkmn_name = pkmn.find_all('small')[-2].text
     else:
-        pkmn_name = pkmn.find_all('a')[1].text
+        try:
+            pkmn_name = pkmn.find_all('a')[1].text
+        except IndexError:
+            pkmn_name = pkmn.find('a').text
     pkmn_name = re.sub(' ', '_', pkmn_name.lower())
     return pkmn_name
 
