@@ -416,6 +416,8 @@ for div in div_list:
         form = div.find_previous('h3')
         if form:
             form = re.sub(' ', '_', form.text.lower())
+            if form == 'darmanitan':
+                form = 'standard_mode'
             if form not in forms:
                 forms[form] = {}
             forms[form]['dex_entries'] = {}
@@ -544,6 +546,8 @@ for gen in gens:
                 move_list = [zone.find('table')]
 
             for form, moves in zip(form_tab_list, move_list):
+                if form == 'darmanitan':
+                    form = 'standard_mode'
                 if form not in forms:
                     forms[form] = {}
                 if 'moveset' not in forms[form]:
