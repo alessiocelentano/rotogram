@@ -496,12 +496,15 @@ for pokemon in pokemon_list:
 
     for gen in gens:
         if gen is not True:
-            href = gen.find('a').attrs['href']
-            moves_url = base_url.format(href)
-            request = urllib.request.Request(moves_url, None, headers)
-            response = urllib.request.urlopen(request)
-            dataa = response.read()
-            soup = BeautifulSoup(dataa, 'html.parser')
+            try:
+                href = gen.find('a').attrs['href']
+                moves_url = base_url.format(href)
+                request = urllib.request.Request(moves_url, None, headers)
+                response = urllib.request.urlopen(request)
+                dataa = response.read()
+                soup = BeautifulSoup(dataa, 'html.parser')
+            except urllib.error.HTTPError:
+                continue
 
         tmp = soup.find_all(
                 'div', {
@@ -532,9 +535,8 @@ for pokemon in pokemon_list:
             data_methods = tab.find_all('h3')
             for method in data_methods:
                 zone = method.find_next_sibling('div')
-                next_method = method.find_next_sibling('div')
-                zone2 = next_method.find_previous_sibling('div')
-                if zone == zone2:
+                p = method.find_next_sibling('p')
+                if p.attrs == {'class': ['text-small']}:
                     if multiple_forms:
                         if 'tabset-moves-game-form' in zone.attrs.values():
                             # Have multiple forms for this method
