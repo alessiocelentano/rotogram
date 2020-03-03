@@ -65,11 +65,10 @@ with open('./pkmn.txt', 'r') as f:
 for pokemon in pokemon_list:
     # Get Pokémon page HTML
     # Credits: PokémonDB (https://pokemondb.net)
+    pokemon = re.sub(' ', '-', pokemon[:-1])
     headers = {'User-Agent': 'Mozilla/5.0'}
     base_url = 'https://pokemondb.net/pokedex/{}'
-    url = base_url.format(
-        re.sub(' ', '-', pokemon[:-1])
-    )
+    url = base_url.format(pokemon)
     url = re.sub('♀', '-f', url)  # For Nidoran♀
     url = re.sub('♂', '-m', url)  # For Nidoran♂
     print(url)
