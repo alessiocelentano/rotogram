@@ -416,7 +416,7 @@ for div in div_list:
         form = div.find_previous('h3')
         if form:
             form = re.sub(' ', '_', form.text.lower())
-            if form not in data[pkmn]:
+            if form not in forms:
                 forms[form] = {}
             forms[form]['dex_entries'] = {}
             entries_list = table.find_all('tr')
