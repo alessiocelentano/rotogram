@@ -95,6 +95,17 @@ if len(form_list) > 1:
         forms[form] = {}
 
 
+# Artwork
+artwork_list = soup.find_all(
+    'div', {
+        'class': 'grid-col span-md-6 span-lg-4 text-center'
+    }
+)
+for artwork, form in zip(artwork_list, form_list):
+    artwork = artwork.find('img').attrs['src']
+    forms[form]['artwork'] = artwork
+
+
 # Dex, Typing, Species, Height, Weight and abilities
 pokedex_data_list = soup.find_all(
     'div', {
