@@ -81,7 +81,7 @@ for pokemon in pokemon_list:
     soup = BeautifulSoup(html, 'html.parser')
 
     # Name
-    pkmn = re.sub(' ', '_', pokemon.lower())
+    pkmn = re.sub('[ -]', '_', pokemon.lower())
     data[pkmn] = {}
 
     # Forms
