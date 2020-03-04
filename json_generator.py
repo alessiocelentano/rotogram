@@ -66,12 +66,14 @@ for pokemon in pokemon_list:
     # Get Pokémon page HTML
     # Credits: PokémonDB (https://pokemondb.net)
     pokemon = re.sub(' ', '-', pokemon[:-1])
-    pokemon = re.sub('[\'\.]', '', pokemon)
+    pokemon = re.sub('♀', '-f', url)  # For Nidoran♀
+    pokemon = re.sub('♂', '-m', url)  # For Nidoran♂
+    pokemon = re.sub('é', 'e', pokemon)  # For Flabébé
+    pokemon = re.sub('[^az-]', '', pokemon)
+
     headers = {'User-Agent': 'Mozilla/5.0'}
     base_url = 'https://pokemondb.net/pokedex/{}'
     url = base_url.format(pokemon)
-    url = re.sub('♀', '-f', url)  # For Nidoran♀
-    url = re.sub('♂', '-m', url)  # For Nidoran♂
     print(url)
     request = urllib.request.Request(url, None, headers)
     response = urllib.request.urlopen(request)
