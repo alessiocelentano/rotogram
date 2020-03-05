@@ -66,16 +66,22 @@ files = {
     'dist/gen7/gen7.json': 'dist/gen7/gen7.txt',
     'dist/gen8/gen8.json': 'dist/gen8/gen8.txt',
 }
-for key, value in files.items():
-    with open(key, 'r') as f:
+percentage_index = 0
+for path1, path2 in files.items():
+    with open(path1, 'r') as f:
         data = json.load(f)
-    with open(value, 'r') as f:
+    with open(path2, 'r') as f:
         pokemon_list = f.readlines()
+    print('\nGen\t| General\t| Pokémon')
 
     for pokemon in pokemon_list:
         # Get Pokémon page HTML
         # Credits: PokémonDB (https://pokemondb.net)
+        percentage_index += 1
+        gen_percentage = '{0:.2f}%'.format(percentage_index/len(pokemon_list))
+        general_percentage = '{0:.2f}%'.format(percentage_index/890)
         name = pokemon[:-1]
+        print(gen_percentage + '\t| ' + general_percentage + ' \t| ' + name)
         pokemon = re.sub(' ', '-', pokemon[:-1])
         pokemon = re.sub('♀', '-f', pokemon)  # For Nidoran♀
         pokemon = re.sub('♂', '-m', pokemon)  # For Nidoran♂
@@ -85,7 +91,6 @@ for key, value in files.items():
         headers = {'User-Agent': 'Mozilla/5.0'}
         base_url = 'https://pokemondb.net/pokedex/{}'
         url = base_url.format(pokemon)
-        print(url)
         request = urllib.request.Request(url, None, headers)
         response = urllib.request.urlopen(request)
         html = response.read()
@@ -649,5 +654,5 @@ for key, value in files.items():
             for key, value in forms[pkmn].items():
                 data[pkmn][key] = value
 
-        with open(key, 'w') as f:
+        with open(path1, 'w') as f:
             json.dump(data, f, indent=4)
