@@ -396,7 +396,8 @@ for key, value in files.items():
                                 'class': 'infocard'
                             }
                         )
-                        next_method = re.sub('[()]', '', next_method.small.text)
+                        next_method = next_method.small.text
+                        next_method = re.sub('[()]', '', next_method)
                         next_pkmn = find_name(next_pkmn)
                         next_pkmn = re.sub('_', ' ', next_pkmn.title())
                         next_methods_list.append(next_method)
