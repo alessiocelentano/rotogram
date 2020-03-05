@@ -56,16 +56,53 @@ def find_acronym(game):
     return game
 
 
-files = {
-    'dist/gen1/gen1.json': 'dist/gen1/gen1.txt',
-    'dist/gen2/gen2.json': 'dist/gen2/gen2.txt',
-    'dist/gen3/gen3.json': 'dist/gen3/gen3.txt',
-    'dist/gen4/gen4.json': 'dist/gen4/gen4.txt',
-    'dist/gen5/gen5.json': 'dist/gen5/gen5.txt',
-    'dist/gen6/gen6.json': 'dist/gen6/gen6.txt',
-    'dist/gen7/gen7.json': 'dist/gen7/gen7.txt',
-    'dist/gen8/gen8.json': 'dist/gen8/gen8.txt',
-}
+print('What do you want dump?')
+print('1 = 1gen (Pokémon Red/Green/Blue/Yellow)')
+print('2 = 2gen (Pokémon Gold/Silver/Crystal)')
+print('3 = 3gen (Pokémon Ruby/Sapphire/Emerald)')
+print('4 = 4gen (Pokémon Diamond/Pearl/Platinum)')
+print('5 = 5gen (Black/White/Black2/White2)')
+print('6 = 6gen (X/Y)')
+print('7 = 7gen (Sun/Moon/Ultrasun/Ultramoon)')
+print('8 = 8gen (Sword/Shield)')
+print('x to y = from xgen to ygen extremes included')
+print('all = All 890 Pokémons')
+
+while True:
+    gen = input()
+    if gen == 'all':
+        files = {
+            'dist/gen1/gen1.json': 'dist/gen1/gen1.txt',
+            'dist/gen2/gen2.json': 'dist/gen2/gen2.txt',
+            'dist/gen3/gen3.json': 'dist/gen3/gen3.txt',
+            'dist/gen4/gen4.json': 'dist/gen4/gen4.txt',
+            'dist/gen5/gen5.json': 'dist/gen5/gen5.txt',
+            'dist/gen6/gen6.json': 'dist/gen6/gen6.txt',
+            'dist/gen7/gen7.json': 'dist/gen7/gen7.txt',
+            'dist/gen8/gen8.json': 'dist/gen8/gen8.txt',
+        }
+        break
+    elif re.search('[1-8] to [1-8]', gen):
+        files = {}
+        start = int(gen[0])
+        end = int(gen[-1]+1)
+        if start < end:
+            for i in range(start, end):
+                key = 'dist/gen{}/gen{}.json'.format(i, i)
+                value = 'dist/gen{}/gen{}.txt'.format(i, i)
+                files[key] = value
+            break
+        else:
+            print('Invalid input')
+    elif re.search('[1-8]', gen):
+        key = 'dist/gen{}/gen{}.json'.format(gen, gen)
+        value = 'dist/gen{}/gen{}.txt'.format(gen, gen)
+        files = {key: value}
+        break
+    else:
+        print('Invalid input')
+
+
 general_index = 0
 for path1, path2 in files.items():
     with open(path1, 'r') as f:
