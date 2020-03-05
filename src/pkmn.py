@@ -75,6 +75,7 @@ for key, value in files.items():
     for pokemon in pokemon_list:
         # Get Pokémon page HTML
         # Credits: PokémonDB (https://pokemondb.net)
+        name = pokemon[:-1]
         pokemon = re.sub(' ', '-', pokemon[:-1])
         pokemon = re.sub('♀', '-f', pokemon)  # For Nidoran♀
         pokemon = re.sub('♂', '-m', pokemon)  # For Nidoran♂
@@ -92,7 +93,7 @@ for key, value in files.items():
 
         # Name
         pkmn = re.sub('[ -]', '_', pokemon.lower())
-        data[pkmn] = {}
+        data[pkmn] = {'name': name}
 
         # Forms
         form_tab = soup.find(
