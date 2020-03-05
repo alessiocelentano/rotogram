@@ -79,7 +79,7 @@ for key, value in files.items():
         pokemon = re.sub('♀', '-f', pokemon)  # For Nidoran♀
         pokemon = re.sub('♂', '-m', pokemon)  # For Nidoran♂
         pokemon = re.sub('é', 'e', pokemon)  # For Flabébé
-        pokemon = re.sub('[^A-Za-z\-]', '', pokemon)
+        pokemon = re.sub('[^A-Za-z-]', '', pokemon)
 
         headers = {'User-Agent': 'Mozilla/5.0'}
         base_url = 'https://pokemondb.net/pokedex/{}'
@@ -624,7 +624,7 @@ for key, value in files.items():
                                 move = re.sub(' ', '_', move.text.lower())
                                 value_list = line.find_all('td')
                                 for col, value in zip(cols, value_list):
-                                    key = re.sub('\.', '', col.text.lower())
+                                    key = re.sub('[.]', '', col.text.lower())
                                     if value.find('img'):
                                         value = value.img.attrs['title']
                                     elif value.find('span'):
