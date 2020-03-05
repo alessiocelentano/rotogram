@@ -648,5 +648,5 @@ for key, value in files.items():
             for key, value in forms[pkmn].items():
                 data[pkmn][key] = value
 
-    with open('data/gen1.json', 'w') as filee:
-        json.dump(data, filee, skipkeys=True, indent=4)
+        with open(key, 'w') as f:
+            json.dump(data, f, indent=4)
