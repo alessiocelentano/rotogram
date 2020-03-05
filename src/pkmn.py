@@ -80,8 +80,8 @@ for path1, path2 in files.items():
         # Credits: PokémonDB (https://pokemondb.net)
         general_index += 1
         gen_index += 1
-        general_percentage = '{0:.2f}%'.format(general_index/890)
-        gen_percentage = '{0:.2f}%'.format(gen_index/len(pokemon_list))
+        general_percentage = '{0:.2f}%'.format(general_index/890*100)
+        gen_percentage = '{0:.2f}%'.format(gen_index/len(pokemon_list)*100)
         name = pokemon[:-1]
         print(gen_percentage + '\t| ' + general_percentage + ' \t| ' + name)
         pokemon = re.sub(' ', '-', pokemon[:-1])
