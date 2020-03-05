@@ -2,7 +2,7 @@ import telebot
 from telebot import types
 
 
-token = open('token.txt', 'r').read()
+token = open('src/token.txt', 'r').read()
 bot = telebot.TeleBot(token)
 
 
