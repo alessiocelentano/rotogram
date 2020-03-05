@@ -66,20 +66,22 @@ files = {
     'dist/gen7/gen7.json': 'dist/gen7/gen7.txt',
     'dist/gen8/gen8.json': 'dist/gen8/gen8.txt',
 }
-percentage_index = 0
+general_index = 0
 for path1, path2 in files.items():
     with open(path1, 'r') as f:
         data = json.load(f)
     with open(path2, 'r') as f:
         pokemon_list = f.readlines()
     print('\nGen\t| General\t| Pokémon')
+    gen_index = 0
 
     for pokemon in pokemon_list:
         # Get Pokémon page HTML
         # Credits: PokémonDB (https://pokemondb.net)
-        percentage_index += 1
-        gen_percentage = '{0:.2f}%'.format(percentage_index/len(pokemon_list))
-        general_percentage = '{0:.2f}%'.format(percentage_index/890)
+        general_index += 1
+        gen_index += 1
+        general_percentage = '{0:.2f}%'.format(general_index/890)
+        gen_percentage = '{0:.2f}%'.format(gen_index/len(pokemon_list))
         name = pokemon[:-1]
         print(gen_percentage + '\t| ' + general_percentage + ' \t| ' + name)
         pokemon = re.sub(' ', '-', pokemon[:-1])
