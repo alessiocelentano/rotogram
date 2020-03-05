@@ -57,14 +57,14 @@ def find_acronym(game):
 
 
 files = {
-    'gen1/gen1.json': 'gen1/gen1.txt',
-    'gen2/gen2.json': 'gen2/gen2.txt',
-    'gen3/gen3.json': 'gen3/gen3.txt',
-    'gen4/gen4.json': 'gen4/gen4.txt',
-    'gen5/gen5.json': 'gen5/gen5.txt',
-    'gen6/gen6.json': 'gen6/gen6.txt',
-    'gen7/gen7.json': 'gen7/gen7.txt',
-    'gen8/gen8.json': 'gen8/gen8.txt',
+    'dist/gen1/gen1.json': 'dist/gen1/gen1.txt',
+    'dist/gen2/gen2.json': 'dist/gen2/gen2.txt',
+    'dist/gen3/gen3.json': 'dist/gen3/gen3.txt',
+    'dist/gen4/gen4.json': 'dist/gen4/gen4.txt',
+    'dist/gen5/gen5.json': 'dist/gen5/gen5.txt',
+    'dist/gen6/gen6.json': 'dist/gen6/gen6.txt',
+    'dist/gen7/gen7.json': 'dist/gen7/gen7.txt',
+    'dist/gen8/gen8.json': 'dist/gen8/gen8.txt',
 }
 for key, value in files.items():
     with open(key, 'r') as f:
