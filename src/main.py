@@ -20,7 +20,7 @@ def find_name(message):
 
 
 def set_message(pkmn_data):
-    base_text = '''<b><u>{}</u></b> {}\n
+    base_text = '''<b><u>{}</u></b> <a href="{}">{}</a>\n
 <b>National</b>: <i>{}</i>
 <b>Type(s)</b>: <i>{}</i>
 <b>Ability(ies)</b>: <i>{}</i>\n
@@ -30,6 +30,8 @@ def set_message(pkmn_data):
     name = pkmn_data['name']
 
     national = pkmn_data['national']
+
+    artwork = pkmn_data['artwork']
 
     typee = ''
     for i in pkmn_data['type'].values():
@@ -78,6 +80,7 @@ def set_message(pkmn_data):
 
     text = base_text.format(
         name,
+        artwork,
         emoji,
         national,
         typee,
