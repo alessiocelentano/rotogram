@@ -19,6 +19,16 @@ def find_name(message):
     return pkmn
 
 
+def manage_forms(pkmn_data, data):
+    if 'forms' in pkmn_data:
+        for form in pkmn_data['forms'].items():
+            value = pkmn_data['forms'][form[0]][data]
+            break
+    else:
+        value = pkmn_data[data]
+    return value
+
+
 def set_message(pkmn_data):
     base_text = '''<b><u>{}</u></b> <a href="{}">{}</a>\n
 <b>National</b>: <i>{}</i>
@@ -31,10 +41,10 @@ def set_message(pkmn_data):
 
     national = pkmn_data['national']
 
-    artwork = pkmn_data['artwork']
+    artwork = manage_forms(pkmn_data, 'artwork')
 
     typee = ''
-    for i in pkmn_data['type'].values():
+    for i in manage_forms(pkmn_data, 'type').values():
         typee += '/' + i
     typee = typee[1:]
     if '/' in typee:
@@ -59,13 +69,14 @@ def set_message(pkmn_data):
         'Psychic': '🔮',
         'Electric': '⚡️',
         'Ground': '🌍',
-        'Rock': '🗻'
+        'Rock': '🗻',
+        'Poison': '☠️'
     }
     first_type = re.split('/', typee)[0]
     emoji = emoji_dict[first_type]
 
     ability = ''
-    for i, j in pkmn_data['abilities'].items():
+    for i, j in manage_forms(pkmn_data, 'abilities').items():
         if i == 'hidden_ability':
             ability += '\n' + '<b>Hidden Ability</b>: ' + j
         else:
@@ -79,9 +90,9 @@ def set_message(pkmn_data):
     base_stats = ''
     stats = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe']
     for base, minn, maxx, stat in zip(
-        pkmn_data['base_stats'].values(),
-        pkmn_data['min_stats'].values(),
-        pkmn_data['max_stats'].values(),
+        manage_forms(pkmn_data, 'base_stats').values(),
+        manage_forms(pkmn_data, 'min_stats').values(),
+        manage_forms(pkmn_data, 'max_stats').values(),
         stats
     ):
         base_stats += stat + ': ' + base + ' (' + minn + '-' + maxx + ')\n'
