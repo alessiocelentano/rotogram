@@ -36,7 +36,7 @@ Base stats:
     ability = ''
     for i, j in pkmn_data['abilities'].items():
         if i == 'hidden_ability':
-            ability += '\n' + j
+            ability += '\n' + 'Hidden Ability: ' + j
         else:
             ability += '/' + j
     ability = ability[1:]
