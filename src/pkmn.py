@@ -559,132 +559,108 @@ for path1, path2 in files.items():
             data[pkmn]['name_origin'][origin] = descrip
 
         # Moveset
-        moveset = tmp.find_next(
-            'ul', {
-                'class': 'list-nav panel panel-nav'
+        tmp = soup.find_all(
+                'div', {
+                    'class': 'tabset-moves-game-form'
+                }
+            )
+        if tmp:
+            multiple_forms = True
+        else:
+            multiple_forms = False
+
+        games_tab_wrapper = soup.find(
+            'div', {
+                'class': 'tabset-moves-game tabs-wrapper'
             }
         )
-        try:
-            gens = moveset.find_all('li')
-            gens = [i for i in gens if not i.attrs]
-            base_url = 'https://pokemondb.net{}'
-        except AttributeError:
-            gens = [True]
+        games_tab = games_tab_wrapper.find('div')
+        games = games_tab.find_all('a')
+        all_moves = games_tab.find_next('div')
+        move_tabs = all_moves.find_all(
+            'div', {
+                'class': 'tabs-panel'
+            }
+        )
 
-        for gen in gens:
-            if gen is not True:
-                try:
-                    href = gen.find('a').attrs['href']
-                    moves_url = base_url.format(href)
-                    request = urllib.request.Request(moves_url, None, headers)
-                    response = urllib.request.urlopen(request)
-                    dataa = response.read()
-                    soup = BeautifulSoup(dataa, 'html.parser')
-                except urllib.error.HTTPError:
-                    continue
-
-            tmp = soup.find_all(
-                    'div', {
-                        'class': 'tabset-moves-game-form'
-                    }
-                )
-            if tmp:
-                multiple_forms = True
-            else:
-                multiple_forms = False
-
-            games_tab_wrapper = soup.find(
-                'div', {
-                    'class': 'tabset-moves-game tabs-wrapper'
-                }
-            )
-            games_tab = games_tab_wrapper.find('div')
-            games = games_tab.find_all('a')
-            all_moves = games_tab.find_next('div')
-            move_tabs = all_moves.find_all(
-                'div', {
-                    'class': 'tabs-panel'
-                }
-            )
-
-            for game, tab in zip(games, move_tabs):
-                game = find_acronym(game)
-                data_methods = tab.find_all('h3')
-                for method in data_methods:
-                    zone = method.find_next_sibling('div')
-                    p = method.find_next_sibling('p')
-                    if p.attrs == {'class': ['text-small']}:
-                        if multiple_forms:
-                            if 'tabset-moves-game-form' in zone.attrs.values():
-                                # Have multiple forms for this method
-                                form_tabs = zone.find('div')
-                                all_forms = form_tabs.find_all('a')
-                                form_tab_list = [find_name(i) for i in all_forms]
-                                move_tabs = form_tabs.find_next('div')
-                                move_list = move_tabs.find_all('table')
-                            else:
-                                form_tab_list = form_list
-                                move_list = []
-                                for i in form_tab_list:
-                                    move_list.append(zone.find('table'))
+        for game, tab in zip(games, move_tabs):
+            game = find_acronym(game)
+            data_methods = tab.find_all('h3')
+            for method in data_methods:
+                zone = method.find_next_sibling('div')
+                p = method.find_next_sibling('p')
+                if p.attrs == {'class': ['text-small']}:
+                    if multiple_forms:
+                        if 'tabset-moves-game-form' in zone.attrs.values():
+                            # Have multiple forms for this method
+                            form_tabs = zone.find('div')
+                            all_forms = form_tabs.find_all('a')
+                            form_tab_list = [find_name(i) for i in all_forms]
+                            move_tabs = form_tabs.find_next('div')
+                            move_list = move_tabs.find_all('table')
                         else:
-                            form_tab_list = [pkmn]
-                            move_list = [zone.find('table')]
+                            form_tab_list = form_list
+                            move_list = []
+                            for i in form_tab_list:
+                                move_list.append(zone.find('table'))
+                    else:
+                        form_tab_list = [pkmn]
+                        move_list = [zone.find('table')]
 
-                        for form, moves in zip(form_tab_list, move_list):
-                            if form == 'darmanitan':
-                                form = 'standard_mode'
-                            if form not in forms:
-                                forms[form] = {}
-                            if 'moveset' not in forms[form]:
-                                forms[form]['moveset'] = {}
-                            if game not in forms[form]['moveset']:
-                                forms[form]['moveset'][game] = {}
-                            if method.text == 'Moves learnt by level up':
-                                method_text = 'level_up'
-                            elif method.text == 'Egg moves':
-                                method_text = 'egg_moves'
-                            elif method.text == 'Move Tutor moves':
-                                method_text = 'move_tutor'
-                            elif method.text == 'Pre-evolution moves':
-                                method_text = 'pre_evo_moves'
-                            elif method.text == 'Moves learnt by TM':
-                                method_text = 'tm'
-                            elif method.text == 'Special moves':
-                                method_text = 'special_moves'
-                            elif method.text == 'Transfer-only moves':
-                                method_text = 'transfer_only'
-                            elif method.text == 'Moves learnt by TR':
-                                method_text = 'tr'
-                            elif method.text == 'Moves learnt by HM':
-                                method_text = 'hm'
+                    for form, moves in zip(form_tab_list, move_list):
+                        if form == 'darmanitan':
+                            form = 'standard_mode'
+                        if form not in forms:
+                            forms[form] = {}
+                        if 'moveset' not in forms[form]:
+                            forms[form]['moveset'] = {}
+                        if game not in forms[form]['moveset']:
+                            forms[form]['moveset'][game] = {}
+                        if method.text == 'Moves learnt by level up':
+                            method_text = 'level_up'
+                        elif method.text == 'Egg moves':
+                            method_text = 'egg_moves'
+                        elif method.text == 'Move Tutor moves':
+                            method_text = 'move_tutor'
+                        elif method.text == 'Pre-evolution moves':
+                            method_text = 'pre_evo_moves'
+                        elif method.text == 'Moves learnt by TM':
+                            method_text = 'tm'
+                        elif method.text == 'Special moves':
+                            method_text = 'special_moves'
+                        elif method.text == 'Transfer-only moves':
+                            method_text = 'transfer_only'
+                        elif method.text == 'Moves learnt by TR':
+                            method_text = 'tr'
+                        elif method.text == 'Moves learnt by HM':
+                            method_text = 'hm'
 
-                            cols = moves.find_all('th')
-                            lines = moves.find_all('tr')
-                            del lines[0]
-                            for line in lines:
-                                move = line.find(
-                                    'td', {
-                                        'class': 'cell-name'
-                                    }
-                                )
-                                move = re.sub(' ', '_', move.text.lower())
-                                value_list = line.find_all('td')
-                                for col, value in zip(cols, value_list):
-                                    key = re.sub('[.]', '', col.text.lower())
-                                    if value.find('img'):
-                                        value = value.img.attrs['title']
-                                    elif value.find('span'):
-                                        value = value.span.attrs['title']
-                                    elif value.text == '\u2014':
-                                        value = None
-                                    else:
-                                        value = value.text
-                                    if method_text not in forms[form]['moveset'][game]:
-                                        forms[form]['moveset'][game][method_text] = {}
-                                    if move not in forms[form]['moveset'][game][method_text]:
-                                        forms[form]['moveset'][game][method_text][move] = {}
-                                    forms[form]['moveset'][game][method_text][move][key] = value
+                        cols = moves.find_all('th')
+                        lines = moves.find_all('tr')
+                        del lines[0]
+                        for line in lines:
+                            move = line.find(
+                                'td', {
+                                    'class': 'cell-name'
+                                }
+                            )
+                            move = re.sub(' ', '_', move.text.lower())
+                            value_list = line.find_all('td')
+                            for col, value in zip(cols, value_list):
+                                key = re.sub('[.]', '', col.text.lower())
+                                if value.find('img'):
+                                    value = value.img.attrs['title']
+                                elif value.find('span'):
+                                    value = value.span.attrs['title']
+                                elif value.text == '\u2014':
+                                    value = None
+                                else:
+                                    value = value.text
+                                if method_text not in forms[form]['moveset'][game]:
+                                    forms[form]['moveset'][game][method_text] = {}
+                                if move not in forms[form]['moveset'][game][method_text]:
+                                    forms[form]['moveset'][game][method_text][move] = {}
+                                forms[form]['moveset'][game][method_text][move][key] = value
 
         # Add forms dictionary at the end of the JSON
         # for more readibility
