@@ -20,7 +20,7 @@ def find_name(message):
 
 
 def set_message(pkmn_data):
-    base_text = '''<b><u>{}</u></b>\n
+    base_text = '''<b><u>{}</u></b> {}\n
 <b>National</b>: <i>{}</i>
 <b>Type(s)</b>: <i>{}</i>
 <b>Ability(ies)</b>: <i>{}</i>\n
@@ -28,11 +28,36 @@ def set_message(pkmn_data):
 <i>{}</i>
 '''
     name = pkmn_data['name']
+
     national = pkmn_data['national']
+
     typee = ''
     for i in pkmn_data['type'].values():
         typee += '/' + i
     typee = typee[1:]
+
+    emoji_dict = {
+        'Grass': '🌱',
+        'Fire': '🔥',
+        'Water': '💧',
+        'Flying': '🦅',
+        'Bug': '🐞',
+        'Normal': '🐾',
+        'Dragon': '🐲',
+        'Ice': '❄️',
+        'Ghost': '👻',
+        'Fighting': '💪',
+        'Fairy': '🌸',
+        'Steel': '⚙️',
+        'Dark': '🌙',
+        'Psychic': '🔮',
+        'Electric': '⚡️',
+        'Ground': '🌍',
+        'Rock': '🗻'
+    }
+    first_type = re.split('/', typee)[0]
+    emoji = emoji_dict[first_type]
+
     ability = ''
     for i, j in pkmn_data['abilities'].items():
         if i == 'hidden_ability':
@@ -40,6 +65,7 @@ def set_message(pkmn_data):
         else:
             ability += '/' + j
     ability = ability[1:]
+
     base_stats = ''
     stats = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe']
     for base, minn, maxx, stat in zip(
@@ -49,8 +75,10 @@ def set_message(pkmn_data):
         stats
     ):
         base_stats += stat + ': ' + base + ' (' + minn + '-' + maxx + ')\n'
+
     text = base_text.format(
         name,
+        emoji,
         national,
         typee,
         ability,
