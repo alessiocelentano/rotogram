@@ -22,8 +22,8 @@ def find_name(message):
 def set_message(pkmn_data):
     base_text = '''<b><u>{}</u></b> <a href="{}">{}</a>\n
 <b>National</b>: <i>{}</i>
-<b>Type(s)</b>: <i>{}</i>
-<b>Ability(ies)</b>: <i>{}</i>\n
+<b>{}</b>: <i>{}</i>
+<b>{}</b>: <i>{}</i>\n
 <b>Base stats</b>:
 <i>{}</i>
 '''
@@ -37,6 +37,10 @@ def set_message(pkmn_data):
     for i in pkmn_data['type'].values():
         typee += '/' + i
     typee = typee[1:]
+    if '/' in typee:
+        typee_str = 'Type'
+    else:
+        typee_str = 'Types'
 
     emoji_dict = {
         'Grass': '🌱',
@@ -67,6 +71,10 @@ def set_message(pkmn_data):
         else:
             ability += '/' + j
     ability = ability[1:]
+    if '/' in ability:
+        ab_str = 'Abilities'
+    else:
+        ab_str = 'Ability'
 
     base_stats = ''
     stats = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe']
@@ -83,7 +91,9 @@ def set_message(pkmn_data):
         artwork,
         emoji,
         national,
+        typee_str,
         typee,
+        ab_str,
         ability,
         base_stats,
     )
