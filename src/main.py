@@ -20,12 +20,12 @@ def find_name(message):
 
 
 def set_message(pkmn_data):
-    base_text = '''<b>{}</b>\n
-National: {}
-Type(s): {}
-Ability(ies): {}\n
-Base stats:
-{}
+    base_text = '''<b><u>{}</u></b>\n
+<b>National</b>: <i>{}</i>
+<b>Type(s)</b>: <i>{}</i>
+<b>Ability(ies)</b>: <i>{}</i>\n
+<b>Base stats</b>:
+<i>{}</i>
 '''
     name = pkmn_data['name']
     national = pkmn_data['national']
@@ -36,7 +36,7 @@ Base stats:
     ability = ''
     for i, j in pkmn_data['abilities'].items():
         if i == 'hidden_ability':
-            ability += '\n' + 'Hidden Ability: ' + j
+            ability += '\n' + '<b>Hidden Ability</b>: ' + j
         else:
             ability += '/' + j
     ability = ability[1:]
