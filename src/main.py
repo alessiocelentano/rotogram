@@ -34,7 +34,7 @@ Base stats:
         typee += '/' + i
     typee = typee[1:]
     ability = ''
-    for i, j in pkmn_data['abilities'].items() :
+    for i, j in pkmn_data['abilities'].items():
         if i == 'hidden_ability':
             ability += '\n' + j
         else:
@@ -50,7 +50,7 @@ Base stats:
     ):
         base_stats += stat + ': ' + base + ' (' + minn + '-' + maxx + ')\n'
     text = base.format(
-        name
+        name,
         national,
         typee,
         ability,
