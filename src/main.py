@@ -10,12 +10,12 @@ bot = telebot.TeleBot(token)
 
 
 def find_name(message):
-    pkmn = re.sub('/data ', '', message.text)
+    pkmn = re.sub('/data ', '', message.text.lower())
     pkmn = re.sub('♀', '-f', pkmn)  # For Nidoran♀
     pkmn = re.sub('♂', '-m', pkmn)  # For Nidoran♂
     pkmn = re.sub('[èé]', 'e', pkmn)  # For Flabébé
     pkmn = re.sub(' ', '-', pkmn)
-    pkmn = re.sub('[^A-Za-z-]', '', pkmn)
+    pkmn = re.sub('[^a-z-]', '', pkmn)
     return pkmn
 
 
