@@ -20,7 +20,7 @@ def find_name(message):
 
 
 def set_message(pkmn_data):
-    base = '''<b>{}</b>\n
+    base_text = '''<b>{}</b>\n
 National: {}
 Type(s): {}
 Ability(ies): {}\n
@@ -49,7 +49,7 @@ Base stats:
         stats
     ):
         base_stats += stat + ': ' + base + ' (' + minn + '-' + maxx + ')\n'
-    text = base.format(
+    text = base_text.format(
         name,
         national,
         typee,
@@ -69,20 +69,17 @@ def start(message):
 def pkmn_search(message):
     cid = message.chat.id
     pkmn = find_name(message)
-    path = 'dist/gen{}/gen{}.json'
 
-    for i in range(1, 9):
-        with open(path.format(i, i), 'r') as f:
-            data = json.load(f)
-        if pkmn in data:
-            pkmn_data = data[pkmn]
-            break
+    with open('dist/pkmn.json', 'r') as f:
+        data = json.load(f)
+    if pkmn in data:
+        pkmn_data = data[pkmn]
     else:
         bot.send_message(cid, 'Pokémon not found :(')
         return None
 
     text = set_message(pkmn_data)
-    bot.send_message(cid, text)
+    bot.send_message(cid, text, parse_mode='HTML')
 
 
 bot.polling(none_stop=True)
