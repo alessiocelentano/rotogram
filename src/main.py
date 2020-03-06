@@ -44,8 +44,8 @@ Base stats:
     stats = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe']
     for base, minn, maxx, stat in zip(
         pkmn_data['base_stats'].values(),
-        pkmn_data['base_stats'].values(),
-        pkmn_data['base_stats'].values(),
+        pkmn_data['min_stats'].values(),
+        pkmn_data['max_stats'].values(),
         stats
     ):
         base_stats += stat + ': ' + base + ' (' + minn + '-' + maxx + ')\n'
