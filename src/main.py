@@ -20,30 +20,41 @@ def find_name(message):
 
 
 def set_message(pkmn_data):
-    base = '''National: {}
-Species: {}
-Catch Rate: {}
-Base Friendship: {}
-Growth Rate: {}
-Egg Cycles: {}
-Artwork: {}
+    base = '''<b>{}</b>\n
+National: {}
+Type(s): {}
+Ability(ies): {}\n
+Base stats:
+{}
 '''
+    name = pkmn_data['name']
     national = pkmn_data['national']
-    species = pkmn_data['species']
-    catch_rate = pkmn_data['catch_rate']
-    base_friendship = pkmn_data['base_friendship']
-    growth_rate = pkmn_data['growth_rate']
-    egg_cycles = pkmn_data['egg_cycles']
-    artwork = pkmn_data['artwork']
-
+    typee = ''
+    for i in pkmn_data['type'].values():
+        typee += '/' + i
+    typee = typee[1:]
+    ability = ''
+    for i, j in pkmn_data['abilities'].items() :
+        if i == 'hidden_ability':
+            ability += '\n' + j
+        else:
+            ability += '/' + j
+    ability = ability[1:]
+    base_stats = ''
+    stats = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe']
+    for base, minn, maxx, stat in zip(
+        pkmn_data['base_stats'].values(),
+        pkmn_data['base_stats'].values(),
+        pkmn_data['base_stats'].values(),
+        stats
+    ):
+        base_stats += stat + ': ' + base + ' (' + minn + '-' + maxx + ')\n'
     text = base.format(
+        name
         national,
-        species,
-        catch_rate,
-        base_friendship,
-        growth_rate,
-        egg_cycles,
-        artwork
+        typee,
+        ability,
+        base_stats,
     )
     return text
 
