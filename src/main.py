@@ -6,7 +6,9 @@ from telebot import types
 
 
 token = open('src/token.txt', 'r').read()
-bot = telebot.TeleBot('979765263:AAELCFhUsKZWyjnvwLuAowk8ZNSAHgRxa7k')
+bot = telebot.TeleBot(token)
+with open('src/texts.json', 'r') as f:
+    t = json.load(f)
 
 
 def find_name(message):
@@ -50,27 +52,7 @@ def set_rating(base):
 
 def set_message(pkmn_data, *args):
     if args:
-        base_text = '''<b><u>{}</u></b> <a href="{}">{}</a>\n
-<b>National</b>: <i>{}</i>
-<b>{}</b>: <i>{}</i>
-<b>{}</b>: <i>{}</i>\n
-<b><u>Games data</u></b>
-<b>Gender: </b><i>{}</i>
-<b>Base friendship: </b><i>{}</i>
-<b>EV yield: </b><i>{}</i>
-<b>Catch rate: </b><i>{}</i>
-<b>Growth rate: </b><i>{}</i>
-<b>Egg groups: </b><i>{}</i>
-<b>Egg cycles: </b><i>{}</i>
-<b><u>About Pokémon</u></b>
-<b>Species: </b><i>{}</i>
-<b>Height: </b><i>{}</i>
-<b>Weight: </b><i>{}</i>
-<b>Name origin: </b><i>{}</i>
-<b>Other lang: </b><i>{}</i>\n
-<b><u>Base stats</u></b>:
-{}
-'''
+        base_text = t['expanded_text']
 
         base_friendship = pkmn_data['base_friendship']
         catch_rate = pkmn_data['catch_rate']
@@ -109,34 +91,9 @@ def set_message(pkmn_data, *args):
         weight = tmp['si'] + ' (' + tmp['usc'] + ')'
 
     else:
-        base_text = '''<b><u>{}</u></b> <a href="{}">{}</a>\n
-<b>National</b>: <i>{}</i>
-<b>{}</b>: <i>{}</i>
-<b>{}</b>: <i>{}</i>\n
-<b><u>Base stats</u></b>:
-{}
-'''
+        base_text = t['reduced_text']
 
-    emoji_dict = {
-        'Grass': '🌱',
-        'Fire': '🔥',
-        'Water': '💧',
-        'Flying': '🦅',
-        'Bug': '🐞',
-        'Normal': '🐾',
-        'Dragon': '🐲',
-        'Ice': '❄️',
-        'Ghost': '👻',
-        'Fighting': '💪',
-        'Fairy': '🌸',
-        'Steel': '⚙️',
-        'Dark': '🌙',
-        'Psychic': '🔮',
-        'Electric': '⚡️',
-        'Ground': '🌍',
-        'Rock': '🗻',
-        'Poison': '☠️'
-    }
+    emoji_dict = t['emoji_dict']
     typee = ''
     for i in manage_forms(pkmn_data, 'type').values():
         typee += '/' + i
@@ -217,17 +174,14 @@ def set_message(pkmn_data, *args):
 @bot.message_handler(commands=['start'])
 def start(message):
     cid = message.chat.id
-    text = '''
-⚡️ Zzzt! Ehy. I\'m Rotom! My trainer merged me with a Telegram Bot. \
-He\'s teaching me some commanzzz, for now I can tell you basic \
-information about all Pokémon using <code>/data</code> command.
-'''
+    text = t['start_message']
     bot.send_message(cid, text, parse_mode='HTML')
 
 
 @bot.callback_query_handler(lambda call: 'basic_infos' in call.data)
 @bot.message_handler(commands=['data'])
 def pkmn_search(message):
+    markup = types.InlineKeyboardMarkup()
     try:
         cid = message.message.chat.id
         pkmn = re.split('/', message.data)[1]
@@ -246,18 +200,12 @@ def pkmn_search(message):
         cid = message.chat.id
 
         if message.text == '/data':
-            text = '''
-⚡️ Zzrrt! My trainer's teaching me many thingzz, \
-but I still can't read in thought. Use this syntax: \
-<code>/data + PokémonName</code>
-ex.: <code>/data Rotom</code>
-'''
+            text = t['error1']
         else:
             with open('dist/pkmn.json', 'r') as f:
                 data = json.load(f)
             if pkmn in data:
                 text = set_message(data[pkmn])
-                markup = types.InlineKeyboardMarkup()
                 expand = types.InlineKeyboardButton(
                     text='➕ Expand',
                     callback_data='all_infos/' + pkmn
@@ -265,10 +213,7 @@ ex.: <code>/data Rotom</code>
                 markup.add(expand)
 
             else:
-                text = '''
-Mm-hmm, well, maybe he's an anime character, but he certainly \
-izzn't a Pokémon. Zzzt-zzt! ⚡️
-'''
+                text = t['error2']
 
     bot.send_message(cid, text, parse_mode='HTML', reply_markup=markup)
 
