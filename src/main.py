@@ -114,7 +114,10 @@ def set_message(pkmn_data):
 @bot.message_handler(commands=['start'])
 def start(message):
     cid = message.chat.id
-    bot.send_message(cid, 'Hello Trainer!')
+    text1 = '⚡️ Zzzt! Ehy. I\'m Rotom! My trainer merged me with a Telegram Bo'
+    text2 = 't. He\'s teaching me some commanzzz, for now I can tell you basic'
+    text3 = ' information about all Pokémon using <code>/data</code> command.'
+    bot.send_message(cid, text1+text2+text3, parse_mode='HTML')
 
 
 @bot.message_handler(commands=['data'])
