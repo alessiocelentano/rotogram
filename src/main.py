@@ -96,12 +96,12 @@ def set_message(pkmn_data, *args):
         other_lang = ''
         for i, j in pkmn_data['other_lang'].items():
             other_lang += '\n' + i.title() + ': ' + j
-        other_lang = other_lang[:1]
+        other_lang = other_lang[1:]
 
         name_origin = ''
         for i, j in pkmn_data['name_origin'].items():
             name_origin += ', ' + i + ' (' + j + ')'
-        name_origin = name_origin[:2]
+        name_origin = name_origin[2:]
 
         tmp = manage_forms(pkmn_data, 'height')
         height = tmp['si'] + ' (' + tmp['usc'] + ')'
