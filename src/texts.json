@@ -1,0 +1,27 @@
+{
+    "expanded_text": "<b><u>{}</u></b> <a href=\"{}\">{}</a>\n\n<b>National</b>: <i>{}</i>\n<b>{}</b>: <i>{}</i>\n<b>{}</b>: <i>{}</i>\n\n<b><u>Games data</u></b>\n<b>Gender: </b><i>{}</i>\n<b>Base friendship: </b><i>{}</i>\n<b>EV yield: </b><i>{}</i>\n<b>Catch rate: </b><i>{}</i>\n<b>Growth rate: </b><i>{}</i>\n<b>Egg groups: </b><i>{}</i>\n<b>Egg cycles: </b><i>{}</i>\n<b><u>About Pokémon</u></b>\n<b>Species: </b><i>{}</i>\n<b>Height: </b><i>{}</i>\n<b>Weight: </b><i>{}</i>\n<b>Name origin: </b><i>{}</i>\n<b>Other lang: </b><i>{}</i>\n\n<b><u>Base stats</u></b>:\n{}",
+    "reduced_text": "<b><u>{}</u></b> <a href=\"{}\">{}</a>\n\n<b>National</b>: <i>{}</i>\n<b>{}</b>: <i>{}</i>\n<b>{}</b>: <i>{}</i>\n\n<b><u>Base stats</u></b>:\n{}",
+    "emoji_dict": {
+        "Grass": "🌱",
+        "Fire": "🔥",
+        "Water": "💧",
+        "Flying": "🦅",
+        "Bug": "🐞",
+        "Normal": "🐾",
+        "Dragon": "🐲",
+        "Ice": "❄️",
+        "Ghost": "👻",
+        "Fighting": "💪",
+        "Fairy": "🌸",
+        "Steel": "⚙️",
+        "Dark": "🌙",
+        "Psychic": "🔮",
+        "Electric": "⚡️",
+        "Ground": "🌍",
+        "Rock": "🗻",
+        "Poison": "☠️"
+    },
+    "start_message": "⚡️ Zzzt! Ehy. I'm Rotom! My trainer merged me with a Telegram Bot. He's teaching me some commanzzz, for now I can tell you basic information about all Pokémon using <code>/data</code> command.",
+    "error1": "⚡️ Zzrrt! My trainer's teaching me many thingzz, but I still can't read in thought. Use this syntax: <code>/data + PokémonName</code>\nex.: <code>/data Rotom</code>",
+    "error2": "Mm-hmm, well, maybe he's an anime character, but he certainly izzn't a Pokémon. Zzzt-zzt! ⚡️"
+}
