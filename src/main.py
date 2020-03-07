@@ -130,8 +130,9 @@ def pkmn_search(message):
     if message.text == '/data':
         text = '''
 ⚡️ Zzrrt! My trainer's teaching me many thingzz, \
-but I still can't read in thought. Use this syntax: /data + PokémonName
-ex.: /data Rotom'
+but I still can't read in thought. Use this syntax: \
+<code>/data + PokémonName</code>
+ex.: <code>/data Rotom</code>
 '''
     else:
         with open('dist/pkmn.json', 'r') as f:
