@@ -114,10 +114,12 @@ def set_message(pkmn_data):
 @bot.message_handler(commands=['start'])
 def start(message):
     cid = message.chat.id
-    text1 = '⚡️ Zzzt! Ehy. I\'m Rotom! My trainer merged me with a Telegram Bo'
-    text2 = 't. He\'s teaching me some commanzzz, for now I can tell you basic'
-    text3 = ' information about all Pokémon using <code>/data</code> command.'
-    bot.send_message(cid, text1+text2+text3, parse_mode='HTML')
+    text = '''
+⚡️ Zzzt! Ehy. I\'m Rotom! My trainer merged me with a Telegram Bot. \
+He\'s teaching me some commanzzz, for now I can tell you basic \
+information about all Pokémon using <code>/data</code> command.
+'''
+    bot.send_message(cid, text, parse_mode='HTML')
 
 
 @bot.message_handler(commands=['data'])
@@ -125,15 +127,23 @@ def pkmn_search(message):
     cid = message.chat.id
     pkmn = find_name(message)
 
-    with open('dist/pkmn.json', 'r') as f:
-        data = json.load(f)
-    if pkmn in data:
-        pkmn_data = data[pkmn]
+    if message.text == '/data':
+        text = '''
+⚡️ Zzrrt! My trainer's teaching me many thingzz, \
+but I still can't read in thought. Use this syntax: /data + PokémonName
+ex.: /data Rotom'
+'''
     else:
-        bot.send_message(cid, 'Pokémon not found :(')
-        return None
+        with open('dist/pkmn.json', 'r') as f:
+            data = json.load(f)
+        if pkmn in data:
+            text = set_message(data[pkmn])
+        else:
+            text = '''
+Mm-hmm, well, maybe he's an anime character, but he certainly \
+izzn't a Pokémon. Zzzt-zzt! ⚡️
+'''
 
-    text = set_message(pkmn_data)
     bot.send_message(cid, text, parse_mode='HTML')
 
 
