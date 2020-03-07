@@ -51,9 +51,10 @@ def set_rating(base):
 
 
 def set_message(pkmn_data, *args):
-    if args:
+    if not args:
+        base_text = t['reduced_text']
+    else:
         base_text = t['expanded_text']
-
         base_friendship = pkmn_data['base_friendship']
         catch_rate = pkmn_data['catch_rate']
         growth_rate = pkmn_data['growth_rate']
@@ -90,25 +91,6 @@ def set_message(pkmn_data, *args):
         tmp = manage_forms(pkmn_data, 'weight')
         weight = tmp['si'] + ' (' + tmp['usc'] + ')'
 
-    else:
-        base_text = t['reduced_text']
-
-    emoji_dict = t['emoji_dict']
-    typee = ''
-    for i in manage_forms(pkmn_data, 'type').values():
-        typee += '/' + i
-    typee = typee[1:]
-    if '/' in typee:
-        typee_str = 'Type'
-    else:
-        typee_str = 'Types'
-    first_type = re.split('/', typee)[0]
-    emoji = emoji_dict[first_type]
-
-    name = pkmn_data['name']
-    national = pkmn_data['national']
-    artwork = manage_forms(pkmn_data, 'artwork')
-
     ability = ''
     for i, j in manage_forms(pkmn_data, 'abilities').items():
         if i == 'hidden_ability':
@@ -132,41 +114,37 @@ def set_message(pkmn_data, *args):
         rating = set_rating(int(base))
         base_stats += '<b>' + base + '</b> ' + stat + ' ' + rating + '\n'
 
+    typee = ''
+    for i in manage_forms(pkmn_data, 'type').values():
+        typee += '/' + i
+    typee = typee[1:]
+    if '/' in typee:
+        typee_str = 'Type'
+    else:
+        typee_str = 'Types'
+
+    emoji_dict = t['emoji_dict']
+    first_type = re.split('/', typee)[0]
+    emoji = emoji_dict[first_type]
+    name = pkmn_data['name']
+    national = pkmn_data['national']
+    artwork = manage_forms(pkmn_data, 'artwork')
+
     if args:
         text = base_text.format(
-            name,
-            artwork,
-            emoji,
-            national,
-            typee_str,
-            typee,
-            ab_str,
-            ability,
-            gender,
-            base_friendship,
-            ev_yield,
-            catch_rate,
-            growth_rate,
-            egg_groups,
-            egg_cycles,
-            species,
-            height,
-            weight,
-            name_origin,
-            other_lang,
-            base_stats,
+            name, artwork, emoji,
+            national, typee_str, typee,
+            ab_str, ability, gender,
+            base_friendship, ev_yield, catch_rate,
+            growth_rate, egg_groups, egg_cycles,
+            species, height, weight,
+            name_origin, other_lang, base_stats
         )
     else:
         text = base_text.format(
-            name,
-            artwork,
-            emoji,
-            national,
-            typee_str,
-            typee,
-            ab_str,
-            ability,
-            base_stats,
+            name, artwork, emoji,
+            national, typee_str, typee,
+            ab_str, ability, base_stats
         )
     return text
 
@@ -188,7 +166,6 @@ def pkmn_search(message):
         with open('dist/pkmn.json', 'r') as f:
             data = json.load(f)
         text = set_message(data[pkmn])
-        markup = types.InlineKeyboardMarkup()
         expand = types.InlineKeyboardButton(
             text='➕ Expand',
             callback_data='all_infos/' + pkmn
@@ -198,7 +175,6 @@ def pkmn_search(message):
     except AttributeError:
         pkmn = find_name(message)
         cid = message.chat.id
-
         if message.text == '/data':
             text = t['error1']
         else:
@@ -211,11 +187,15 @@ def pkmn_search(message):
                     callback_data='all_infos/' + pkmn
                 )
                 markup.add(expand)
-
             else:
                 text = t['error2']
 
-    bot.send_message(cid, text, parse_mode='HTML', reply_markup=markup)
+    bot.send_message(
+        chat_id=cid,
+        text=text,
+        parse_mode='HTML',
+        reply_markup=markup
+    )
 
 
 @bot.callback_query_handler(lambda call: 'all_infos' in call.data)
