@@ -225,32 +225,47 @@ information about all Pokémon using <code>/data</code> command.
     bot.send_message(cid, text, parse_mode='HTML')
 
 
+@bot.callback_query_handler(lambda call: 'basic_infos' in call.data)
 @bot.message_handler(commands=['data'])
 def pkmn_search(message):
-    cid = message.chat.id
-    pkmn = find_name(message)
+    try:
+        cid = message.message.chat.id
+        pkmn = re.split('/', message.data)[1]
+        with open('dist/pkmn.json', 'r') as f:
+            data = json.load(f)
+        text = set_message(data[pkmn])
+        markup = types.InlineKeyboardMarkup()
+        expand = types.InlineKeyboardButton(
+            text='➕ Expand',
+            callback_data='all_infos/' + pkmn
+        )
+        markup.add(expand)
 
-    if message.text == '/data':
-        text = '''
+    except AttributeError:
+        pkmn = find_name(message)
+        cid = message.chat.id
+
+        if message.text == '/data':
+            text = '''
 ⚡️ Zzrrt! My trainer's teaching me many thingzz, \
 but I still can't read in thought. Use this syntax: \
 <code>/data + PokémonName</code>
 ex.: <code>/data Rotom</code>
 '''
-    else:
-        with open('dist/pkmn.json', 'r') as f:
-            data = json.load(f)
-        if pkmn in data:
-            text = set_message(data[pkmn])
-            markup = types.InlineKeyboardMarkup()
-            expand = types.InlineKeyboardButton(
-                text='➕ Expand',
-                callback_data='all_infos/' + pkmn
-            )
-            markup.add(expand)
-
         else:
-            text = '''
+            with open('dist/pkmn.json', 'r') as f:
+                data = json.load(f)
+            if pkmn in data:
+                text = set_message(data[pkmn])
+                markup = types.InlineKeyboardMarkup()
+                expand = types.InlineKeyboardButton(
+                    text='➕ Expand',
+                    callback_data='all_infos/' + pkmn
+                )
+                markup.add(expand)
+
+            else:
+                text = '''
 Mm-hmm, well, maybe he's an anime character, but he certainly \
 izzn't a Pokémon. Zzzt-zzt! ⚡️
 '''
@@ -269,7 +284,7 @@ def all_infos(call):
     markup = types.InlineKeyboardMarkup()
     reduce = types.InlineKeyboardButton(
         text='➖ Reduce',
-        callback_data='basic_infos'
+        callback_data='basic_infos/' + pkmn
     )
     markup.add(reduce)
 
