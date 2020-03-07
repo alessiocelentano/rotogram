@@ -6,7 +6,7 @@ from telebot import types
 
 
 token = open('src/token.txt', 'r').read()
-bot = telebot.TeleBot(token)
+bot = telebot.TeleBot('979765263:AAELCFhUsKZWyjnvwLuAowk8ZNSAHgRxa7k')
 
 
 def find_name(message):
@@ -48,28 +48,74 @@ def set_rating(base):
     return rating_emoji
 
 
-def set_message(pkmn_data):
-    base_text = '''<b><u>{}</u></b> <a href="{}">{}</a>\n
+def set_message(pkmn_data, *args):
+    if args:
+        base_text = '''<b><u>{}</u></b> <a href="{}">{}</a>\n
 <b>National</b>: <i>{}</i>
 <b>{}</b>: <i>{}</i>
 <b>{}</b>: <i>{}</i>\n
-<b>Base stats</b>:
+<b><u>Games data</u></b>
+<b>Gender: </b><i>{}</i>
+<b>Base friendship: </b><i>{}</i>
+<b>EV yield: </b><i>{}</i>
+<b>Catch rate: </b><i>{}</i>
+<b>Growth rate: </b><i>{}</i>
+<b>Egg groups: </b><i>{}</i>
+<b>Egg cycles: </b><i>{}</i>
+<b><u>About Pokémon</u></b>
+<b>Species: </b><i>{}</i>
+<b>Height: </b><i>{}</i>
+<b>Weight: </b><i>{}</i>
+<b>Name origin: </b><i>{}</i>
+<b>Other lang: </b><i>{}</i>\n
+<b><u>Base stats</u></b>:
 {}
 '''
-    name = pkmn_data['name']
 
-    national = pkmn_data['national']
+        base_friendship = pkmn_data['base_friendship']
+        catch_rate = pkmn_data['catch_rate']
+        growth_rate = pkmn_data['growth_rate']
+        egg_cycles = pkmn_data['egg_cycles']
+        species = pkmn_data['species']
 
-    artwork = manage_forms(pkmn_data, 'artwork')
+        gender = ''
+        for i in pkmn_data['gender']:
+            gender += '/' + i
+        gender = gender[1:]
 
-    typee = ''
-    for i in manage_forms(pkmn_data, 'type').values():
-        typee += '/' + i
-    typee = typee[1:]
-    if '/' in typee:
-        typee_str = 'Type'
+        ev_yield = ''
+        for i in manage_forms(pkmn_data, 'ev_yield'):
+            ev_yield += '/' + i
+        ev_yield = ev_yield[1:]
+
+        egg_groups = ''
+        for i in pkmn_data['egg_groups']:
+            egg_groups += '/' + i
+        egg_groups = egg_groups[1:]
+
+        other_lang = ''
+        for i, j in pkmn_data['other_lang'].items():
+            other_lang += '\n' + i.title() + ': ' + j
+        other_lang = other_lang[:1]
+
+        name_origin = ''
+        for i, j in pkmn_data['name_origin'].items():
+            name_origin += ', ' + i + ' (' + j + ')'
+        name_origin = name_origin[:2]
+
+        tmp = manage_forms(pkmn_data, 'height')
+        height = tmp['si'] + ' (' + tmp['usc'] + ')'
+        tmp = manage_forms(pkmn_data, 'weight')
+        weight = tmp['si'] + ' (' + tmp['usc'] + ')'
+
     else:
-        typee_str = 'Types'
+        base_text = '''<b><u>{}</u></b> <a href="{}">{}</a>\n
+<b>National</b>: <i>{}</i>
+<b>{}</b>: <i>{}</i>
+<b>{}</b>: <i>{}</i>\n
+<b><u>Base stats</u></b>:
+{}
+'''
 
     emoji_dict = {
         'Grass': '🌱',
@@ -91,8 +137,20 @@ def set_message(pkmn_data):
         'Rock': '🗻',
         'Poison': '☠️'
     }
+    typee = ''
+    for i in manage_forms(pkmn_data, 'type').values():
+        typee += '/' + i
+    typee = typee[1:]
+    if '/' in typee:
+        typee_str = 'Type'
+    else:
+        typee_str = 'Types'
     first_type = re.split('/', typee)[0]
     emoji = emoji_dict[first_type]
+
+    name = pkmn_data['name']
+    national = pkmn_data['national']
+    artwork = manage_forms(pkmn_data, 'artwork')
 
     ability = ''
     for i, j in manage_forms(pkmn_data, 'abilities').items():
@@ -117,17 +175,42 @@ def set_message(pkmn_data):
         rating = set_rating(int(base))
         base_stats += '<b>' + base + '</b> ' + stat + ' ' + rating + '\n'
 
-    text = base_text.format(
-        name,
-        artwork,
-        emoji,
-        national,
-        typee_str,
-        typee,
-        ab_str,
-        ability,
-        base_stats,
-    )
+    if args:
+        text = base_text.format(
+            name,
+            artwork,
+            emoji,
+            national,
+            typee_str,
+            typee,
+            ab_str,
+            ability,
+            gender,
+            base_friendship,
+            ev_yield,
+            catch_rate,
+            growth_rate,
+            egg_groups,
+            egg_cycles,
+            species,
+            height,
+            weight,
+            name_origin,
+            other_lang,
+            base_stats,
+        )
+    else:
+        text = base_text.format(
+            name,
+            artwork,
+            emoji,
+            national,
+            typee_str,
+            typee,
+            ab_str,
+            ability,
+            base_stats,
+        )
     return text
 
 
@@ -159,13 +242,44 @@ ex.: <code>/data Rotom</code>
             data = json.load(f)
         if pkmn in data:
             text = set_message(data[pkmn])
+            markup = types.InlineKeyboardMarkup()
+            expand = types.InlineKeyboardButton(
+                text='➕ Expand',
+                callback_data='all_infos/' + pkmn
+            )
+            markup.add(expand)
+
         else:
             text = '''
 Mm-hmm, well, maybe he's an anime character, but he certainly \
 izzn't a Pokémon. Zzzt-zzt! ⚡️
 '''
 
-    bot.send_message(cid, text, parse_mode='HTML')
+    bot.send_message(cid, text, parse_mode='HTML', reply_markup=markup)
+
+
+@bot.callback_query_handler(lambda call: 'all_infos' in call.data)
+def all_infos(call):
+    cid = call.message.chat.id
+    mid = call.message.message_id
+    pkmn = re.split('/', call.data)[1]
+    with open('dist/pkmn.json', 'r') as f:
+        data = json.load(f)
+    text = set_message(data[pkmn], True)
+    markup = types.InlineKeyboardMarkup()
+    reduce = types.InlineKeyboardButton(
+        text='➖ Reduce',
+        callback_data='basic_infos'
+    )
+    markup.add(reduce)
+
+    bot.edit_message_text(
+        text=text,
+        chat_id=cid,
+        message_id=mid,
+        parse_mode='HTML',
+        reply_markup=markup
+    )
 
 
 bot.polling(none_stop=True)
