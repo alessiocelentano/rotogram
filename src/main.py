@@ -29,13 +29,32 @@ def manage_forms(pkmn_data, data):
     return value
 
 
+def set_rating(base):
+    rating_n = 0
+    rating_emoji = ''
+    tiers = [0, 9, 19, 39, 79, 89, 99, 114, 129, 149, 256]
+    for i in tiers:
+        if base < i:
+            while rating_n >= 2:
+                rating_emoji += '🌕'
+                rating_n -= 2
+            if rating_n == 1:
+                rating_emoji += '🌗'
+            while len(rating_emoji) != 5:
+                rating_emoji += '🌑'
+            break
+        else:
+            rating_n += 1
+    return rating_emoji
+
+
 def set_message(pkmn_data):
     base_text = '''<b><u>{}</u></b> <a href="{}">{}</a>\n
 <b>National</b>: <i>{}</i>
 <b>{}</b>: <i>{}</i>
 <b>{}</b>: <i>{}</i>\n
 <b>Base stats</b>:
-<i>{}</i>
+{}
 '''
     name = pkmn_data['name']
 
@@ -95,7 +114,8 @@ def set_message(pkmn_data):
         manage_forms(pkmn_data, 'max_stats').values(),
         stats
     ):
-        base_stats += stat + ': ' + base + ' (' + minn + '-' + maxx + ')\n'
+        rating = set_rating(int(base))
+        base_stats += '<b>' + base + '</b> ' + stat + ' ' + rating + '\n'
 
     text = base_text.format(
         name,
