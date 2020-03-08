@@ -24,5 +24,6 @@
     "start_message": "⚡️ Zzzt! Ehy. I'm Rotom! My trainer merged me with a Telegram Bot. He's teaching me some commanzzz, for now I can tell you basic information about all Pokémon using <code>/data</code> command.",
     "error1": "⚡️ Zzrrt! My trainer's teaching me many thingzz, but I still can't read in thought. Use this syntax: <code>/data + PokémonName</code>\nex.: <code>/data Rotom</code>",
     "error2": "Mm-hmm, well, maybe he's an anime character, but he certainly izzn't a Pokémon. Zzzt-zzt! ⚡️",
-    "about": "⚡️ Zzt-zzz! Do you want some lore? Well, I'll give you some interesting links\n\n<b>Rotomgram channel</b>\nMy trainer iszz writing a biography about me on @rotomgram\n\n<b>Affiliate group</b>\nI have a fan-page, too 😍\n@pokemon_italia \n\n<b>GitHub</b>\nI'm completely open-source! https://github.com/alessiocelentano/Rotomgram\n\n<b>Credits</b>\n@alessiocelentano (bot, logo)\npokemondb.net (data)\npokemon.com (artworks)"
+    "about": "⚡️ Zzt-zzz! Do you want some lore? Well, I'll give you some interesting links\n\n<b>Rotomgram channel</b>\nMy trainer iszz writing a biography about me on @rotomgram\n\n<b>Affiliate group</b>\nI have a fan-page, too 😍\n@pokemon_italia \n\n<b>GitHub</b>\nI'm completely open-source! https://github.com/alessiocelentano/Rotomgram\n\n<b>Credits</b>\n@alessiocelentano (bot, logo)\npokemondb.net (data)\npokemon.com (artworks)",
+    "legend": "<i>Move, Type (Category)\nPower/Accuracy, method</i>"
 }
