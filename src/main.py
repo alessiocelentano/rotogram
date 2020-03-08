@@ -6,7 +6,7 @@ from telebot import types
 
 
 token = open('src/token.txt', 'r').read()
-bot = telebot.TeleBot(token)
+bot = telebot.TeleBot('979765263:AAELCFhUsKZWyjnvwLuAowk8ZNSAHgRxa7k')
 with open('src/texts.json', 'r') as f:
     t = json.load(f)
 
@@ -220,6 +220,20 @@ def all_infos(call):
         parse_mode='HTML',
         reply_markup=markup
     )
+
+
+@bot.message_handler(commands=['about'])
+def about(message):
+    cid = message.chat.id
+    text = t['about']
+    markup = types.InlineKeyboardMarkup()
+    github = types.InlineKeyboardButton(
+        text='➖ Reduce',
+        url='https://github.com/alessiocelentano/Rotomgram'
+    )
+
+    markup.add(github)
+    bot.send_message(cid, text, reply_markup=markup, parse_mode='HTML')
 
 
 bot.polling(none_stop=True)
