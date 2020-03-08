@@ -6,7 +6,7 @@ from telebot import types
 
 
 token = open('src/token.txt', 'r').read()
-bot = telebot.TeleBot('979765263:AAELCFhUsKZWyjnvwLuAowk8ZNSAHgRxa7k')
+bot = telebot.TeleBot(token)
 with open('src/texts.json', 'r') as f:
     t = json.load(f)
 
@@ -228,7 +228,7 @@ def about(message):
     text = t['about']
     markup = types.InlineKeyboardMarkup()
     github = types.InlineKeyboardButton(
-        text='➖ Reduce',
+        text='Github',
         url='https://github.com/alessiocelentano/Rotomgram'
     )
 
