@@ -6,7 +6,7 @@ from telebot import types
 
 
 token = open('src/token.txt', 'r').read()
-bot = telebot.TeleBot('979765263:AAELCFhUsKZWyjnvwLuAowk8ZNSAHgRxa7k')
+bot = telebot.TeleBot(token)
 with open('src/texts.json', 'r') as f:
     t = json.load(f)
 with open('dist/pkmn.json', 'r') as f:
@@ -153,7 +153,7 @@ def set_message(pkmn_data, *args):
 
 def set_moveset(pkmn):
     text = t['legend'] + '\n\n'
-    base_text = '<a href="{}">{}</a> {}, {} ({})\n      {}/{}, {}\n\n'
+    base_text = '<a href="{}">{}</a> <b>{}</b>, {} ({})\n      {}/{}, {}\n\n'
     if 'forms' in data[pkmn]:
         moveset = data[pkmn]['forms'][pkmn]['moveset']
         artwork = data[pkmn]['forms'][pkmn]['artwork']
@@ -169,8 +169,8 @@ def set_moveset(pkmn):
             name = info['move']
             typee = info['type']
             category = info['cat']
-            power = info['power']
-            accuracy = info['acc']
+            power = info['power'] if info['power'] is not None else '-'
+            accuracy = info['acc'] if info['acc'] is not None else '-'
             emoji = t['emoji_dict'][typee]
             if method == 'level_up':
                 method_text = 'Level ' + info['lv']
@@ -217,6 +217,7 @@ def pkmn_search(message):
     markup = types.InlineKeyboardMarkup(1)
     try:
         cid = message.message.chat.id
+        mid = message.message.message_id
         pkmn = re.split('/', message.data)[1]
         text = set_message(data[pkmn])
         expand = types.InlineKeyboardButton(
@@ -246,12 +247,21 @@ def pkmn_search(message):
     )
     markup.add(moveset)
 
-    bot.send_message(
-        chat_id=cid,
-        text=text,
-        parse_mode='HTML',
-        reply_markup=markup
-    )
+    try:
+        bot.edit_message_text(
+            text=text,
+            chat_id=cid,
+            message_id=mid,
+            parse_mode='HTML',
+            reply_markup=markup
+        )
+    except UnboundLocalError:
+        bot.send_message(
+            chat_id=cid,
+            text=text,
+            parse_mode='HTML',
+            reply_markup=markup
+        )
 
 
 @bot.callback_query_handler(lambda call: 'all_infos' in call.data)
@@ -260,12 +270,16 @@ def all_infos(call):
     mid = call.message.message_id
     pkmn = re.split('/', call.data)[1]
     text = set_message(data[pkmn], True)
-    markup = types.InlineKeyboardMarkup()
+    markup = types.InlineKeyboardMarkup(1)
     reduce = types.InlineKeyboardButton(
         text='➖ Reduce',
         callback_data='basic_infos/' + pkmn
     )
-    markup.add(reduce)
+    moveset = types.InlineKeyboardButton(
+        text='⚔️ Moveset',
+        callback_data='moveset/' + pkmn
+    )
+    markup.add(reduce, moveset)
 
     bot.edit_message_text(
         text=text,
