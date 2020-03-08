@@ -105,13 +105,18 @@ for pokemon in pokemon_list:
         forms[form] = {}
 
     # Artwork
-    index = str(perc_index)
-    if len(index) == 1:
-        index = '00' + index
-    elif len(index) == 2:
-        index = '0' + index
-    link = 'https://assets.pokemon.com/assets/cms2/img/pokedex/detail/{}.png'
-    artwork = link.format(index)
+    artwork_list = soup.find_all(
+        'div', {
+            'class': 'grid-col span-md-6 span-lg-4 text-center'
+        }
+    )
+    for artwork, form in zip(artwork_list, form_list):
+        if artwork.find('img'):
+            artwork = artwork.find('img').attrs['src']
+            artwork = re.sub('artwork', 'artwork/large', artwork)
+        else:
+            continue
+        forms[form]['artwork'] = artwork
 
     # Dex, Typing, Species, Height, Weight and abilities
     pokedex_data_list = soup.find_all(
