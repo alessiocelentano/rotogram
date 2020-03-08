@@ -363,7 +363,7 @@ def second_page(call):
         chat_id=cid,
         message_id=mid,
         parse_mode='HTML',
-        reply_markuo=markup
+        reply_markup=markup
     )
 
 
