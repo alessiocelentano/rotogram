@@ -6,9 +6,11 @@ from telebot import types
 
 
 token = open('src/token.txt', 'r').read()
-bot = telebot.TeleBot(token)
+bot = telebot.TeleBot('979765263:AAELCFhUsKZWyjnvwLuAowk8ZNSAHgRxa7k')
 with open('src/texts.json', 'r') as f:
     t = json.load(f)
+with open('dist/pkmn.json', 'r') as f:
+    data = json.load(f)
 
 
 def find_name(message):
@@ -149,6 +151,59 @@ def set_message(pkmn_data, *args):
     return text
 
 
+def set_moveset(pkmn):
+    text = t['legend'] + '\n\n'
+    base_text = '<a href="{}">{}</a> {}, {} ({})\n      {}/{}, {}\n\n'
+    if 'forms' in data[pkmn]:
+        moveset = data[pkmn]['forms'][pkmn]['moveset']
+        artwork = data[pkmn]['forms'][pkmn]['artwork']
+    else:
+        moveset = data[pkmn]['moveset']
+        artwork = data[pkmn]['artwork']
+    if 'swsh' in moveset:
+        moveset = moveset['swsh']
+    else:
+        moveset = moveset['usum']
+    for method, moves in zip(moveset, moveset.values()):
+        for move, info in zip(moves, moves.values()):
+            name = info['move']
+            typee = info['type']
+            category = info['cat']
+            power = info['power']
+            accuracy = info['acc']
+            emoji = t['emoji_dict'][typee]
+            if method == 'level_up':
+                method_text = 'Level ' + info['lv']
+            elif method == 'tm':
+                method_text = 'TM ' + info['tm']
+            elif method == 'tr':
+                method_text = 'TR ' + info['tr']
+            elif method == 'move_tutor':
+                method_text = 'Move Tutor'
+            elif method == 'hm':
+                method_text = 'HM ' + info['hm']
+            elif method == 'pre_evo_moves':
+                method_text = 'Learned by pre-evolution'
+            elif method == 'transfer_only':
+                method_text = 'Transfer only'
+            elif method == 'egg_moves':
+                method_text = 'Egg Move'
+            elif method == 'special_moves':
+                method_text = 'Special move'
+            text += base_text.format(
+                artwork,
+                emoji,
+                name,
+                typee,
+                category,
+                power,
+                accuracy,
+                method_text
+            )
+    text += t['legend']
+    return text
+
+
 @bot.message_handler(commands=['start'])
 def start(message):
     cid = message.chat.id
@@ -159,12 +214,10 @@ def start(message):
 @bot.callback_query_handler(lambda call: 'basic_infos' in call.data)
 @bot.message_handler(commands=['data'])
 def pkmn_search(message):
-    markup = types.InlineKeyboardMarkup()
+    markup = types.InlineKeyboardMarkup(1)
     try:
         cid = message.message.chat.id
         pkmn = re.split('/', message.data)[1]
-        with open('dist/pkmn.json', 'r') as f:
-            data = json.load(f)
         text = set_message(data[pkmn])
         expand = types.InlineKeyboardButton(
             text='➕ Expand',
@@ -178,8 +231,6 @@ def pkmn_search(message):
         if message.text == '/data':
             text = t['error1']
         else:
-            with open('dist/pkmn.json', 'r') as f:
-                data = json.load(f)
             if pkmn in data:
                 text = set_message(data[pkmn])
                 expand = types.InlineKeyboardButton(
@@ -189,6 +240,11 @@ def pkmn_search(message):
                 markup.add(expand)
             else:
                 text = t['error2']
+    moveset = types.InlineKeyboardButton(
+        text='⚔️ Moveset',
+        callback_data='moveset/' + pkmn
+    )
+    markup.add(moveset)
 
     bot.send_message(
         chat_id=cid,
@@ -203,8 +259,6 @@ def all_infos(call):
     cid = call.message.chat.id
     mid = call.message.message_id
     pkmn = re.split('/', call.data)[1]
-    with open('dist/pkmn.json', 'r') as f:
-        data = json.load(f)
     text = set_message(data[pkmn], True)
     markup = types.InlineKeyboardMarkup()
     reduce = types.InlineKeyboardButton(
@@ -219,6 +273,20 @@ def all_infos(call):
         message_id=mid,
         parse_mode='HTML',
         reply_markup=markup
+    )
+
+
+@bot.callback_query_handler(lambda call: 'moveset' in call.data)
+def moveset(call):
+    cid = call.message.chat.id
+    mid = call.message.message_id
+    pkmn = re.split('/', call.data)[1]
+    text = set_moveset(pkmn)
+    bot.edit_message_text(
+        text=text,
+        chat_id=cid,
+        message_id=mid,
+        parse_mode='HTML',
     )
 
 
