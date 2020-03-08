@@ -233,7 +233,13 @@ def about(message):
     )
 
     markup.add(github)
-    bot.send_message(cid, text, reply_markup=markup, parse_mode='HTML')
+    bot.send_message(
+        chat_id=cid,
+        text=text,
+        disable_web_page_preview=True,
+        reply_markup=markup,
+        parse_mode='HTML'
+    )
 
 
 bot.polling(none_stop=True)
