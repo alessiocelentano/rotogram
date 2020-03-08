@@ -6,7 +6,7 @@ from telebot import types
 
 
 token = open('src/token.txt', 'r').read()
-bot = telebot.TeleBot(token)
+bot = telebot.TeleBot('979765263:AAELCFhUsKZWyjnvwLuAowk8ZNSAHgRxa7k')
 with open('src/texts.json', 'r') as f:
     t = json.load(f)
 with open('dist/pkmn.json', 'r') as f:
@@ -296,6 +296,13 @@ def moveset(call):
     mid = call.message.message_id
     pkmn = re.split('/', call.data)[1]
     text = set_moveset(pkmn)
+    markup = types.InlineKeyboardMarkup()
+    info = types.InlineKeyboardButton(
+        text='📑 Info',
+        callback_data='basic_infos/' + pkmn
+    )
+    markup.add(info)
+
     bot.edit_message_text(
         text=text,
         chat_id=cid,
