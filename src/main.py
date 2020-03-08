@@ -354,9 +354,13 @@ def second_page(call):
     markup = types.InlineKeyboardMarkup(1)
     page1 = types.InlineKeyboardButton(
         text='<< Page 1 📃',
-        callback_data='page1/' + pkmn
+        callback_data='moveset/' + pkmn
     )
-    markup.add(page1)
+    info = types.InlineKeyboardButton(
+        text='🏠 Basic info',
+        callback_data='basic_infos/' + pkmn
+    )
+    markup.add(page1, info)
 
     bot.edit_message_text(
         text=text,
