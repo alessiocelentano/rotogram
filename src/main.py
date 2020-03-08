@@ -247,7 +247,11 @@ def pkmn_search(message):
             text='➕ Expand',
             callback_data='all_infos/' + pkmn
         )
-        markup.add(expand)
+        moveset = types.InlineKeyboardButton(
+            text='⚔️ Moveset',
+            callback_data='moveset/' + pkmn
+        )
+        markup.add(expand, moveset)
 
     except AttributeError:
         pkmn = find_name(message)
@@ -262,13 +266,14 @@ def pkmn_search(message):
                     callback_data='all_infos/' + pkmn
                 )
                 markup.add(expand)
+                moveset = types.InlineKeyboardButton(
+                    text='⚔️ Moveset',
+                    callback_data='moveset/' + pkmn
+                )
+                markup.add(expand, moveset)
+
             else:
                 text = t['error2']
-    moveset = types.InlineKeyboardButton(
-        text='⚔️ Moveset',
-        callback_data='moveset/' + pkmn
-    )
-    markup.add(moveset)
 
     try:
         bot.edit_message_text(
