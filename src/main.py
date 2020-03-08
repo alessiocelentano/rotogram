@@ -13,6 +13,9 @@ with open('dist/pkmn.json', 'r') as f:
     data = json.load(f)
 
 
+user_dict = {}
+
+
 def find_name(message):
     pkmn = re.sub('/data ', '', message.text.lower())
     pkmn = re.sub('♀', '-f', pkmn)  # For Nidoran♀
@@ -152,7 +155,10 @@ def set_message(pkmn_data, *args):
 
 
 def set_moveset(pkmn):
+    index = 0
+    long_moveset = False
     text = t['legend'] + '\n\n'
+    text2 = t['legend'] + '\n\n'
     base_text = '<a href="{}">{}</a> <b>{}</b>, {} ({})\n      {}/{}, {}\n\n'
     if 'forms' in data[pkmn]:
         moveset = data[pkmn]['forms'][pkmn]['moveset']
@@ -166,6 +172,7 @@ def set_moveset(pkmn):
         moveset = moveset['usum']
     for method, moves in zip(moveset, moveset.values()):
         for move, info in zip(moves, moves.values()):
+            index += 1
             name = info['move']
             typee = info['type']
             category = info['cat']
@@ -190,17 +197,33 @@ def set_moveset(pkmn):
                 method_text = 'Egg Move'
             elif method == 'special_moves':
                 method_text = 'Special move'
-            text += base_text.format(
-                artwork,
-                emoji,
-                name,
-                typee,
-                category,
-                power,
-                accuracy,
-                method_text
-            )
+            if index > 70:
+                long_moveset = True
+                text2 += base_text.format(
+                    artwork,
+                    emoji,
+                    name,
+                    typee,
+                    category,
+                    power,
+                    accuracy,
+                    method_text
+                )
+            else:
+                text += base_text.format(
+                    artwork,
+                    emoji,
+                    name,
+                    typee,
+                    category,
+                    power,
+                    accuracy,
+                    method_text
+                )
     text += t['legend']
+    if long_moveset:
+        text2 += t['legend']
+        text = [text, text2]
     return text
 
 
@@ -296,9 +319,19 @@ def moveset(call):
     mid = call.message.message_id
     pkmn = re.split('/', call.data)[1]
     text = set_moveset(pkmn)
-    markup = types.InlineKeyboardMarkup()
+    markup = types.InlineKeyboardMarkup(1)
+
+    if type(text) == list:
+        page2 = types.InlineKeyboardButton(
+            text='📃 Page 2 >>',
+            callback_data='page2/' + pkmn
+        )
+        user_dict[mid] = text[1]
+        markup.add(page2)
+        text = text[0]
+
     info = types.InlineKeyboardButton(
-        text='📑 Info',
+        text='🏠 Basic info',
         callback_data='basic_infos/' + pkmn
     )
     markup.add(info)
@@ -308,6 +341,29 @@ def moveset(call):
         chat_id=cid,
         message_id=mid,
         parse_mode='HTML',
+        reply_markup=markup
+    )
+
+
+@bot.callback_query_handler(lambda call: 'page2' in call.data)
+def second_page(call):
+    cid = call.message.chat.id
+    mid = call.message.message_id
+    pkmn = re.split('/', call.data)[1]
+    text = user_dict[mid]
+    markup = types.InlineKeyboardMarkup(1)
+    page1 = types.InlineKeyboardButton(
+        text='<< Page 1 📃',
+        callback_data='page1/' + pkmn
+    )
+    markup.add(page1)
+
+    bot.edit_message_text(
+        text=text,
+        chat_id=cid,
+        message_id=mid,
+        parse_mode='HTML',
+        reply_markuo=markup
     )
 
 
