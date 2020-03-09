@@ -300,7 +300,7 @@ def pkmn_search(message):
                     callback_data='moveset/' + pkmn
                 )
                 locations = types.InlineKeyboardButton(
-                    text='⚔🏠 Locations',
+                    text='🏠 Locations',
                     callback_data='locations/' + pkmn
                 )
                 markup.add(expand, moveset, locations)
