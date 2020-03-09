@@ -161,8 +161,9 @@ def set_moveset(pkmn):
     text2 = t['legend'] + '\n\n'
     base_text = '<a href="{}">{}</a> <b>{}</b>, {} ({})\n      {}/{}, {}\n\n'
     if 'forms' in data[pkmn]:
+        form = list(data[pkmn]['forms'].keys())[0]
         moveset = data[pkmn]['forms'][pkmn]['moveset']
-        artwork = data[pkmn]['forms'][pkmn]['artwork']
+        artwork = data[pkmn]['forms'][form]['artwork']
     else:
         moveset = data[pkmn]['moveset']
         artwork = data[pkmn]['artwork']
