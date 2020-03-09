@@ -227,6 +227,32 @@ def set_moveset(pkmn):
     return text
 
 
+def get_locations(data, pkmn):
+    text = ''
+    loc_dict = data[pkmn]['location']
+    for game, location in loc_dict.items():
+        if game == 'firered':
+            game = 'Fire Red'
+        elif game == 'leafgreen':
+            game =  'Leaf Green'
+        elif game == 'heartgold':
+            game = 'Heart Gold'
+        elif game == 'soulsilver':
+            game = 'Soul Silver'
+        elif game == 'omegaruby':
+            game = 'Omega Ruby'
+        elif game == 'alphasapphire':
+            game = 'Alpha Sapphire'
+        elif game == 'letsgopikachu':
+            game = 'Let\'s Go, Pikachu!'
+        elif game == 'letsgoeevee':
+            game = 'Let\'s Go, Eevee!'
+        else:
+            game = game.title()
+        text += '<b>' + game + '</b>: <i>' + location + '</i>\n'
+    return text
+
+
 @bot.message_handler(commands=['start'])
 def start(message):
     cid = message.chat.id
@@ -251,7 +277,11 @@ def pkmn_search(message):
             text='⚔️ Moveset',
             callback_data='moveset/' + pkmn
         )
-        markup.add(expand, moveset)
+        locations = types.InlineKeyboardButton(
+            text='🏠 Locations',
+            callback_data='locations/' + pkmn
+        )
+        markup.add(expand, moveset, locations)
 
     except AttributeError:
         pkmn = find_name(message)
@@ -269,7 +299,11 @@ def pkmn_search(message):
                     text='⚔️ Moveset',
                     callback_data='moveset/' + pkmn
                 )
-                markup.add(expand, moveset)
+                locations = types.InlineKeyboardButton(
+                    text='⚔🏠 Locations',
+                    callback_data='locations/' + pkmn
+                )
+                markup.add(expand, moveset, locations)
 
             else:
                 text = t['error2']
@@ -335,7 +369,7 @@ def moveset(call):
         text = text[0]
 
     info = types.InlineKeyboardButton(
-        text='🏠 Basic info',
+        text='❓ Basic info',
         callback_data='basic_infos/' + pkmn
     )
     markup.add(info)
@@ -361,7 +395,7 @@ def second_page(call):
         callback_data='moveset/' + pkmn
     )
     info = types.InlineKeyboardButton(
-        text='🏠 Basic info',
+        text='❓ Basic info',
         callback_data='basic_infos/' + pkmn
     )
     markup.add(page1, info)
@@ -372,6 +406,20 @@ def second_page(call):
         message_id=mid,
         parse_mode='HTML',
         reply_markup=markup
+    )
+
+
+@bot.callback_query_handler(lambda call: 'locations' in call.data)
+def locations(call):
+    cid = call.message.chat.id
+    mid = call.message.message_id
+    pkmn = re.split('/', call.data)[1]
+    text = get_locations(data, pkmn)
+    bot.edit_message_text(
+        text=text,
+        chat_id=cid,
+        message_id=mid,
+        parse_mode='HTML'
     )
 
 
