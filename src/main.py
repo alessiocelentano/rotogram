@@ -415,11 +415,19 @@ def locations(call):
     mid = call.message.message_id
     pkmn = re.split('/', call.data)[1]
     text = get_locations(data, pkmn)
+    markup = types.InlineKeyboardMarkup(1)
+    info = types.InlineKeyboardButton(
+        text='❓ Basic info',
+        callback_data='basic_infos/' + pkmn
+    )
+    markup.add(info)
+
     bot.edit_message_text(
         text=text,
         chat_id=cid,
         message_id=mid,
-        parse_mode='HTML'
+        parse_mode='HTML',
+        reply_markup=markup
     )
 
 
