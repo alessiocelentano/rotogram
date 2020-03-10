@@ -6,7 +6,7 @@ from telebot import types
 
 
 token = open('src/token.txt', 'r').read()
-bot = telebot.TeleBot(token)
+bot = telebot.TeleBot('979765263:AAELCFhUsKZWyjnvwLuAowk8ZNSAHgRxa7k')
 with open('src/texts.json', 'r') as f:
     t = json.load(f)
 with open('dist/pkmn.json', 'r') as f:
@@ -341,7 +341,11 @@ def all_infos(call):
         text='⚔️ Moveset',
         callback_data='moveset/' + pkmn
     )
-    markup.add(reduce, moveset)
+    locations = types.InlineKeyboardButton(
+        text='🏠 Locations',
+        callback_data='locations/' + pkmn
+    )
+    markup.add(reduce, moveset, locations)
 
     bot.edit_message_text(
         text=text,
@@ -373,7 +377,11 @@ def moveset(call):
         text='❓ Basic info',
         callback_data='basic_infos/' + pkmn
     )
-    markup.add(info)
+    locations = types.InlineKeyboardButton(
+        text='🏠 Locations',
+        callback_data='locations/' + pkmn
+    )
+    markup.add(info, locations)
 
     bot.edit_message_text(
         text=text,
@@ -399,7 +407,11 @@ def second_page(call):
         text='❓ Basic info',
         callback_data='basic_infos/' + pkmn
     )
-    markup.add(page1, info)
+    locations = types.InlineKeyboardButton(
+        text='🏠 Locations',
+        callback_data='locations/' + pkmn
+    )
+    markup.add(page1, info, locations)
 
     bot.edit_message_text(
         text=text,
@@ -421,7 +433,12 @@ def locations(call):
         text='❓ Basic info',
         callback_data='basic_infos/' + pkmn
     )
-    markup.add(info)
+    moveset = types.InlineKeyboardButton(
+        text='⚔️ Moveset',
+        callback_data='moveset/' + pkmn
+    )
+
+    markup.add(info, moveset)
 
     bot.edit_message_text(
         text=text,
