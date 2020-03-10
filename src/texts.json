@@ -1,6 +1,6 @@
 {
-    "expanded_text": "<b><u>{}</u></b> <a href=\"{}\">{}</a>\n\n<b>National</b>: <i>{}</i>\n<b>{}</b>: <i>{}</i>\n<b>{}</b>: <i>{}</i>\n\n<b><u>Games data</u></b>\n<b>Gender: </b><i>{}</i>\n<b>Base friendship: </b><i>{}</i>\n<b>EV yield: </b><i>{}</i>\n<b>Catch rate: </b><i>{}</i>\n<b>Growth rate: </b><i>{}</i>\n<b>Egg groups: </b><i>{}</i>\n<b>Egg cycles: </b><i>{}</i>\n<b><u>About Pokémon</u></b>\n<b>Species: </b><i>{}</i>\n<b>Height: </b><i>{}</i>\n<b>Weight: </b><i>{}</i>\n<b>Name origin: </b><i>{}</i>\n<b>Other lang: </b><i>{}</i>\n\n<b><u>Base stats</u></b>:\n{}",
-    "reduced_text": "<b><u>{}</u></b> <a href=\"{}\">{}</a>\n\n<b>National</b>: <i>{}</i>\n<b>{}</b>: <i>{}</i>\n<b>{}</b>: <i>{}</i>\n\n<b><u>Base stats</u></b>:\n{}",
+    "expanded_text": "<b><u>{}</u></b> <a href=\"{}\">{}</a>\n\n<b>National</b>: <i>{}</i>\n<b>{}</b>: <i>{}</i>\n<b>{}</b>: <i>{}</i>\n\n<b><u>Games data</u></b>\n<b>Gender: </b><i>{}</i>\n<b>Base friendship: </b><i>{}</i>\n<b>EV yield: </b><i>{}</i>\n<b>Catch rate: </b><i>{}</i>\n<b>Growth rate: </b><i>{}</i>\n<b>Egg groups: </b><i>{}</i>\n<b>Egg cycles: </b><i>{}</i>\n<b><u>About Pokémon</u></b>\n<b>Species: </b><i>{}</i>\n<b>Height: </b><i>{}</i>\n<b>Weight: </b><i>{}</i>\n<b>Name origin: </b><i>{}</i>\n<b>Other lang: </b><i>{}</i>\n\n<b><u>Base stats</u></b>:\n{}{}",
+    "reduced_text": "<b><u>{}</u></b> <a href=\"{}\">{}</a>\n\n<b>National</b>: <i>{}</i>\n<b>{}</b>: <i>{}</i>\n<b>{}</b>: <i>{}</i>\n\n<b><u>Base stats</u></b>:\n{}{}",
     "emoji_dict": {
         "Grass": "🌱",
         "Fire": "🔥",
@@ -25,5 +25,6 @@
     "error1": "⚡️ Zzrrt! My trainer's teaching me many thingzz, but I still can't read in thought. Use this syntax: <code>/data + PokémonName</code>\nex.: <code>/data Rotom</code>",
     "error2": "Mm-hmm, well, maybe he's an anime character, but he certainly izzn't a Pokémon. Zzzt-zzt! ⚡️",
     "about": "⚡️ Zzt-zzz! Do you want some lore? Well, I'll give you some interesting links\n\n<b>Rotomgram channel</b>\nMy trainer iszz writing a biography about me on @rotomgram\n\n<b>Affiliate group</b>\nI have a fan-page, too 😍\n@pokemon_italia \n\n<b>GitHub</b>\nI'm completely open-source! https://github.com/alessiocelentano/Rotomgram\n\n<b>Credits</b>\n@alessiocelentano (bot, logo)\npokemondb.net (data)\npokemon.com (artworks)",
-    "legend": "<i>Move, Type (Category)\nPower/Accuracy, method</i>"
+    "legend": "<i>Move, Type (Category)\nPower/Accuracy, method</i>",
+    "minmax": "<i>Min/max stats at level 100</i>"
 }

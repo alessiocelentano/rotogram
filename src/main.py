@@ -117,7 +117,14 @@ def set_message(pkmn_data, *args):
         stats
     ):
         rating = set_rating(int(base))
-        base_stats += '<b>' + base + '</b> ' + stat + ' ' + rating + '\n'
+        base_stats += '<b>{}</b> {} (<i>{}-{}</i>) {}\n'.format(
+            base,
+            stat,
+            minn,
+            maxx,
+            rating
+        )
+    legend = t['minmax']
 
     typee = ''
     for i in manage_forms(pkmn_data, 'type').values():
@@ -143,13 +150,13 @@ def set_message(pkmn_data, *args):
             base_friendship, ev_yield, catch_rate,
             growth_rate, egg_groups, egg_cycles,
             species, height, weight,
-            name_origin, other_lang, base_stats
+            name_origin, other_lang, base_stats, legend
         )
     else:
         text = base_text.format(
             name, artwork, emoji,
             national, typee_str, typee,
-            ab_str, ability, base_stats
+            ab_str, ability, base_stats, legend
         )
     return text
 
