@@ -108,6 +108,21 @@ def set_message(pkmn_data, *args):
     else:
         ab_str = 'Ability'
 
+    evo_text = ''
+    family = manage_forms(pkmn_data, 'evolutions')
+    if 'from' in family and None not in family['from']:
+        evo_text += 'It evolves from <b>{}</b> (<i>{}</i>)\n'.format(
+            family['from']['name'],
+            family['from']['method']
+        )
+    if 'into' in family and None not in family['into']:
+        evo_text += 'It evolves into <b>{}</b> (<i>{}</i>)\n'.format(
+            family['into']['name'],
+            family['into']['method']
+        )
+    if not evo_text:
+        evo_text = 'It is not known to evolve into or from any other Pokémon\n'
+
     base_stats = ''
     stats = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe']
     for base, minn, maxx, stat in zip(
@@ -144,19 +159,18 @@ def set_message(pkmn_data, *args):
 
     if args:
         text = base_text.format(
-            name, artwork, emoji,
-            national, typee_str, typee,
-            ab_str, ability, gender,
-            base_friendship, ev_yield, catch_rate,
-            growth_rate, egg_groups, egg_cycles,
-            species, height, weight,
-            name_origin, other_lang, base_stats, legend
+            name, artwork, emoji, evo_text,
+            national, typee_str, typee, ab_str,
+            ability, gender, base_friendship, ev_yield,
+            catch_rate, growth_rate, egg_groups, egg_cycles,
+            species, height, weight, name_origin,
+            other_lang, base_stats, legend
         )
     else:
         text = base_text.format(
-            name, artwork, emoji,
-            national, typee_str, typee,
-            ab_str, ability, base_stats, legend
+            name, artwork, emoji, evo_text,
+            national, typee_str, typee, ab_str,
+            ability, base_stats, legend
         )
     return text
 
