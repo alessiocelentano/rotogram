@@ -13,7 +13,7 @@ with open('dist/pkmn.json', 'r') as f:
     data = json.load(f)
 
 
-user_dict = {}
+# /--- Functions ---/
 
 
 def find_name(message):
@@ -242,7 +242,7 @@ def get_locations(data, pkmn):
         if game == 'firered':
             game = 'Fire Red'
         elif game == 'leafgreen':
-            game =  'Leaf Green'
+            game = 'Leaf Green'
         elif game == 'heartgold':
             game = 'Heart Gold'
         elif game == 'soulsilver':
@@ -259,6 +259,9 @@ def get_locations(data, pkmn):
             game = game.title()
         text += '<b>' + game + '</b>: <i>' + location + '</i>\n'
     return text
+
+
+# /--- Bot commands ---/
 
 
 @bot.message_handler(commands=['start'])
@@ -376,7 +379,6 @@ def moveset(call):
             text='📃 Page 2 >>',
             callback_data='page2/' + pkmn
         )
-        user_dict[mid] = text[1]
         markup.add(page2)
         text = text[0]
 
@@ -404,7 +406,7 @@ def second_page(call):
     cid = call.message.chat.id
     mid = call.message.message_id
     pkmn = re.split('/', call.data)[1]
-    text = user_dict[mid]
+    text = set_moveset(pkmn)[1]
     markup = types.InlineKeyboardMarkup(1)
     page1 = types.InlineKeyboardButton(
         text='<< Page 1 📃',
