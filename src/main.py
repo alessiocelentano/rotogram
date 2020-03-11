@@ -6,7 +6,7 @@ from telebot import types
 
 
 token = open('src/token.txt', 'r').read()
-bot = telebot.TeleBot(token)
+bot = telebot.TeleBot('979765263:AAELCFhUsKZWyjnvwLuAowk8ZNSAHgRxa7k')
 with open('src/texts.json', 'r') as f:
     t = json.load(f)
 with open('dist/pkmn.json', 'r') as f:
@@ -116,10 +116,20 @@ def set_message(pkmn_data, *args):
             family['from']['method']
         )
     if 'into' in family and None not in family['into']:
-        evo_text += 'It evolves into <b>{}</b> (<i>{}</i>)\n'.format(
-            family['into']['name'],
-            family['into']['method']
-        )
+        if type(family['into']['name']) == list:
+            evo = family['into']
+            for name, method in zip(evo['name'], evo['method']):
+                evo_text += '{} evolves into <b>{}</b> (<i>{}</i>){}'.format(
+                    'or' if name != evo['name'][0] else 'It',
+                    name,
+                    method,
+                    '\n' if name == evo['name'][-1] else ' '
+                )
+        else:
+            evo_text += 'It evolves into <b>{}</b> (<i>{}</i>)\n'.format(
+                family['into']['name'],
+                family['into']['method']
+            )
     if not evo_text:
         evo_text = 'It is not known to evolve into or from any other Pokémon\n'
 
