@@ -1,12 +1,14 @@
 import json
 import re
+import urllib
 
 import telebot
 from telebot import types
+from bs4 import BeautifulSoup
 
 
 token = open('src/token.txt', 'r').read()
-bot = telebot.TeleBot('979765263:AAELCFhUsKZWyjnvwLuAowk8ZNSAHgRxa7k')
+bot = telebot.TeleBot(token)
 with open('src/texts.json', 'r') as f:
     t = json.load(f)
 with open('dist/pkmn.json', 'r') as f:
@@ -285,6 +287,44 @@ def get_locations(data, pkmn):
     return text
 
 
+def get_usage_vgc():
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    url = 'https://www.smogon.com/stats/'
+    request = urllib.request.Request(url, None, headers)
+    response = urllib.request.urlopen(request)
+    html = response.read()
+    soup = BeautifulSoup(html, 'html.parser')
+
+    link = soup.find_all('a')[-1].attrs['href']
+    url = 'https://www.smogon.com/stats/{}gen8vgc2020-1760.txt'.format(link)
+    request = urllib.request.Request(url, None, headers)
+    response = urllib.request.urlopen(request)
+    html = response.read()
+    soup = BeautifulSoup(html, 'html.parser')
+
+    leaderboard = []
+    i = 0
+    txt = soup.text
+    pkmn_list = re.split('\|......\|', txt)
+    for pkmn in pkmn_list:
+        if pkmn != pkmn_list[0] and pkmn != pkmn_list[1]:
+            i += 1
+            pkmn = re.sub(' ', '', pkmn)
+            stats = re.split('\|', pkmn)
+            dictt = {
+                'rank': i,
+                'pokemon': stats[0],
+                'usage': stats[1],
+                'raw': stats[2],
+                'raw%': stats[3],
+                'real': stats[4],
+                'real%': stats[5]
+            }
+            leaderboard.append(dictt)
+
+    return leaderboard
+
+
 # /--- Bot commands ---/
 
 
@@ -479,6 +519,40 @@ def locations(call):
         message_id=mid,
         parse_mode='HTML',
         reply_markup=markup
+    )
+
+
+@bot.message_handler(commands=['usage'])
+def usage(message):
+    cid = message.chat.id
+    leaderboard = get_usage_vgc()
+    text = ''
+    base_text = '''
+{}. <b>{}</b>
+Usage: <code>{}</code>
+Raw: <code>{}</code>
+Raw%: <code>{}</code>
+Real: <code>{}</code>
+Real%: <code>{}</code>
+'''
+    for i in range(5):
+        pkmn = leaderboard[i]
+        text += base_text.format(
+            i+1,
+            pkmn['pokemon'],
+            pkmn['usage'],
+            pkmn['raw'],
+            pkmn['raw%'],
+            pkmn['real'],
+            pkmn['real%']
+        )
+    markup = types.InlineKeyboardMarkup()
+
+
+    bot.send_message(
+        chat_id=cid,
+        text=text,
+        parse_mode='HTML'
     )
 
 
