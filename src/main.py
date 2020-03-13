@@ -258,7 +258,7 @@ def set_moveset(pkmn, page):
         callback_data='moveset/'+pkmn+'/'+str(page-1)
     )
     page_button = types.InlineKeyboardButton(
-        text='·'+str(page)+'·',
+        text='•'+str(page)+'•',
         callback_data='moveset/'+pkmn+'/'+str(page)
     )
     suc = types.InlineKeyboardButton(
@@ -268,6 +268,10 @@ def set_moveset(pkmn, page):
     end = types.InlineKeyboardButton(
         text=str(pages)+'>>',
         callback_data='moveset/'+pkmn+'/'+str(pages)
+    )
+    back = types.InlineKeyboardButton(
+        text='🔙 Back to basic infos',
+        callback_data='basic_infos/'+pkmn
     )
 
     if page == pages:
@@ -284,6 +288,7 @@ def set_moveset(pkmn, page):
             markup.add(pre, page_button, suc)
     else:
         markup.add(page_button, suc, end)
+    markup.add(back)
 
     return {'text': text, 'markup': markup}
 
@@ -435,7 +440,7 @@ def all_infos(call):
     mid = call.message.message_id
     pkmn = re.split('/', call.data)[1]
     text = set_message(data[pkmn], True)
-    markup = types.InlineKeyboardMarkup(1)
+    markup = types.InlineKeyboardMarkup(2)
     reduce = types.InlineKeyboardButton(
         text='➖ Reduce',
         callback_data='basic_infos/' + pkmn
@@ -448,8 +453,10 @@ def all_infos(call):
         text='🏠 Locations',
         callback_data='locations/' + pkmn
     )
-    markup.add(reduce, moveset, locations)
+    markup.add(reduce)
+    markup.add(moveset, locations)
 
+    bot.answer_callback_query(call.id)
     bot.edit_message_text(
         text=text,
         chat_id=cid,
@@ -470,6 +477,7 @@ def moveset(call):
         page = 1
     dictt = set_moveset(pkmn, int(page))
 
+    bot.answer_callback_query(call.id)
     bot.edit_message_text(
         text=dictt['text'],
         chat_id=cid,
@@ -486,16 +494,17 @@ def locations(call):
     pkmn = re.split('/', call.data)[1]
     text = get_locations(data, pkmn)
     markup = types.InlineKeyboardMarkup(1)
-    info = types.InlineKeyboardButton(
-        text='❓ Basic info',
-        callback_data='basic_infos/' + pkmn
-    )
     moveset = types.InlineKeyboardButton(
         text='⚔️ Moveset',
         callback_data='moveset/' + pkmn
     )
 
-    markup.add(info, moveset)
+    info = types.InlineKeyboardButton(
+        text='🔙 Back to basic infos',
+        callback_data='basic_infos/' + pkmn
+    )
+
+    markup.add(moveset, info)
 
     bot.edit_message_text(
         text=text,
@@ -547,8 +556,8 @@ def about(message):
         text='Github',
         url='https://github.com/alessiocelentano/Rotomgram'
     )
-
     markup.add(github)
+
     bot.send_message(
         chat_id=cid,
         text=text,
