@@ -171,28 +171,31 @@ def set_message(pkmn_data, *args):
 
     if args:
         text = base_text.format(
-            name, artwork, emoji, evo_text,
-            national, typee_str, typee, ab_str,
-            ability, gender, base_friendship, ev_yield,
+            name, artwork, emoji, national,
+            typee_str, typee, ab_str, ability,
+            evo_text, gender, base_friendship, ev_yield,
             catch_rate, growth_rate, egg_groups, egg_cycles,
             species, height, weight, name_origin,
             other_lang, base_stats, legend
         )
     else:
         text = base_text.format(
-            name, artwork, emoji, evo_text,
-            national, typee_str, typee, ab_str,
-            ability, base_stats, legend
+            name, artwork, emoji, national,
+            typee_str, typee, ab_str, ability,
+            evo_text, base_stats, legend
         )
     return text
 
 
-def set_moveset(pkmn):
+def set_moveset(pkmn, page):
+    maxx = page * 10
+    minn = maxx - 9
     index = 0
-    long_moveset = False
+
     text = t['legend'] + '\n\n'
-    text2 = t['legend'] + '\n\n'
-    base_text = '<a href="{}">{}</a> <b>{}</b>, {} ({})\n      {}/{}, {}\n\n'
+    base_text = '<a href="{}">{}</a> <b>{}</b> ({})\n  \
+        <i>{}, {}</i>\n'
+
     if 'forms' in data[pkmn]:
         form = list(data[pkmn]['forms'].keys())[0]
         moveset = data[pkmn]['forms'][pkmn]['moveset']
@@ -200,65 +203,89 @@ def set_moveset(pkmn):
     else:
         moveset = data[pkmn]['moveset']
         artwork = data[pkmn]['artwork']
+
     if 'swsh' in moveset:
         moveset = moveset['swsh']
     else:
         moveset = moveset['usum']
+
     for method, moves in zip(moveset, moveset.values()):
         for move, info in zip(moves, moves.values()):
             index += 1
-            name = info['move']
-            typee = info['type']
-            category = info['cat']
-            power = info['power'] if info['power'] is not None else '-'
-            accuracy = info['acc'] if info['acc'] is not None else '-'
-            emoji = t['emoji_dict'][typee]
-            if method == 'level_up':
-                method_text = 'Level ' + info['lv']
-            elif method == 'tm':
-                method_text = 'TM ' + info['tm']
-            elif method == 'tr':
-                method_text = 'TR ' + info['tr']
-            elif method == 'move_tutor':
-                method_text = 'Move Tutor'
-            elif method == 'hm':
-                method_text = 'HM ' + info['hm']
-            elif method == 'pre_evo_moves':
-                method_text = 'Learned by pre-evolution'
-            elif method == 'transfer_only':
-                method_text = 'Transfer only'
-            elif method == 'egg_moves':
-                method_text = 'Egg Move'
-            elif method == 'special_moves':
-                method_text = 'Special move'
-            if index > 70:
-                long_moveset = True
-                text2 += base_text.format(
-                    artwork,
-                    emoji,
-                    name,
-                    typee,
-                    category,
-                    power,
-                    accuracy,
-                    method_text
-                )
-            else:
-                text += base_text.format(
-                    artwork,
-                    emoji,
-                    name,
-                    typee,
-                    category,
-                    power,
-                    accuracy,
-                    method_text
-                )
-    text += t['legend']
-    if long_moveset:
-        text2 += t['legend']
-        text = [text, text2]
-    return text
+            if index >= minn:
+                if index <= maxx:
+                    name = info['move']
+                    typee = info['type']
+                    category = info['cat']
+                    power = info['power'] if info['power'] is not None else '-'
+                    accuracy = info['acc'] if info['acc'] is not None else '-'
+                    emoji = t['emoji_dict'][typee]
+                    if method == 'level_up':
+                        method_text = 'Level ' + info['lv']
+                    elif method == 'tm':
+                        method_text = 'TM ' + info['tm']
+                    elif method == 'tr':
+                        method_text = 'TR ' + info['tr']
+                    elif method == 'move_tutor':
+                        method_text = 'Move Tutor'
+                    elif method == 'hm':
+                        method_text = 'HM ' + info['hm']
+                    elif method == 'pre_evo_moves':
+                        method_text = 'Learned by pre-evolution'
+                    elif method == 'transfer_only':
+                        method_text = 'Transfer only'
+                    elif method == 'egg_moves':
+                        method_text = 'Egg Move'
+                    elif method == 'special_moves':
+                        method_text = 'Special move'
+                    text += base_text.format(
+                        artwork,
+                        emoji,
+                        name,
+                        typee,
+                        category,
+                        method_text
+                    )
+    pages = int(index / 10) + 1
+
+    markup = types.InlineKeyboardMarkup(5)
+    begin = types.InlineKeyboardButton(
+        text='<<1',
+        callback_data='moveset/'+pkmn+'/1'
+    )
+    pre = types.InlineKeyboardButton(
+        text=str(page-1),
+        callback_data='moveset/'+pkmn+'/'+str(page-1)
+    )
+    page_button = types.InlineKeyboardButton(
+        text='·'+str(page)+'·',
+        callback_data='moveset/'+pkmn+'/'+str(page)
+    )
+    suc = types.InlineKeyboardButton(
+        text=str(page+1),
+        callback_data='moveset/'+pkmn+'/'+str(page+1)
+    )
+    end = types.InlineKeyboardButton(
+        text=str(pages)+'>>',
+        callback_data='moveset/'+pkmn+'/'+str(pages)
+    )
+
+    if page == pages:
+        markup.add(begin, pre, page_button)
+    elif page > 2:
+        if page < pages-1:
+            markup.add(begin, pre, page_button, suc, end)
+        elif page < pages:
+            markup.add(begin, pre, page_button, suc)
+    elif page > 1:
+        if page < pages-1:
+            markup.add(pre, page_button, suc, end)
+        elif page < pages:
+            markup.add(pre, page_button, suc)
+    else:
+        markup.add(page_button, suc, end)
+
+    return {'text': text, 'markup': markup}
 
 
 def get_locations(data, pkmn):
@@ -338,7 +365,7 @@ def start(message):
 @bot.callback_query_handler(lambda call: 'basic_infos' in call.data)
 @bot.message_handler(commands=['data'])
 def pkmn_search(message):
-    markup = types.InlineKeyboardMarkup(1)
+    markup = types.InlineKeyboardMarkup(2)
     try:
         cid = message.message.chat.id
         mid = message.message.message_id
@@ -356,7 +383,8 @@ def pkmn_search(message):
             text='🏠 Locations',
             callback_data='locations/' + pkmn
         )
-        markup.add(expand, moveset, locations)
+        markup.add(expand)
+        markup.add(moveset, locations)
 
     except AttributeError:
         pkmn = find_name(message)
@@ -378,7 +406,8 @@ def pkmn_search(message):
                     text='🏠 Locations',
                     callback_data='locations/' + pkmn
                 )
-                markup.add(expand, moveset, locations)
+                markup.add(expand)
+                markup.add(moveset, locations)
 
             else:
                 text = t['error2']
@@ -435,63 +464,18 @@ def moveset(call):
     cid = call.message.chat.id
     mid = call.message.message_id
     pkmn = re.split('/', call.data)[1]
-    text = set_moveset(pkmn)
-    markup = types.InlineKeyboardMarkup(1)
-
-    if type(text) == list:
-        page2 = types.InlineKeyboardButton(
-            text='📃 Page 2 >>',
-            callback_data='page2/' + pkmn
-        )
-        markup.add(page2)
-        text = text[0]
-
-    info = types.InlineKeyboardButton(
-        text='❓ Basic info',
-        callback_data='basic_infos/' + pkmn
-    )
-    locations = types.InlineKeyboardButton(
-        text='🏠 Locations',
-        callback_data='locations/' + pkmn
-    )
-    markup.add(info, locations)
+    if len(re.split('/', call.data)) == 3:
+        page = re.split('/', call.data)[2]
+    else:
+        page = 1
+    dictt = set_moveset(pkmn, int(page))
 
     bot.edit_message_text(
-        text=text,
+        text=dictt['text'],
         chat_id=cid,
         message_id=mid,
         parse_mode='HTML',
-        reply_markup=markup
-    )
-
-
-@bot.callback_query_handler(lambda call: 'page2' in call.data)
-def second_page(call):
-    cid = call.message.chat.id
-    mid = call.message.message_id
-    pkmn = re.split('/', call.data)[1]
-    text = set_moveset(pkmn)[1]
-    markup = types.InlineKeyboardMarkup(1)
-    page1 = types.InlineKeyboardButton(
-        text='<< Page 1 📃',
-        callback_data='moveset/' + pkmn
-    )
-    info = types.InlineKeyboardButton(
-        text='❓ Basic info',
-        callback_data='basic_infos/' + pkmn
-    )
-    locations = types.InlineKeyboardButton(
-        text='🏠 Locations',
-        callback_data='locations/' + pkmn
-    )
-    markup.add(page1, info, locations)
-
-    bot.edit_message_text(
-        text=text,
-        chat_id=cid,
-        message_id=mid,
-        parse_mode='HTML',
-        reply_markup=markup
+        reply_markup=dictt['markup']
     )
 
 
@@ -546,8 +530,6 @@ Real%: <code>{}</code>
             pkmn['real'],
             pkmn['real%']
         )
-    markup = types.InlineKeyboardMarkup()
-
 
     bot.send_message(
         chat_id=cid,
