@@ -19,10 +19,13 @@ with open('dist/pkmn.json', 'r') as f:
 
 
 def find_name(message):
-    pkmn = re.sub('/data ', '', message.text.lower())
+    """Convert input in a valid format for JSON"""
+
+    pkmn = message.text.lower()
     pkmn = re.sub('♀', '-f', pkmn)  # For Nidoran♀
     pkmn = re.sub('♂', '-m', pkmn)  # For Nidoran♂
     pkmn = re.sub('[èé]', 'e', pkmn)  # For Flabébé
+    pkmn = re.sub('/data(@RotomgramBot|) ', '', pkmn)
     pkmn = re.sub(' ', '-', pkmn)
     pkmn = re.sub('[^a-z-]', '', pkmn)
     return pkmn
@@ -38,29 +41,37 @@ def manage_forms(pkmn_data, data):
     return value
 
 
-def set_rating(base):
-    rating_n = 0
-    rating_emoji = ''
-    tiers = [0, 9, 19, 39, 79, 89, 99, 114, 129, 149, 256]
-    for i in tiers:
-        if base < i:
-            while rating_n >= 2:
-                rating_emoji += '🌕'
-                rating_n -= 2
-            if rating_n == 1:
-                rating_emoji += '🌗'
-            while len(rating_emoji) != 5:
-                rating_emoji += '🌑'
-            break
-        else:
-            rating_n += 1
-    return rating_emoji
-
-
 def set_message(pkmn_data, *args):
+    """Set Home message"""
+
+    def set_rating(base):
+        """Create a legend with moon emoticons
+        The higher the statistic, the more full moons there will be
+        """
+
+        rating_n = 0
+        rating_emoji = ''
+        tiers = [0, 9, 19, 39, 79, 89, 99, 114, 129, 149, 256]
+        for i in tiers:
+            if base < i:
+                while rating_n >= 2:
+                    rating_emoji += '🌕'
+                    rating_n -= 2
+                if rating_n == 1:
+                    rating_emoji += '🌗'
+                while len(rating_emoji) != 5:
+                    rating_emoji += '🌑'
+                break
+            else:
+                rating_n += 1
+        return rating_emoji
+
     if not args:
         base_text = t['reduced_text']
+
     else:
+        # If True is passed in set_message, it returns all informations
+        # Below, convert JSON additional data in user-friendly message
         base_text = t['expanded_text']
         base_friendship = pkmn_data['base_friendship']
         catch_rate = pkmn_data['catch_rate']
@@ -98,6 +109,7 @@ def set_message(pkmn_data, *args):
         tmp = manage_forms(pkmn_data, 'weight')
         weight = tmp['si'] + ' (' + tmp['usc'] + ')'
 
+    # Convert JSON base data in user-friendly message
     ability = ''
     for i, j in manage_forms(pkmn_data, 'abilities').items():
         if i == 'hidden_ability':
@@ -170,6 +182,7 @@ def set_message(pkmn_data, *args):
     artwork = manage_forms(pkmn_data, 'artwork')
 
     if args:
+        # If True is passed in set_message, it returns all informations
         text = base_text.format(
             name, artwork, emoji, national,
             typee_str, typee, ab_str, ability,
@@ -179,6 +192,7 @@ def set_message(pkmn_data, *args):
             other_lang, base_stats, legend
         )
     else:
+        # Otherwise, it returns base informations
         text = base_text.format(
             name, artwork, emoji, national,
             typee_str, typee, ab_str, ability,
@@ -188,6 +202,11 @@ def set_message(pkmn_data, *args):
 
 
 def set_moveset(pkmn, page):
+    """Set moveset message
+    with page it split moveset in multiple pages of 10 moves each
+    """
+
+    # Get the range
     maxx = page * 10
     minn = maxx - 9
     index = 0
@@ -212,42 +231,45 @@ def set_moveset(pkmn, page):
     for method, moves in zip(moveset, moveset.values()):
         for move, info in zip(moves, moves.values()):
             index += 1
-            if index >= minn:
-                if index <= maxx:
-                    name = info['move']
-                    typee = info['type']
-                    category = info['cat']
-                    power = info['power'] if info['power'] is not None else '-'
-                    accuracy = info['acc'] if info['acc'] is not None else '-'
-                    emoji = t['emoji_dict'][typee]
-                    if method == 'level_up':
-                        method_text = 'Level ' + info['lv']
-                    elif method == 'tm':
-                        method_text = 'TM ' + info['tm']
-                    elif method == 'tr':
-                        method_text = 'TR ' + info['tr']
-                    elif method == 'move_tutor':
-                        method_text = 'Move Tutor'
-                    elif method == 'hm':
-                        method_text = 'HM ' + info['hm']
-                    elif method == 'pre_evo_moves':
-                        method_text = 'Learned by pre-evolution'
-                    elif method == 'transfer_only':
-                        method_text = 'Transfer only'
-                    elif method == 'egg_moves':
-                        method_text = 'Egg Move'
-                    elif method == 'special_moves':
-                        method_text = 'Special move'
-                    text += base_text.format(
-                        artwork,
-                        emoji,
-                        name,
-                        typee,
-                        category,
-                        method_text
-                    )
+            if index >= minn and index <= maxx:
+                name = info['move']
+                typee = info['type']
+                category = info['cat']
+                power = info['power'] if info['power'] is not None else '-'
+                accuracy = info['acc'] if info['acc'] is not None else '-'
+                emoji = t['emoji_dict'][typee]
+                if method == 'level_up':
+                    method_text = 'Level ' + info['lv']
+                elif method == 'tm':
+                    method_text = 'TM ' + info['tm']
+                elif method == 'tr':
+                    method_text = 'TR ' + info['tr']
+                elif method == 'move_tutor':
+                    method_text = 'Move Tutor'
+                elif method == 'hm':
+                    method_text = 'HM ' + info['hm']
+                elif method == 'pre_evo_moves':
+                    method_text = 'Learned by pre-evolution'
+                elif method == 'transfer_only':
+                    method_text = 'Transfer only'
+                elif method == 'egg_moves':
+                    method_text = 'Egg Move'
+                elif method == 'special_moves':
+                    method_text = 'Special move'
+                text += base_text.format(
+                    artwork,
+                    emoji,
+                    name,
+                    typee,
+                    category,
+                    method_text
+                )
+
+    # Number of pages. 10 moves for each page
+    # So if we have 68 moves, we need 7 pages
     pages = int(index / 10) + 1
 
+    # Initialize buttons
     markup = types.InlineKeyboardMarkup(5)
     begin = types.InlineKeyboardButton(
         text='<<1',
@@ -274,6 +296,8 @@ def set_moveset(pkmn, page):
         callback_data='basic_infos/'+pkmn
     )
 
+    # Create a page index that display, when possible,
+    # First page, previous page, current page, next page, last page
     if page == pages:
         markup.add(begin, pre, page_button)
     elif page > 2:
@@ -294,7 +318,11 @@ def set_moveset(pkmn, page):
 
 
 def get_locations(data, pkmn):
+    """Get Pokémon location in every game of the core series"""
+
     def find_game_name(game):
+        """Convert JSON format into real name"""
+
         if game == 'firered':
             game = 'Fire Red'
         elif game == 'leafgreen':
@@ -324,6 +352,8 @@ def get_locations(data, pkmn):
         if location != 'Trade/migrate from another game':
             if location not in locations:
                 if games and locations:
+
+                    # Merge games with the same location
                     for game2, location2 in zip(games, locations):
                         if game != game2:
                             if location == location2:
@@ -331,9 +361,12 @@ def get_locations(data, pkmn):
                             else:
                                 games.append(game)
                                 locations.append(location)
+
                 else:
+                    # Initialize lists
                     games.append(game)
                     locations.append(location)
+
     for game, location in zip(games, locations):
         text += '<b>' + game + '</b>: <i>' + location + '</i>\n'
 
@@ -341,6 +374,12 @@ def get_locations(data, pkmn):
 
 
 def get_usage_vgc():
+    """Get usage of Pokémon in VGC20.
+    It does web scraping in the official Smogon web site with
+    Pokémon Showdown usage (https://www.smogon.com/stats/)
+    """
+
+    # Get usage history soup
     headers = {'User-Agent': 'Mozilla/5.0'}
     url = 'https://www.smogon.com/stats/'
     request = urllib.request.Request(url, None, headers)
@@ -348,13 +387,20 @@ def get_usage_vgc():
     html = response.read()
     soup = BeautifulSoup(html, 'html.parser')
 
+    # From the previous soup, find the last uploaded data
+    # Then, go in VGC20 section
     link = soup.find_all('a')[-1].attrs['href']
+    # 1860 in the link below is the rank
+    # There are other 2 rank, but since the bot look for data every time
+    # it would be very slow. So it take usage of higher rank
     url = 'https://www.smogon.com/stats/{}gen8vgc2020-1760.txt'.format(link)
     request = urllib.request.Request(url, None, headers)
     response = urllib.request.urlopen(request)
     html = response.read()
     soup = BeautifulSoup(html, 'html.parser')
 
+    # Data in the site is organized in a table
+    # So RegEx are used
     leaderboard = []
     i = 0
     txt = soup.text
@@ -383,6 +429,8 @@ def get_usage_vgc():
 
 @bot.message_handler(commands=['start'])
 def start(message):
+    """Simply the start command"""
+
     cid = message.chat.id
     text = t['start_message']
     bot.send_message(cid, text, parse_mode='HTML')
@@ -391,6 +439,8 @@ def start(message):
 @bot.callback_query_handler(lambda call: 'basic_infos' in call.data)
 @bot.message_handler(commands=['data'])
 def pkmn_search(message):
+    """It shows basic information about the Pokémon"""
+
     markup = types.InlineKeyboardMarkup(2)
     try:
         cid = message.message.chat.id
@@ -457,10 +507,13 @@ def pkmn_search(message):
 
 @bot.callback_query_handler(lambda call: 'all_infos' in call.data)
 def all_infos(call):
+    """Show all information about the Pokémon by pressing "Expand" button"""
+
     cid = call.message.chat.id
     mid = call.message.message_id
     pkmn = re.split('/', call.data)[1]
     text = set_message(data[pkmn], True)
+
     markup = types.InlineKeyboardMarkup(2)
     reduce = types.InlineKeyboardButton(
         text='➖ Reduce',
@@ -489,6 +542,8 @@ def all_infos(call):
 
 @bot.callback_query_handler(lambda call: 'moveset' in call.data)
 def moveset(call):
+    """Show Pokémon moveset"""
+
     cid = call.message.chat.id
     mid = call.message.message_id
     pkmn = re.split('/', call.data)[1]
@@ -510,6 +565,8 @@ def moveset(call):
 
 @bot.callback_query_handler(lambda call: 'locations' in call.data)
 def locations(call):
+    """Show Pokémon location in each core game"""
+
     cid = call.message.chat.id
     mid = call.message.message_id
     pkmn = re.split('/', call.data)[1]
@@ -536,6 +593,8 @@ def locations(call):
 
 @bot.message_handler(commands=['usage'])
 def usage(message):
+    """Show usage leaderboard"""
+
     cid = message.chat.id
     leaderboard = get_usage_vgc()
     text = ''
@@ -547,6 +606,7 @@ Raw%: <code>{}</code>
 Real: <code>{}</code>
 Real%: <code>{}</code>
 '''
+
     for i in range(5):
         pkmn = leaderboard[i]
         text += base_text.format(
@@ -568,6 +628,8 @@ Real%: <code>{}</code>
 
 @bot.message_handler(commands=['about'])
 def about(message):
+    """About the Pokémon"""
+
     cid = message.chat.id
     text = t['about']
     markup = types.InlineKeyboardMarkup()
