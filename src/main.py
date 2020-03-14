@@ -294,9 +294,7 @@ def set_moveset(pkmn, page):
 
 
 def get_locations(data, pkmn):
-    text = ''
-    loc_dict = data[pkmn]['location']
-    for game, location in loc_dict.items():
+    def find_game_name(game):
         if game == 'firered':
             game = 'Fire Red'
         elif game == 'leafgreen':
@@ -315,7 +313,30 @@ def get_locations(data, pkmn):
             game = 'Let\'s Go, Eevee!'
         else:
             game = game.title()
+        return game
+
+    text = ''
+    loc_dict = data[pkmn]['location']
+    games = []
+    locations = []
+    for game, location in loc_dict.items():
+        game = find_game_name(game)
+        if location != 'Trade/migrate from another game':
+            if location not in locations:
+                if games and locations:
+                    for game2, location2 in zip(games, locations):
+                        if game != game2:
+                            if location == location2:
+                                games[games.index(game2)] = game2 + '/' + game
+                            else:
+                                games.append(game)
+                                locations.append(location)
+                else:
+                    games.append(game)
+                    locations.append(location)
+    for game, location in zip(games, locations):
         text += '<b>' + game + '</b>: <i>' + location + '</i>\n'
+
     return text
 
 
@@ -498,12 +519,10 @@ def locations(call):
         text='⚔️ Moveset',
         callback_data='moveset/' + pkmn
     )
-
     info = types.InlineKeyboardButton(
         text='🔙 Back to basic infos',
         callback_data='basic_infos/' + pkmn
     )
-
     markup.add(moveset, info)
 
     bot.edit_message_text(
