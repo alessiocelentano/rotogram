@@ -18,10 +18,10 @@ with open('dist/pkmn.json', 'r') as f:
 # /--- Functions ---/
 
 
-def find_name(message):
+def find_name(pkmn):
     """Convert input in a valid format for JSON"""
 
-    pkmn = message.text.lower()
+    pkmn = pkmn.lower()
     pkmn = re.sub('♀', '-f', pkmn)  # For Nidoran♀
     pkmn = re.sub('♂', '-m', pkmn)  # For Nidoran♂
     pkmn = re.sub('[èé]', 'e', pkmn)  # For Flabébé
@@ -31,17 +31,7 @@ def find_name(message):
     return pkmn
 
 
-def manage_forms(pkmn_data, data):
-    if 'forms' in pkmn_data:
-        for form in pkmn_data['forms'].items():
-            value = pkmn_data['forms'][form[0]][data]
-            break
-    else:
-        value = pkmn_data[data]
-    return value
-
-
-def set_message(pkmn_data, *args):
+def set_message(pkmn, *args):
     """Set Home message"""
 
     def set_rating(base):
@@ -73,86 +63,87 @@ def set_message(pkmn_data, *args):
         # If True is passed in set_message, it returns all informations
         # Below, convert JSON additional data in user-friendly message
         base_text = t['expanded_text']
-        base_friendship = pkmn_data['base_friendship']
-        catch_rate = pkmn_data['catch_rate']
-        growth_rate = pkmn_data['growth_rate']
-        egg_cycles = pkmn_data['egg_cycles']
-        species = pkmn_data['species']
+        base_friendship = pkmn['base_friendship']['value']
+        catch_rate = pkmn['catch_rate']['value']
+        growth_rate = pkmn['growth_rate']
+        egg_cycles = pkmn['egg_cycles']
+        species = pkmn['species']
 
         gender = ''
-        for i in pkmn_data['gender']:
-            gender += '/' + i
-        gender = gender[1:]
+        for i in list(pkmn['gender'].values()):
+            gender += ' / ' + i
+        gender = gender[3:]
 
         ev_yield = ''
-        for i in manage_forms(pkmn_data, 'ev_yield'):
-            ev_yield += '/' + i
-        ev_yield = ev_yield[1:]
+        for i in pkmn['ev_yield']:
+            ev_yield += ' / ' + pkmn['ev_yield'][i] + ' ' + i.title()
+        ev_yield = ev_yield[3:]
 
         egg_groups = ''
-        for i in pkmn_data['egg_groups']:
-            egg_groups += '/' + i
-        egg_groups = egg_groups[1:]
+        for i in pkmn['egg_groups']:
+            egg_groups += ' / ' + i
+        egg_groups = egg_groups[3:]
 
         other_lang = ''
-        for i, j in pkmn_data['other_lang'].items():
+        for i, j in pkmn['other_lang'].items():
             other_lang += '\n' + i.title() + ': ' + j
         other_lang = other_lang[1:]
 
         name_origin = ''
-        for i, j in pkmn_data['name_origin'].items():
+        for i, j in pkmn['name_origin'].items():
             name_origin += ', ' + i + ' (' + j + ')'
         name_origin = name_origin[2:]
 
-        tmp = manage_forms(pkmn_data, 'height')
+        tmp = pkmn['height']
         height = tmp['si'] + ' (' + tmp['usc'] + ')'
-        tmp = manage_forms(pkmn_data, 'weight')
+        tmp = pkmn['weight']
         weight = tmp['si'] + ' (' + tmp['usc'] + ')'
 
     # Convert JSON base data in user-friendly message
     ability = ''
-    for i, j in manage_forms(pkmn_data, 'abilities').items():
+    for i, j in pkmn['abilities'].items():
         if i == 'hidden_ability':
             ability += '\n' + '<b>Hidden Ability</b>: ' + j
         else:
-            ability += '/' + j
-    ability = ability[1:]
+            ability += ' / ' + j
+    ability = ability[3:]
     if '/' in ability:
         ab_str = 'Abilities'
     else:
         ab_str = 'Ability'
 
     evo_text = ''
-    family = manage_forms(pkmn_data, 'evolutions')
-    if 'from' in family and None not in family['from']:
-        evo_text += 'It evolves from <b>{}</b> (<i>{}</i>)\n'.format(
-            family['from']['name'],
-            family['from']['method']
-        )
-    if 'into' in family and None not in family['into']:
-        if type(family['into']['name']) == list:
-            evo = family['into']
-            for name, method in zip(evo['name'], evo['method']):
-                evo_text += '{} evolves into <b>{}</b> (<i>{}</i>){}'.format(
-                    'or' if name != evo['name'][0] else 'It',
-                    name,
-                    method,
-                    '\n' if name == evo['name'][-1] else ' '
-                )
-        else:
-            evo_text += 'It evolves into <b>{}</b> (<i>{}</i>)\n'.format(
-                family['into']['name'],
-                family['into']['method']
+    family = pkmn['evolutions']
+    if family:
+        if None not in family['from'].values():
+            evo_text += 'It evolves from <b>{}</b> (<i>{}</i>)\n'.format(
+                family['from']['name'],
+                family['from']['method']
             )
-    if not evo_text:
+        if None not in family['into'].values():
+            if type(family['into']['name']) == list:
+                evo = family['into']
+                for name, method in zip(evo['name'], evo['method']):
+                    evo_text += '{} evolves into <b>{}</b> (<i>{}</i>){}'.format(
+                        'or' if name != evo['name'][0] else 'It',
+                        name,
+                        method,
+                        '\n' if name == evo['name'][-1] else ' '
+                    )
+            else:
+                evo_text += 'It evolves into <b>{}</b> (<i>{}</i>)\n'.format(
+                    family['into']['name'],
+                    family['into']['method']
+                )
+    else:
         evo_text = 'It is not known to evolve into or from any other Pokémon\n'
 
     base_stats = ''
     stats = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe']
     for base, minn, maxx, stat in zip(
-        manage_forms(pkmn_data, 'base_stats').values(),
-        manage_forms(pkmn_data, 'min_stats').values(),
-        manage_forms(pkmn_data, 'max_stats').values(),
+        pkmn['base_stats'].values(),
+        pkmn['min_stats'].values(),
+        pkmn['max_stats'].values(),
         stats
     ):
         rating = set_rating(int(base))
@@ -166,9 +157,9 @@ def set_message(pkmn_data, *args):
     legend = t['minmax']
 
     typee = ''
-    for i in manage_forms(pkmn_data, 'type').values():
-        typee += '/' + i
-    typee = typee[1:]
+    for i in pkmn['type'].values():
+        typee += ' / ' + i
+    typee = typee[3:]
     if '/' in typee:
         typee_str = 'Type'
     else:
@@ -177,9 +168,9 @@ def set_message(pkmn_data, *args):
     emoji_dict = t['emoji_dict']
     first_type = re.split('/', typee)[0]
     emoji = emoji_dict[first_type]
-    name = pkmn_data['name']
-    national = pkmn_data['national']
-    artwork = manage_forms(pkmn_data, 'artwork')
+    name = pkmn['name']
+    national = pkmn['national']
+    artwork = pkmn['artwork']
 
     if args:
         # If True is passed in set_message, it returns all informations
@@ -206,6 +197,8 @@ def set_moveset(pkmn, page):
     with page it split moveset in multiple pages of 10 moves each
     """
 
+    pkmn_name = find_name(pkmn['name'])
+
     # Get the range
     maxx = page * 10
     minn = maxx - 9
@@ -215,55 +208,27 @@ def set_moveset(pkmn, page):
     base_text = '<a href="{}">{}</a> <b>{}</b> ({})\n  \
         <i>{}, {}</i>\n'
 
-    if 'forms' in data[pkmn]:
-        form = list(data[pkmn]['forms'].keys())[0]
-        moveset = data[pkmn]['forms'][pkmn]['moveset']
-        artwork = data[pkmn]['forms'][form]['artwork']
-    else:
-        moveset = data[pkmn]['moveset']
-        artwork = data[pkmn]['artwork']
+    move_list = [move for move in pkmn['moveset']]
+    info_list = [pkmn['moveset'][move] for move in pkmn['moveset']]
 
-    if 'swsh' in moveset:
-        moveset = moveset['swsh']
-    else:
-        moveset = moveset['usum']
-
-    for method, moves in zip(moveset, moveset.values()):
-        for move, info in zip(moves, moves.values()):
-            index += 1
-            if index >= minn and index <= maxx:
-                name = info['move']
-                typee = info['type']
-                category = info['cat']
-                power = info['power'] if info['power'] is not None else '-'
-                accuracy = info['acc'] if info['acc'] is not None else '-'
-                emoji = t['emoji_dict'][typee]
-                if method == 'level_up':
-                    method_text = 'Level ' + info['lv']
-                elif method == 'tm':
-                    method_text = 'TM ' + info['tm']
-                elif method == 'tr':
-                    method_text = 'TR ' + info['tr']
-                elif method == 'move_tutor':
-                    method_text = 'Move Tutor'
-                elif method == 'hm':
-                    method_text = 'HM ' + info['hm']
-                elif method == 'pre_evo_moves':
-                    method_text = 'Learned by pre-evolution'
-                elif method == 'transfer_only':
-                    method_text = 'Transfer only'
-                elif method == 'egg_moves':
-                    method_text = 'Egg Move'
-                elif method == 'special_moves':
-                    method_text = 'Special move'
-                text += base_text.format(
-                    artwork,
-                    emoji,
-                    name,
-                    typee,
-                    category,
-                    method_text
-                )
+    for move, info in zip(move_list, info_list):
+        index += 1
+        if index >= minn and index <= maxx:
+            if type(info['method']) == list:
+                method = ''
+                for i in info['method']:
+                    method += ' / ' + i
+                method = method[3:]
+            else:
+                method = info['method']
+            text += base_text.format(
+                pkmn['artwork'],
+                t['emoji_dict'][info['type']],
+                info['name'],
+                info['type'],
+                info['cat'],
+                method
+            )
 
     # Number of pages. 10 moves for each page
     # So if we have 68 moves, we need 7 pages
@@ -273,27 +238,27 @@ def set_moveset(pkmn, page):
     markup = types.InlineKeyboardMarkup(5)
     begin = types.InlineKeyboardButton(
         text='<<1',
-        callback_data='moveset/'+pkmn+'/1'
+        callback_data='moveset/'+pkmn_name+'/1'
     )
     pre = types.InlineKeyboardButton(
         text=str(page-1),
-        callback_data='moveset/'+pkmn+'/'+str(page-1)
+        callback_data='moveset/'+pkmn_name+'/'+str(page-1)
     )
     page_button = types.InlineKeyboardButton(
         text='•'+str(page)+'•',
-        callback_data='moveset/'+pkmn+'/'+str(page)
+        callback_data='moveset/'+pkmn_name+'/'+str(page)
     )
     suc = types.InlineKeyboardButton(
         text=str(page+1),
-        callback_data='moveset/'+pkmn+'/'+str(page+1)
+        callback_data='moveset/'+pkmn_name+'/'+str(page+1)
     )
     end = types.InlineKeyboardButton(
         text=str(pages)+'>>',
-        callback_data='moveset/'+pkmn+'/'+str(pages)
+        callback_data='moveset/'+pkmn_name+'/'+str(pages)
     )
     back = types.InlineKeyboardButton(
         text='🔙 Back to basic infos',
-        callback_data='basic_infos/'+pkmn
+        callback_data='basic_infos/'+pkmn_name
     )
 
     # Create a page index that display, when possible,
@@ -344,28 +309,22 @@ def get_locations(data, pkmn):
         return game
 
     text = ''
-    loc_dict = data[pkmn]['location']
+    form = list(data[pkmn].keys())[0]
+    loc_dict = data[pkmn][form]['location']
     games = []
     locations = []
     for game, location in loc_dict.items():
         game = find_game_name(game)
         if location != 'Trade/migrate from another game':
-            if location not in locations:
-                if games and locations:
-
+            if location in locations:
                     # Merge games with the same location
                     for game2, location2 in zip(games, locations):
-                        if game != game2:
-                            if location == location2:
-                                games[games.index(game2)] = game2 + '/' + game
-                            else:
-                                games.append(game)
-                                locations.append(location)
-
-                else:
-                    # Initialize lists
-                    games.append(game)
-                    locations.append(location)
+                        if location == location2:
+                            games[games.index(game2)] += '/' + game
+            else:
+                # Initialize lists
+                games.append(game)
+                locations.append(location)
 
     for game, location in zip(games, locations):
         text += '<b>' + game + '</b>: <i>' + location + '</i>\n'
@@ -446,7 +405,8 @@ def pkmn_search(message):
         cid = message.message.chat.id
         mid = message.message.message_id
         pkmn = re.split('/', message.data)[1]
-        text = set_message(data[pkmn])
+        form = list(data[pkmn])[0]
+        text = set_message(data[pkmn][form])
         expand = types.InlineKeyboardButton(
             text='➕ Expand',
             callback_data='all_infos/' + pkmn
@@ -463,13 +423,15 @@ def pkmn_search(message):
         markup.add(moveset, locations)
 
     except AttributeError:
-        pkmn = find_name(message)
+        pkmn = find_name(message.text)
         cid = message.chat.id
         if message.text == '/data':
             text = t['error1']
         else:
             if pkmn in data:
-                text = set_message(data[pkmn])
+                # Take the first form of the Pokémon
+                form = list(data[pkmn])[0]
+                text = set_message(data[pkmn][form])
                 expand = types.InlineKeyboardButton(
                     text='➕ Expand',
                     callback_data='all_infos/' + pkmn
@@ -512,7 +474,8 @@ def all_infos(call):
     cid = call.message.chat.id
     mid = call.message.message_id
     pkmn = re.split('/', call.data)[1]
-    text = set_message(data[pkmn], True)
+    form = list(data[pkmn])[0]
+    text = set_message(data[pkmn][form], True)
 
     markup = types.InlineKeyboardMarkup(2)
     reduce = types.InlineKeyboardButton(
@@ -551,7 +514,8 @@ def moveset(call):
         page = re.split('/', call.data)[2]
     else:
         page = 1
-    dictt = set_moveset(pkmn, int(page))
+    form = list(data[pkmn])[0]
+    dictt = set_moveset(data[pkmn][form], int(page))
 
     bot.answer_callback_query(call.id)
     bot.edit_message_text(
