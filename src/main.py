@@ -166,7 +166,7 @@ def set_message(pkmn, *args):
         typee_str = 'Types'
 
     emoji_dict = t['emoji_dict']
-    first_type = re.split('/', typee)[0]
+    first_type = re.split(' / ', typee)[0]
     emoji = emoji_dict[first_type]
     name = pkmn['name']
     national = pkmn['national']
