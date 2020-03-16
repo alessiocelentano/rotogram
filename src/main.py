@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 
 
 token = open('src/token.txt', 'r').read()
-bot = telebot.TeleBot(token)
+bot = telebot.TeleBot('979765263:AAFQ41JFJBp9ghT4SP6hhtE4OnRDyQGNfkk')
 with open('src/texts.json', 'r') as f:
     t = json.load(f)
 with open('dist/pkmn.json', 'r') as f:
@@ -70,9 +70,17 @@ def set_message(pkmn, *args):
         species = pkmn['species']
 
         gender = ''
-        for i in list(pkmn['gender'].values()):
-            gender += ' / ' + i
-        gender = gender[3:]
+        if pkmn['gender']['genderless']:
+            gender += 'Genderless'
+        else:
+            for i, j in list(pkmn['gender'].items()):
+                if j == '100%':
+                    gender = i + ': ' + j + '\n'
+                elif type(j) == bool:
+                    continue
+                else:
+                    gender += i + ': ' + j + '\n'
+            gender = gender[:-1]
 
         ev_yield = ''
         for i in pkmn['ev_yield']:
@@ -192,12 +200,10 @@ def set_message(pkmn, *args):
     return text
 
 
-def set_moveset(pkmn, page):
+def set_moveset(pkmn, form, page):
     """Set moveset message
     with page it split moveset in multiple pages of 10 moves each
     """
-
-    pkmn_name = find_name(pkmn['name'])
 
     # Get the range
     maxx = page * 10
@@ -208,8 +214,8 @@ def set_moveset(pkmn, page):
     base_text = '<a href="{}">{}</a> <b>{}</b> ({})\n  \
         <i>{}, {}</i>\n'
 
-    move_list = [move for move in pkmn['moveset']]
-    info_list = [pkmn['moveset'][move] for move in pkmn['moveset']]
+    move_list = [move for move in data[pkmn][form]['moveset']]
+    info_list = list(data[pkmn][form]['moveset'].values())
 
     for move, info in zip(move_list, info_list):
         index += 1
@@ -222,7 +228,7 @@ def set_moveset(pkmn, page):
             else:
                 method = info['method']
             text += base_text.format(
-                pkmn['artwork'],
+                data[pkmn][form]['artwork'],
                 t['emoji_dict'][info['type']],
                 info['name'],
                 info['type'],
@@ -238,33 +244,36 @@ def set_moveset(pkmn, page):
     markup = types.InlineKeyboardMarkup(5)
     begin = types.InlineKeyboardButton(
         text='<<1',
-        callback_data='moveset/'+pkmn_name+'/1'
+        callback_data='moveset/'+pkmn+'/'+form+'/1'
     )
     pre = types.InlineKeyboardButton(
         text=str(page-1),
-        callback_data='moveset/'+pkmn_name+'/'+str(page-1)
+        callback_data='moveset/'+pkmn+'/'+form+'/'+str(page-1)
     )
     page_button = types.InlineKeyboardButton(
         text='•'+str(page)+'•',
-        callback_data='moveset/'+pkmn_name+'/'+str(page)
+        callback_data='moveset/'+pkmn+'/'+form+'/'+str(page)
     )
     suc = types.InlineKeyboardButton(
         text=str(page+1),
-        callback_data='moveset/'+pkmn_name+'/'+str(page+1)
+        callback_data='moveset/'+pkmn+'/'+form+'/'+str(page+1)
     )
     end = types.InlineKeyboardButton(
         text=str(pages)+'>>',
-        callback_data='moveset/'+pkmn_name+'/'+str(pages)
+        callback_data='moveset/'+pkmn+'/'+form+'/'+str(pages)
     )
     back = types.InlineKeyboardButton(
         text='🔙 Back to basic infos',
-        callback_data='basic_infos/'+pkmn_name
+        callback_data='basic_infos/'+pkmn+'/'+form
     )
 
     # Create a page index that display, when possible,
     # First page, previous page, current page, next page, last page
     if page == pages:
-        markup.add(begin, pre, page_button)
+        if page > 2:
+            markup.add(begin, pre, page_button)
+        else:
+            markup.add(pre, page_button)
     elif page > 2:
         if page < pages-1:
             markup.add(begin, pre, page_button, suc, end)
@@ -276,7 +285,10 @@ def set_moveset(pkmn, page):
         elif page < pages:
             markup.add(pre, page_button, suc)
     else:
-        markup.add(page_button, suc, end)
+        if page < pages-1:
+            markup.add(page_button, suc, end)
+        else:
+            markup.add(page_button, suc)
     markup.add(back)
 
     return {'text': text, 'markup': markup}
@@ -405,44 +417,44 @@ def pkmn_search(message):
         cid = message.message.chat.id
         mid = message.message.message_id
         pkmn = re.split('/', message.data)[1]
-        form = list(data[pkmn])[0]
+        form = re.split('/', message.data)[2]
         text = set_message(data[pkmn][form])
         expand = types.InlineKeyboardButton(
             text='➕ Expand',
-            callback_data='all_infos/' + pkmn
+            callback_data='all_infos/'+pkmn+'/'+form
         )
         moveset = types.InlineKeyboardButton(
             text='⚔️ Moveset',
-            callback_data='moveset/' + pkmn
+            callback_data='moveset/'+pkmn+'/'+form
         )
         locations = types.InlineKeyboardButton(
             text='🏠 Locations',
-            callback_data='locations/' + pkmn
+            callback_data='locations/'+pkmn+'/'+form
         )
         markup.add(expand)
         markup.add(moveset, locations)
 
     except AttributeError:
         pkmn = find_name(message.text)
+        # Take the first form of the Pokémon
+        form = list(data[pkmn])[0]
         cid = message.chat.id
         if message.text == '/data':
             text = t['error1']
         else:
             if pkmn in data:
-                # Take the first form of the Pokémon
-                form = list(data[pkmn])[0]
                 text = set_message(data[pkmn][form])
                 expand = types.InlineKeyboardButton(
                     text='➕ Expand',
-                    callback_data='all_infos/' + pkmn
+                    callback_data='all_infos/'+pkmn+'/'+form
                 )
                 moveset = types.InlineKeyboardButton(
                     text='⚔️ Moveset',
-                    callback_data='moveset/' + pkmn
+                    callback_data='moveset/'+pkmn+'/'+form
                 )
                 locations = types.InlineKeyboardButton(
                     text='🏠 Locations',
-                    callback_data='locations/' + pkmn
+                    callback_data='locations/'+pkmn+'/'+form
                 )
                 markup.add(expand)
                 markup.add(moveset, locations)
@@ -474,21 +486,21 @@ def all_infos(call):
     cid = call.message.chat.id
     mid = call.message.message_id
     pkmn = re.split('/', call.data)[1]
-    form = list(data[pkmn])[0]
+    form = re.split('/', call.data)[2]
     text = set_message(data[pkmn][form], True)
 
     markup = types.InlineKeyboardMarkup(2)
     reduce = types.InlineKeyboardButton(
         text='➖ Reduce',
-        callback_data='basic_infos/' + pkmn
+        callback_data='basic_infos/'+pkmn+'/'+form
     )
     moveset = types.InlineKeyboardButton(
         text='⚔️ Moveset',
-        callback_data='moveset/' + pkmn
+        callback_data='moveset/'+pkmn+'/'+form
     )
     locations = types.InlineKeyboardButton(
         text='🏠 Locations',
-        callback_data='locations/' + pkmn
+        callback_data='locations/'+pkmn+'/'+form
     )
     markup.add(reduce)
     markup.add(moveset, locations)
@@ -510,12 +522,12 @@ def moveset(call):
     cid = call.message.chat.id
     mid = call.message.message_id
     pkmn = re.split('/', call.data)[1]
-    if len(re.split('/', call.data)) == 3:
-        page = re.split('/', call.data)[2]
+    form = re.split('/', call.data)[2]
+    if len(re.split('/', call.data)) == 4:
+        page = re.split('/', call.data)[3]
     else:
         page = 1
-    form = list(data[pkmn])[0]
-    dictt = set_moveset(data[pkmn][form], int(page))
+    dictt = set_moveset(pkmn, form, int(page))
 
     bot.answer_callback_query(call.id)
     bot.edit_message_text(
@@ -534,15 +546,16 @@ def locations(call):
     cid = call.message.chat.id
     mid = call.message.message_id
     pkmn = re.split('/', call.data)[1]
+    form = re.split('/', call.data)[2]
     text = get_locations(data, pkmn)
     markup = types.InlineKeyboardMarkup(1)
     moveset = types.InlineKeyboardButton(
         text='⚔️ Moveset',
-        callback_data='moveset/' + pkmn
+        callback_data='moveset/'+pkmn+'/'+form
     )
     info = types.InlineKeyboardButton(
         text='🔙 Back to basic infos',
-        callback_data='basic_infos/' + pkmn
+        callback_data='basic_infos/'+pkmn+'/'+form
     )
     markup.add(moveset, info)
 
