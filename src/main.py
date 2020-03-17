@@ -1,6 +1,7 @@
 import json
 import re
 import urllib
+from collections import OrderedDict
 
 import telebot
 from telebot import types
@@ -27,13 +28,96 @@ def find_name(pkmn):
     """Convert input in a valid format for JSON"""
 
     pkmn = pkmn.lower()
-    pkmn = re.sub('♀', '-f', pkmn)  # For Nidoran♀
-    pkmn = re.sub('♂', '-m', pkmn)  # For Nidoran♂
+    pkmn = re.sub('♀', '_f', pkmn)  # For Nidoran♀
+    pkmn = re.sub('♂', '_m', pkmn)  # For Nidoran♂
     pkmn = re.sub('[èé]', 'e', pkmn)  # For Flabébé
     pkmn = re.sub('/data(@RotomgramBot|) ', '', pkmn)
-    pkmn = re.sub(' ', '-', pkmn)
-    pkmn = re.sub('[^a-z-]', '', pkmn)
+    pkmn = re.sub('[ -]', '_', pkmn)
+    pkmn = re.sub('[^a-z_]', '', pkmn)
     return pkmn
+
+
+def check_name(pkmn, data):
+    """Check the user input"""
+
+    if pkmn in data:
+        return {'pkmn': pkmn, 'form': list(data[pkmn].keys())[0]}
+
+    for key in data:
+        for form in data[key]:
+            if form == pkmn:
+                return {'pkmn': key, 'form': form}
+
+    occurrences = {}
+    comb_list = []
+    for i in range(len(pkmn)):
+        for j in range(len(pkmn), i+1, -1):
+            comb_list.append(pkmn[i:j])
+
+    for key in data:
+        for form in data[key]:
+            if key in form:
+                mon = form
+            else:
+                mon = key
+            mon_ref = mon
+            score1 = 0
+            score2 = 0
+            for letter, letter2 in zip(mon, pkmn):
+                if letter == letter2:
+                    score1 += 25/len(pkmn)
+            for comb in comb_list:
+                if comb in mon:                
+                    score2 += (len(comb)/len(mon_ref))*37.50
+                    splitted_str = re.split('_', mon)
+                    for string in splitted_str:
+                        if re.search('^'+pkmn, mon) or re.search(pkmn+'$', mon):
+                            score2 *= 2
+                            break
+                    mon = mon.replace(comb, '')
+            occurrences[key+'/'+form] = score1 + score2
+
+    for key, value in list(occurrences.items()):
+        if value < 10:
+            del occurrences[key]
+
+    mons = [re.split('/', i)[0] for i in list(occurrences.keys())]
+    if len(list(frozenset(mons))) == 1:
+        pkmn = re.split('/', list(occurrences.keys())[0])[0]
+        form = re.split('/', list(occurrences.keys())[0])[1]
+        return {'pkmn': pkmn, 'form': form}
+    else:
+        result = []
+        summ = sum(list(occurrences.values()))
+        while len(result) < 3:
+            maxx = 0
+            ordered = {}
+            for key, value in list(occurrences.items()):
+                if value > maxx:
+                    ordered = {key: value}
+                    maxx = value
+            for key, value in list(ordered.items()):
+                del occurrences[key]
+                pkmn = re.split('/', key)[0]
+                form = re.split('/', key)[1]
+                value = str('%.2f' % value) + ' %'
+                result.append((pkmn, form, value))
+        return result
+
+
+def form_name(pkmn, form):
+    pkmn = re.sub('_', ' ', pkmn.title())
+    if pkmn in ['Ho Oh', 'Jangmo O', 'Hakamoo O', 'Kommo O']:
+        pkmn = re.sub(' ', '-', pkmn)
+    elif pkmn == 'Nidoran F':
+        pkmn = 'Nidoran ♀'
+    elif pkmn == 'Niforan M':
+        pkmn = 'Nidoran ♂'
+    if pkmn in form:
+        result = form
+    else:
+        result = pkmn + ' (' + form + ')'
+    return result
 
 
 def set_message(pkmn, *args):
@@ -61,7 +145,7 @@ def set_message(pkmn, *args):
                 rating_n += 1
         return rating_emoji
 
-    if not args:
+    if True not in args:
         base_text = t['reduced_text']
 
     else:
@@ -184,14 +268,20 @@ def set_message(pkmn, *args):
     else:
         typee_str = 'Types'
 
+    if args:
+        if type(args[-1]) != str:
+            name = pkmn['name']
+        else:
+            name = args[-1]
+    else:
+        name = pkmn['name']
     emoji_dict = t['emoji_dict']
     first_type = re.split(' / ', typee)[0]
     emoji = emoji_dict[first_type]
-    name = pkmn['name']
     national = pkmn['national']
     artwork = pkmn['artwork']
 
-    if args:
+    if True in args:
         # If True is passed in set_message, it returns all informations
         text = base_text.format(
             name, artwork, emoji, national,
@@ -202,7 +292,7 @@ def set_message(pkmn, *args):
             other_lang, base_stats, legend
         )
     else:
-        # Otherwise, it returns base informations
+        # Otherwise, it returns basic informations
         text = base_text.format(
             name, artwork, emoji, national,
             typee_str, typee, ab_str, ability,
@@ -473,7 +563,12 @@ def pkmn_search(message):
         mid = message.message.message_id
         pkmn = re.split('/', message.data)[1]
         form = re.split('/', message.data)[2]
-        text = set_message(data[pkmn][form])
+        if pkmn in form:
+            text = set_message(data[pkmn][form])
+        else:
+            base_form = re.sub('_', ' ', pkmn.title())
+            name = base_form + ' (' + data[pkmn][form]['name'] + ')'
+            text = set_message(data[pkmn][form], name)
         expand = types.InlineKeyboardButton(
             text='➕ Expand',
             callback_data='all_infos/'+pkmn+'/'+form
@@ -503,9 +598,17 @@ def pkmn_search(message):
         if message.text == '/data':
             text = t['error1']
         else:
-            if pkmn in data:
-                form = list(data[pkmn])[0]
-                text = set_message(data[pkmn][form])
+            dictt = check_name(pkmn, data)
+            if 'pkmn' in dictt:
+                pkmn = dictt['pkmn']
+                form = dictt['form']
+                if pkmn in form:
+                    text = set_message(data[pkmn][form])
+                else:
+                    base_form = re.sub('_', ' ', pkmn.title())
+                    name = base_form + ' (' + data[pkmn][form]['name'] + ')'
+                    text = set_message(data[pkmn][form], name)
+
                 expand = types.InlineKeyboardButton(
                     text='➕ Expand',
                     callback_data='all_infos/'+pkmn+'/'+form
@@ -528,7 +631,12 @@ def pkmn_search(message):
                         )
                         markup.add(form_button)
             else:
-                text = t['error2']
+                pkmn_text = ''
+                for pkmn, form, percent in dictt:
+                    form = data[pkmn][form]['name']
+                    name = form_name(pkmn.title(), form)
+                    pkmn_text += '\n' + name + ': ' + percent
+                text = t['results'].format(pkmn_text)
 
     try:
         bot.edit_message_text(
@@ -555,7 +663,13 @@ def all_infos(call):
     mid = call.message.message_id
     pkmn = re.split('/', call.data)[1]
     form = re.split('/', call.data)[2]
-    text = set_message(data[pkmn][form], True)
+    
+    if pkmn in form:
+        text = set_message(data[pkmn][form], True)
+    else:
+        base_form = re.sub('_', ' ', pkmn.title())
+        name = base_form + ' (' + data[pkmn][form]['name'] + ')'
+        text = set_message(data[pkmn][form], True, name)
 
     markup = types.InlineKeyboardMarkup(2)
     reduce = types.InlineKeyboardButton(
