@@ -488,16 +488,23 @@ def pkmn_search(message):
         )
         markup.add(expand)
         markup.add(moveset, locations)
+        for alt_form in data[pkmn]:
+            if alt_form != form:
+                form_button = types.InlineKeyboardButton(
+                    text=data[pkmn][alt_form]['name'],
+                    callback_data='basic_infos/'+pkmn+'/'+alt_form
+                )
+                markup.add(form_button)
 
     except AttributeError:
         pkmn = find_name(message.text)
         # Take the first form of the Pokémon
-        form = list(data[pkmn])[0]
         cid = message.chat.id
         if message.text == '/data':
             text = t['error1']
         else:
             if pkmn in data:
+                form = list(data[pkmn])[0]
                 text = set_message(data[pkmn][form])
                 expand = types.InlineKeyboardButton(
                     text='➕ Expand',
@@ -513,7 +520,13 @@ def pkmn_search(message):
                 )
                 markup.add(expand)
                 markup.add(moveset, locations)
-
+                for alt_form in data[pkmn]:
+                    if alt_form != form:
+                        form_button = types.InlineKeyboardButton(
+                            text=data[pkmn][alt_form]['name'],
+                            callback_data='basic_infos/'+pkmn+'/'+alt_form
+                        )
+                        markup.add(form_button)
             else:
                 text = t['error2']
 
