@@ -15,6 +15,11 @@ with open('dist/pkmn.json', 'r') as f:
     data = json.load(f)
 
 
+# It's updated when /usage command is used
+# When inline buttons are used, get usage from this list
+usage_dict = {'vgc': None}
+
+
 # /--- Functions ---/
 
 
@@ -132,8 +137,14 @@ def set_message(pkmn, *args):
             if type(family['into']['name']) == list:
                 evo = family['into']
                 for name, method in zip(evo['name'], evo['method']):
-                    evo_text += '{} evolves into <b>{}</b> (<i>{}</i>){}'.format(
-                        'or' if name != evo['name'][0] else 'It',
+                    if name == evo['name'][0]:
+                        intro_text = 'It evolves'
+                    elif name == evo['name'][-1]:
+                        intro_text = 'or'
+                    else:
+                        intro_text = ','
+                    evo_text += '{} into <b>{}</b> (<i>{}</i>){}'.format(
+                        intro_text,
                         name,
                         method,
                         '\n' if name == evo['name'][-1] else ' '
@@ -240,56 +251,7 @@ def set_moveset(pkmn, form, page):
     # So if we have 68 moves, we need 7 pages
     pages = int(index / 10) + 1
 
-    # Initialize buttons
-    markup = types.InlineKeyboardMarkup(5)
-    begin = types.InlineKeyboardButton(
-        text='<<1',
-        callback_data='moveset/'+pkmn+'/'+form+'/1'
-    )
-    pre = types.InlineKeyboardButton(
-        text=str(page-1),
-        callback_data='moveset/'+pkmn+'/'+form+'/'+str(page-1)
-    )
-    page_button = types.InlineKeyboardButton(
-        text='•'+str(page)+'•',
-        callback_data='moveset/'+pkmn+'/'+form+'/'+str(page)
-    )
-    suc = types.InlineKeyboardButton(
-        text=str(page+1),
-        callback_data='moveset/'+pkmn+'/'+form+'/'+str(page+1)
-    )
-    end = types.InlineKeyboardButton(
-        text=str(pages)+'>>',
-        callback_data='moveset/'+pkmn+'/'+form+'/'+str(pages)
-    )
-    back = types.InlineKeyboardButton(
-        text='🔙 Back to basic infos',
-        callback_data='basic_infos/'+pkmn+'/'+form
-    )
-
-    # Create a page index that display, when possible,
-    # First page, previous page, current page, next page, last page
-    if page == pages:
-        if page > 2:
-            markup.add(begin, pre, page_button)
-        else:
-            markup.add(pre, page_button)
-    elif page > 2:
-        if page < pages-1:
-            markup.add(begin, pre, page_button, suc, end)
-        elif page < pages:
-            markup.add(begin, pre, page_button, suc)
-    elif page > 1:
-        if page < pages-1:
-            markup.add(pre, page_button, suc, end)
-        elif page < pages:
-            markup.add(pre, page_button, suc)
-    else:
-        if page < pages-1:
-            markup.add(page_button, suc, end)
-        else:
-            markup.add(page_button, suc)
-    markup.add(back)
+    markup = set_page_buttons(page, pages, pkmn, form)
 
     return {'text': text, 'markup': markup}
 
@@ -344,55 +306,148 @@ def get_locations(data, pkmn):
     return text
 
 
-def get_usage_vgc():
+def get_usage_vgc(page, *args):
     """Get usage of Pokémon in VGC20.
     It does web scraping in the official Smogon web site with
     Pokémon Showdown usage (https://www.smogon.com/stats/)
     """
 
-    # Get usage history soup
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    url = 'https://www.smogon.com/stats/'
-    request = urllib.request.Request(url, None, headers)
-    response = urllib.request.urlopen(request)
-    html = response.read()
-    soup = BeautifulSoup(html, 'html.parser')
+    if not args:
+        # Get usage history soup
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        url = 'https://www.smogon.com/stats/'
+        request = urllib.request.Request(url, None, headers)
+        response = urllib.request.urlopen(request)
+        html = response.read()
+        soup = BeautifulSoup(html, 'html.parser')
 
-    # From the previous soup, find the last uploaded data
-    # Then, go in VGC20 section
-    link = soup.find_all('a')[-1].attrs['href']
-    # 1860 in the link below is the rank
-    # There are other 2 rank, but since the bot look for data every time
-    # it would be very slow. So it take usage of higher rank
-    url = 'https://www.smogon.com/stats/{}gen8vgc2020-1760.txt'.format(link)
-    request = urllib.request.Request(url, None, headers)
-    response = urllib.request.urlopen(request)
-    html = response.read()
-    soup = BeautifulSoup(html, 'html.parser')
+        # From the previous soup, find the last uploaded data
+        # Then, go in VGC20 section
+        link = soup.find_all('a')[-1].attrs['href']
+        # 1860 in the link below is the rank
+        # There are other 2 rank, but since the bot look for data every time
+        # it would be very slow. So it take usage of higher rank
+        url = 'https://www.smogon.com/stats/{}gen8vgc2020-1760.txt'.format(link)
+        request = urllib.request.Request(url, None, headers)
+        response = urllib.request.urlopen(request)
+        html = response.read()
+        soup = BeautifulSoup(html, 'html.parser')
 
-    # Data in the site is organized in a table
-    # So RegEx are used
+        # Data in the site is organized in a table
+        # So RegEx are used
+        txt = soup.text
+        pkmn_list = re.split('\|......\|', txt)
+        del pkmn_list[0]
+        del pkmn_list[1]
+        vgc_usage = pkmn_list
+    else:
+        vgc_usage = args[0]
+
     leaderboard = []
-    i = 0
-    txt = soup.text
-    pkmn_list = re.split('\|......\|', txt)
-    for pkmn in pkmn_list:
-        if pkmn != pkmn_list[0] and pkmn != pkmn_list[1]:
-            i += 1
-            pkmn = re.sub(' ', '', pkmn)
-            stats = re.split('\|', pkmn)
-            dictt = {
-                'rank': i,
-                'pokemon': stats[0],
-                'usage': stats[1],
-                'raw': stats[2],
-                'raw%': stats[3],
-                'real': stats[4],
-                'real%': stats[5]
-            }
-            leaderboard.append(dictt)
+    maxx = page * 5
+    minn = maxx - 4
+    for i in range(minn, maxx+1):
+        pkmn = vgc_usage[i]
+        pkmn = re.sub(' ', '', pkmn)
+        stats = re.split('\|', pkmn)
+        dictt = {
+            'rank': i,
+            'pokemon': stats[0],
+            'usage': stats[1],
+            'raw': stats[2],
+            'raw%': stats[3],
+            'real': stats[4],
+            'real%': stats[5]
+        }
+        leaderboard.append(dictt)
 
-    return leaderboard
+    pages = int((len(vgc_usage)-1) / 5)
+    markup = set_page_buttons(page, pages)
+
+    return {
+        'leaderboard': leaderboard,
+        'markup': markup,
+        'vgc_usage': vgc_usage
+    }
+
+
+def set_page_buttons(page, pages, *args):
+    markup = types.InlineKeyboardMarkup(5)
+    try:
+        pkmn = args[0]
+        form = args[1]
+        callback_data_list = [
+            'moveset/'+pkmn+'/'+form+'/1',
+            'moveset/'+pkmn+'/'+form+'/'+str(page-1),
+            'moveset/'+pkmn+'/'+form+'/'+str(page),
+            'moveset/'+pkmn+'/'+form+'/'+str(page+1),
+            'moveset/'+pkmn+'/'+form+'/'+str(pages),
+            'basic_infos/'+pkmn+'/'+form
+        ]
+    except IndexError:
+        callback_data_list = [
+            'usage/'+'1',
+            'usage/'+str(page-1),
+            'usage/'+str(page),
+            'usage/'+str(page+1),
+            'usage/'+str(pages)
+        ]
+
+    # Initialize buttons
+    begin = types.InlineKeyboardButton(
+        text='<<1',
+        callback_data=callback_data_list[0]
+    )
+    pre = types.InlineKeyboardButton(
+        text=str(page-1),
+        callback_data=callback_data_list[1]
+    )
+    page_button = types.InlineKeyboardButton(
+        text='•'+str(page)+'•',
+        callback_data=callback_data_list[2]
+    )
+    suc = types.InlineKeyboardButton(
+        text=str(page+1),
+        callback_data=callback_data_list[3]
+    )
+    end = types.InlineKeyboardButton(
+        text=str(pages)+'>>',
+        callback_data=callback_data_list[4]
+    )
+
+    # Create a page index that display, when possible,
+    # First page, previous page, current page, next page, last page
+    if page == pages:
+        if page > 2:
+            markup.add(begin, pre, page_button)
+        elif page > 1:
+            markup.add(pre, page_button)
+        else:
+            markup.add(page_button)
+    elif page > 2:
+        if page < pages-1:
+            markup.add(begin, pre, page_button, suc, end)
+        elif page < pages:
+            markup.add(begin, pre, page_button, suc)
+    elif page > 1:
+        if page < pages-1:
+            markup.add(pre, page_button, suc, end)
+        elif page < pages:
+            markup.add(pre, page_button, suc)
+    else:
+        if page < pages-1:
+            markup.add(page_button, suc, end)
+        else:
+            markup.add(page_button, suc)
+
+    if len(callback_data_list) == 6:
+        back = types.InlineKeyboardButton(
+            text='🔙 Back to basic infos',
+            callback_data=callback_data_list[5]
+        )
+        markup.add(back)
+
+    return markup
 
 
 # /--- Bot commands ---/
@@ -568,12 +623,29 @@ def locations(call):
     )
 
 
+@bot.callback_query_handler(lambda call: 'usage' in call.data)
 @bot.message_handler(commands=['usage'])
 def usage(message):
     """Show usage leaderboard"""
 
-    cid = message.chat.id
-    leaderboard = get_usage_vgc()
+    try:
+        cid = message.message.chat.id
+        mid = message.message.message_id
+        page = re.split('/', message.data)[1]
+        dictt = get_usage_vgc(int(page), usage_dict['vgc'])
+    except AttributeError:
+        cid = message.chat.id
+        page = 1
+        msg = bot.send_message(
+            chat_id=cid,
+            text='<i>Connecting to Pokémon Showdown database...</i>',
+            parse_mode='HTML'
+        )
+        dictt = get_usage_vgc(int(page))
+        usage_dict['vgc'] = dictt['vgc_usage']
+
+    leaderboard = dictt['leaderboard']
+    markup = dictt['markup']
     text = ''
     base_text = '''
 {}. <b>{}</b>
@@ -587,7 +659,7 @@ Real%: <code>{}</code>
     for i in range(5):
         pkmn = leaderboard[i]
         text += base_text.format(
-            i+1,
+            pkmn['rank'],
             pkmn['pokemon'],
             pkmn['usage'],
             pkmn['raw'],
@@ -596,10 +668,12 @@ Real%: <code>{}</code>
             pkmn['real%']
         )
 
-    bot.send_message(
-        chat_id=cid,
+    bot.edit_message_text(
         text=text,
-        parse_mode='HTML'
+        chat_id=cid,
+        message_id=msg.message_id,
+        parse_mode='HTML',
+        reply_markup=markup
     )
 
 
