@@ -119,7 +119,7 @@ def check_name(pkmn, data):
 def form_name(pkmn, form):
     pkmn = re.sub('_', ' ', pkmn.title())
     if pkmn in ['Ho Oh', 'Jangmo O', 'Hakamoo O', 'Kommo O']:
-        pkmn = re.sub(' ', '-', pkmn)
+        pkmn = re.sub(' ', '-', pkmn[:-1]+pkmn[-1].lower())
     elif pkmn == 'Nidoran F':
         pkmn = 'Nidoran ♀'
     elif pkmn == 'Niforan M':
