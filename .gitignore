@@ -3,3 +3,6 @@
 
 # Bot token
 src/token.txt
+
+# Directory for module
+src/__pycache__
