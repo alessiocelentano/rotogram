@@ -48,61 +48,72 @@ def check_name(pkmn, data):
             if form == pkmn:
                 return {'pkmn': key, 'form': form}
 
-    occurrences = {}
-    comb_list = []
-    for i in range(len(pkmn)):
-        for j in range(len(pkmn), i+1, -1):
-            comb_list.append(pkmn[i:j])
-
-    for key in data:
-        for form in data[key]:
-            if key in form:
-                mon = form
-            else:
-                mon = key
-            mon_ref = mon
-            score1 = 0
-            score2 = 0
-            for letter, letter2 in zip(mon, pkmn):
-                if letter == letter2:
-                    score1 += 25/len(pkmn)
-            for comb in comb_list:
-                if comb in mon:                
-                    score2 += (len(comb)/len(mon_ref))*37.50
-                    splitted_str = re.split('_', mon)
-                    for string in splitted_str:
-                        if re.search('^'+pkmn, mon) or re.search(pkmn+'$', mon):
-                            score2 *= 2
-                            break
-                    mon = mon.replace(comb, '')
-            occurrences[key+'/'+form] = score1 + score2
-
-    for key, value in list(occurrences.items()):
-        if value < 10:
-            del occurrences[key]
-
-    mons = [re.split('/', i)[0] for i in list(occurrences.keys())]
-    if len(list(frozenset(mons))) == 1:
-        pkmn = re.split('/', list(occurrences.keys())[0])[0]
-        form = re.split('/', list(occurrences.keys())[0])[1]
-        return {'pkmn': pkmn, 'form': form}
+    if len(pkmn) > 25:
+        return t['limit']
     else:
-        result = []
-        summ = sum(list(occurrences.values()))
-        while len(result) < 3:
-            maxx = 0
-            ordered = {}
-            for key, value in list(occurrences.items()):
-                if value > maxx:
-                    ordered = {key: value}
-                    maxx = value
-            for key, value in list(ordered.items()):
+        occurrences = {}
+        comb_list = []
+        for i in range(len(pkmn)):
+            for j in range(len(pkmn), i+1, -1):
+                comb_list.append(pkmn[i:j])
+
+        for key in data:
+            for form in data[key]:
+                if key in form:
+                    mon = form
+                else:
+                    mon = key
+                mon_ref = mon
+                score1 = 0
+                score2 = 0
+                for letter, letter2 in zip(mon, pkmn):
+                    if letter == letter2:
+                        score1 += 12.5/len(pkmn)
+                if len(mon) == len(pkmn):
+                    score1 *= 2
+
+                found = False
+                for comb in comb_list:
+                    if comb in mon:                
+                        score2 += (len(comb)/len(mon_ref))*37.50
+                        mon = mon.replace(comb, '')
+                    splitted_mon = re.split('_', mon_ref)
+                    for spl_mon in splitted_mon:
+                        if not found and len(comb) > 2:
+                            begin = re.search('^'+comb, spl_mon)
+                            end = re.search(comb+'$', spl_mon)
+                            if begin or end:
+                                score2 *= 2*(len(comb)/len(pkmn))
+                                found = True
+                                break
+                occurrences[key+'/'+form] = score1 + score2
+
+        for key, value in list(occurrences.items()):
+            if value < 10:
                 del occurrences[key]
-                pkmn = re.split('/', key)[0]
-                form = re.split('/', key)[1]
-                value = str('%.2f' % value) + ' %'
-                result.append((pkmn, form, value))
-        return result
+
+        mons = [re.split('/', i)[0] for i in list(occurrences.keys())]
+        if len(list(frozenset(mons))) == 1:
+            pkmn = re.split('/', list(occurrences.keys())[0])[0]
+            form = re.split('/', list(occurrences.keys())[0])[1]
+            return {'pkmn': pkmn, 'form': form}
+        else:
+            result = []
+            summ = sum(list(occurrences.values()))
+            while len(result) < 3:
+                maxx = 0
+                ordered = {}
+                for key, value in list(occurrences.items()):
+                    if value > maxx:
+                        ordered = {key: value}
+                        maxx = value
+                for key, value in list(ordered.items()):
+                    del occurrences[key]
+                    pkmn = re.split('/', key)[0]
+                    form = re.split('/', key)[1]
+                    value = str('%.2f' % value) + '%'
+                    result.append((pkmn, form, value))
+            return result
 
 
 def form_name(pkmn, form):
@@ -598,10 +609,12 @@ def pkmn_search(message):
         if message.text == '/data':
             text = t['error1']
         else:
-            dictt = check_name(pkmn, data)
-            if 'pkmn' in dictt:
-                pkmn = dictt['pkmn']
-                form = dictt['form']
+            result = check_name(pkmn, data)
+            if type(result) == str:
+                text = result
+            elif 'pkmn' in result:
+                pkmn = result['pkmn']
+                form = result['form']
                 if pkmn in form:
                     text = set_message(data[pkmn][form])
                 else:
@@ -632,7 +645,7 @@ def pkmn_search(message):
                         markup.add(form_button)
             else:
                 pkmn_text = ''
-                for pkmn, form, percent in dictt:
+                for pkmn, form, percent in result:
                     form = data[pkmn][form]['name']
                     name = form_name(pkmn.title(), form)
                     pkmn_text += '\n' + name + ': ' + percent
@@ -768,6 +781,7 @@ def usage(message):
             text='<i>Connecting to Pokémon Showdown database...</i>',
             parse_mode='HTML'
         )
+        mid = msg.message_id
         dictt = get_usage_vgc(int(page))
         usage_dict['vgc'] = dictt['vgc_usage']
 
@@ -798,7 +812,7 @@ Real%: <code>{}</code>
     bot.edit_message_text(
         text=text,
         chat_id=cid,
-        message_id=msg.message_id,
+        message_id=mid,
         parse_mode='HTML',
         reply_markup=markup
     )
