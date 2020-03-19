@@ -8,7 +8,7 @@ from functions import *
 
 
 token = open('src/token.txt', 'r').read()
-bot = telebot.TeleBot(token)
+bot = telebot.TeleBot('979765263:AAFqyECuu5QG_LjUZzBoMiEbcIxGm7pLmh8')
 with open('src/texts.json', 'r') as f:
     t = json.load(f)
 with open('dist/pkmn.json', 'r') as f:
@@ -157,7 +157,7 @@ def pkmn_search(message):
             parse_mode='HTML',
             reply_markup=markup
         )
-    except UnboundLocalError:
+    except AttributeError:
         # Command
         bot.send_message(
             chat_id=cid,

@@ -61,8 +61,8 @@ def check_name(pkmn, data):
                 #       Low Key Form isn't clear (It's a Toxtricity form)
                 #       in this case, it returns "Toxtricity (Low key Form)"
                 form = key + ' (' + form + ')'
-                # For the algorithm the parenthesis are useless
-                name = re.sub('[()]', '', form)
+            # For the algorithm the parenthesis are useless
+            name = re.sub('[()]', '', form)
             # SCORE 1
             # First score is for typing errors
             # Equal characters with the same index increase the score
@@ -87,9 +87,9 @@ def check_name(pkmn, data):
 
             startend = False
             for comb in comb_list:
-                if comb in form:                
+                if comb in name:                
                     score2 += (len(comb)/len(base))*37.50
-                    form = form.replace(comb, '')
+                    name = name.replace(comb, '')
                 # Mega and Alolan Pokémon will never be able to obtain
                 # start bonus if string isn't splitted
                 spltd_form = re.split('_', base)
@@ -109,6 +109,8 @@ def check_name(pkmn, data):
             del score_dict[key]
 
     # Return 3 best matches
+    if len(score_dict) < 3:
+        return t['nomatch']
     result = []
     summ = sum(list(score_dict.values()))
     while len(result) < 3:
