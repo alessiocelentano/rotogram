@@ -8,7 +8,7 @@ from functions import *
 
 
 token = open('src/token.txt', 'r').read()
-bot = telebot.TeleBot('979765263:AAFQ41JFJBp9ghT4SP6hhtE4OnRDyQGNfkk')
+bot = telebot.TeleBot(token)
 with open('src/texts.json', 'r') as f:
     t = json.load(f)
 with open('dist/pkmn.json', 'r') as f:
