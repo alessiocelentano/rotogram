@@ -5,6 +5,11 @@ import telebot
 from telebot import types
 from bs4 import BeautifulSoup
 
+
+with open('src/texts.json', 'r') as f:
+    t = json.load(f)
+
+
 def find_name(pkmn):
     """Convert input in a valid format for JSON"""
 
