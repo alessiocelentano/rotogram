@@ -1,8 +1,8 @@
-# VSCode directory
 .vscode
 
-# Bot token
+Procfile
+
 src/token.txt
 
-# Directory for module
 src/__pycache__
+
