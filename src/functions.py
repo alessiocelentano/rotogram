@@ -30,82 +30,106 @@ def check_name(pkmn, data):
     """Check the user input"""
 
     if pkmn in data:
+        # Valid input: it returns a dict with Pokémon data
+        form = list(data[pkmn].keys())[0] # Basically first form
         return {'pkmn': pkmn, 'form': list(data[pkmn].keys())[0]}
 
+    # Search into Pokémon forms
     for key in data:
         for form in data[key]:
             if form == pkmn:
+                # Valid input: it returns a dict with Pokémon data
                 return {'pkmn': key, 'form': form}
 
     if len(pkmn) > 25:
+        # Invalid input: it returns error message
         return t['limit']
-    else:
-        occurrences = {}
-        comb_list = []
-        for i in range(len(pkmn)):
-            for j in range(len(pkmn), i+1, -1):
-                comb_list.append(pkmn[i:j])
 
-        for key in data:
-            for form in data[key]:
-                if key in form:
-                    mon = form
-                else:
-                    mon = key
-                mon_ref = mon
-                score1 = 0
-                score2 = 0
-                for letter, letter2 in zip(mon, pkmn):
-                    if letter == letter2:
-                        score1 += 12.5/len(pkmn)
-                if len(mon) == len(pkmn):
-                    score1 *= 2
+    # If input doesn't match with no Pokémon
+    # It returns three best match
+    # The algorithm is plitted in two parts (and two scores)
 
-                found = False
-                for comb in comb_list:
-                    if comb in mon:                
-                        score2 += (len(comb)/len(mon_ref))*37.50
-                        mon = mon.replace(comb, '')
-                    splitted_mon = re.split('_', mon_ref)
-                    for spl_mon in splitted_mon:
-                        if not found and len(comb) > 2:
-                            begin = re.search('^'+comb, spl_mon)
-                            end = re.search(comb+'$', spl_mon)
-                            if begin or end:
-                                score2 *= 2*(len(comb)/len(pkmn))
-                                found = True
-                                break
-                occurrences[key+'/'+form] = score1 + score2
+    score_dict = {}
+    for key in data:
+        for form in data[key]:
+            score1 = 0
+            score2 = 0
+            if key not in form:
+                # For readibility
+                # e.g.: Mega Charizard X has Charizard in the name
+                #       so it's understandable
+                #       Low Key Form isn't clear (It's a Toxtricity form)
+                #       in this case, it returns "Toxtricity (Low key Form)"
+                form = key + ' (' + form + ')'
+                # For the algorithm the parenthesis are useless
+                name = re.sub('[()]', '', form)
+            # SCORE 1
+            # First score is for typing errors
+            # Equal characters with the same index increase the score
+            # Maximum: 12.5% (25% with length bonus)
+            for letter, letter2 in zip(name, pkmn):
+                if letter == letter2:
+                    score1 += 12.5/len(pkmn)
+            if len(name) == len(pkmn):
+                score1 *= 2
 
-        for key, value in list(occurrences.items()):
-            if value < 10:
-                del occurrences[key]
+            # SCORE 2
+            # Second score is for abbreviations
+            # First, it gets a list of all combinations of the input
+            # Note: the combinations consist of at least 3 consecutive letters
+            # All combinations that match with the input increase the score
+            # Maximum 37.5% (75% with start/end bonus)
+            base = name # To increase the score proportionally
+            comb_list = []
+            for i in range(len(pkmn)):
+                for j in range(len(pkmn), i+1, -1):
+                    comb_list.append(pkmn[i:j])
 
-        mons = [re.split('/', i)[0] for i in list(occurrences.keys())]
-        if len(list(frozenset(mons))) == 1:
-            pkmn = re.split('/', list(occurrences.keys())[0])[0]
-            form = re.split('/', list(occurrences.keys())[0])[1]
-            return {'pkmn': pkmn, 'form': form}
-        else:
-            result = []
-            summ = sum(list(occurrences.values()))
-            while len(result) < 3:
-                maxx = 0
-                ordered = {}
-                for key, value in list(occurrences.items()):
-                    if value > maxx:
-                        ordered = {key: value}
-                        maxx = value
-                for key, value in list(ordered.items()):
-                    del occurrences[key]
-                    pkmn = re.split('/', key)[0]
-                    form = re.split('/', key)[1]
-                    value = str('%.2f' % value) + '%'
-                    result.append((pkmn, form, value))
-            return result
+            startend = False
+            for comb in comb_list:
+                if comb in form:                
+                    score2 += (len(comb)/len(base))*37.50
+                    form = form.replace(comb, '')
+                # Mega and Alolan Pokémon will never be able to obtain
+                # start bonus if string isn't splitted
+                spltd_form = re.split('_', base)
+                for elem in spltd_form:
+                    if not startend:
+                        begin = re.search('^'+comb, elem)
+                        end = re.search(comb+'$', elem)
+                        if begin or end:
+                            score2 *= 2*(len(comb)/len(pkmn))
+                            found = True
+                            break
+            score_dict[key+'/'+form] = score1 + score2
+
+    for key, value in list(score_dict.items()):
+        # Delete low scores
+        if value < 5:
+            del score_dict[key]
+
+    # Return 3 best matches
+    result = []
+    summ = sum(list(score_dict.values()))
+    while len(result) < 3:
+        maxx = 0
+        max_dict = {}
+        for key, value in list(score_dict.items()):
+            if value > maxx:
+                max_dict = {key: value}
+                maxx = value
+        for key, value in list(max_dict.items()):
+            del score_dict[key]
+            pkmn = re.split('/', key)[0]
+            form = re.split('/', key)[1]
+            percent = str('%.2f' % value) + '%'
+            result.append((pkmn, form, percent))
+    return result
 
 
 def form_name(pkmn, form):
+    """Return Pokémon form name"""
+
     pkmn = re.sub('_', ' ', pkmn.title())
     if pkmn in ['Ho Oh', 'Jangmo O', 'Hakamoo O', 'Kommo O']:
         pkmn = re.sub(' ', '-', pkmn[:-1]+pkmn[-1].lower())
@@ -114,8 +138,13 @@ def form_name(pkmn, form):
     elif pkmn == 'Nidoran M':
         pkmn = 'Nidoran♂'
     if pkmn in form:
+        # For readibility
+        # e.g.: Mega Charizard X has Charizard in the name
+        #       so it's understandable
         result = form
     else:
+        # Low Key Form isn't clear (It's a Toxtricity form)
+        # in this case, it returns "Toxtricity (Low key Form)"
         result = pkmn + ' (' + form + ')'
     return result
 
