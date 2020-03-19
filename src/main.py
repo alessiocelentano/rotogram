@@ -36,16 +36,24 @@ def pkmn_search(message):
 
     markup = types.InlineKeyboardMarkup(2)
     try:
+        # Run this if a button is pressed
         cid = message.message.chat.id
         mid = message.message.message_id
         pkmn = re.split('/', message.data)[1]
         form = re.split('/', message.data)[2]
+
         if pkmn in form:
+            # For readibility
+            # e.g.: Mega Charizard X has Charizard in the name
+            #       so it's understandable
             text = set_message(data[pkmn][form])
         else:
+            # e.g.: Low Key Form isn't clear (It's a Toxtricity form)
+            #       in this case, it returns "Toxtricity (Low key Form)"
             base_form = re.sub('_', ' ', pkmn.title())
             name = base_form + ' (' + data[pkmn][form]['name'] + ')'
             text = set_message(data[pkmn][form], name)
+
         expand = types.InlineKeyboardButton(
             text='➕ Expand',
             callback_data='all_infos/'+pkmn+'/'+form
@@ -60,6 +68,7 @@ def pkmn_search(message):
         )
         markup.add(expand)
         markup.add(moveset, locations)
+
         for alt_form in data[pkmn]:
             if alt_form != form:
                 form_button = types.InlineKeyboardButton(
@@ -69,21 +78,29 @@ def pkmn_search(message):
                 markup.add(form_button)
 
     except AttributeError:
+        # Run this if /data is used
         pkmn = find_name(message.text)
-        # Take the first form of the Pokémon
         cid = message.chat.id
         if message.text == '/data':
             text = t['error1']
         else:
             result = check_name(pkmn, data)
             if type(result) == str:
+                # Invalid input: 25 characters limit exceeded
                 text = result
+
             elif 'pkmn' in result:
+                # Valid input: return Pokémon infocard
                 pkmn = result['pkmn']
                 form = result['form']
                 if pkmn in form:
+                    # For readibility
+                    # e.g.: Mega Charizard X has Charizard in the name
+                    #       so it's understandable
                     text = set_message(data[pkmn][form])
                 else:
+                    # e.g.: Low Key Form isn't clear (It's a Toxtricity form)
+                    #       in this case, it returns "Toxtricity (Low key Form)"
                     base_form = re.sub('_', ' ', pkmn.title())
                     name = base_form + ' (' + data[pkmn][form]['name'] + ')'
                     text = set_message(data[pkmn][form], name)
@@ -102,6 +119,7 @@ def pkmn_search(message):
                 )
                 markup.add(expand)
                 markup.add(moveset, locations)
+                # If Pokémon has alternative forms, it creates its button
                 for alt_form in data[pkmn]:
                     if alt_form != form:
                         form_button = types.InlineKeyboardButton(
@@ -110,6 +128,7 @@ def pkmn_search(message):
                         )
                         markup.add(form_button)
             else:
+                # Invalid input: it returns 3 best matches
                 text = t['results']
                 index = 1
                 for pkmn, form, percent in result:
@@ -127,6 +146,10 @@ def pkmn_search(message):
                     index += 1
 
     try:
+        # Buttons
+        
+        # It interrupt button loading circle
+        bot.answer_callback_query(message.id)
         bot.edit_message_text(
             text=text,
             chat_id=cid,
@@ -135,6 +158,7 @@ def pkmn_search(message):
             reply_markup=markup
         )
     except UnboundLocalError:
+        # Command
         bot.send_message(
             chat_id=cid,
             text=text,
@@ -153,8 +177,13 @@ def all_infos(call):
     form = re.split('/', call.data)[2]
     
     if pkmn in form:
+        # For readibility
+        # e.g.: Mega Charizard X has Charizard in the name
+        #       so it's understandable
         text = set_message(data[pkmn][form], True)
     else:
+        # e.g.: Low Key Form isn't clear (It's a Toxtricity form)
+        #       in this case, it returns "Toxtricity (Low key Form)"
         base_form = re.sub('_', ' ', pkmn.title())
         name = base_form + ' (' + data[pkmn][form]['name'] + ')'
         text = set_message(data[pkmn][form], True, name)
@@ -175,7 +204,7 @@ def all_infos(call):
     markup.add(reduce)
     markup.add(moveset, locations)
 
-    bot.answer_callback_query(call.id)
+    bot.answer_callback_query(call.id) # It interrupt button loading circle
     bot.edit_message_text(
         text=text,
         chat_id=cid,
@@ -199,7 +228,7 @@ def moveset(call):
         page = 1
     dictt = set_moveset(pkmn, form, int(page))
 
-    bot.answer_callback_query(call.id)
+    bot.answer_callback_query(call.id) # It interrupt button loading circle
     bot.edit_message_text(
         text=dictt['text'],
         chat_id=cid,
@@ -229,6 +258,7 @@ def locations(call):
     )
     markup.add(moveset, info)
 
+    bot.answer_callback_query(call.id) # It interrupt button loading circle
     bot.edit_message_text(
         text=text,
         chat_id=cid,
@@ -244,11 +274,14 @@ def usage(message):
     """Show usage leaderboard"""
 
     try:
+        # Buttons
         cid = message.message.chat.id
         mid = message.message.message_id
         page = re.split('/', message.data)[1]
         dictt = get_usage_vgc(int(page), usage_dict['vgc'])
+
     except AttributeError:
+        # Command
         cid = message.chat.id
         page = 1
         msg = bot.send_message(
@@ -273,6 +306,11 @@ def usage(message):
             pkmn['usage'],
         )
 
+    try:
+        # It interrupt button loading circle
+        bot.answer_callback_query(message.id)
+    except AttributeError:
+        pass
     bot.edit_message_text(
         text=text,
         chat_id=cid,
