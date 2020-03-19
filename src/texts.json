@@ -23,7 +23,7 @@
     },
     "start_message": "⚡️ Zzzt! Ehy. I'm Rotom! My trainer merged me with a Telegram Bot. He's teaching me some commanzzz, for now I can tell you basic information about all Pokémon using <code>/data</code> command.",
     "error1": "⚡️ Zzrrt! My trainer's teaching me many thingzz, but I still can't read in thought. Use this syntax: <code>/data + PokémonName</code>\nex.: <code>/data Rotom</code>",
-    "results": " I traveled to 8 regionz with my trainer but I have never heard of such a Pokémon 🧐\nBUT I can find the <b>3 closest Pokémon</b> to what you told me\n\n<b>Here are the resultz ⚡️</b>",
+    "results": " I traveled to 8 regionz with my trainer but I have never heard of such a Pokémon 🧐\nHowever, I can find the <b>3 closest Pokémon</b> to what you told me\n\n<b>Here are the resultz ⚡️</b>",
     "about": "⚡️ Zzt-zzz! Do you want some lore? Well, I'll give you some interesting links\n\n<b>Rotomgram channel</b>\nMy trainer iszz writing a biography about me on @rotomgram\n\n<b>Affiliate group</b>\nI have a fan-page, too 😍\n@pokemon_italia \n\n<b>GitHub</b>\nI'm completely open-source! https://github.com/alessiocelentano/Rotomgram\n\n<b>Credits</b>\n@alessiocelentano (bot, logo)\npokemondb.net (data)\npokemon.com (artworks)",
     "legend": "<i>Move (Type)\nCategory, Method</i>",
     "minmax": "<i>Min/max stats at level 100</i>",
