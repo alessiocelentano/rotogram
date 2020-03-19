@@ -9,6 +9,8 @@ from bs4 import BeautifulSoup
 
 with open('src/texts.json', 'r') as f:
     t = json.load(f)
+with open('dist/pkmn.json', 'r') as f:
+    data = json.load(f)
 
 
 def find_name(pkmn):
