@@ -102,9 +102,9 @@ def form_name(pkmn, form):
     if pkmn in ['Ho Oh', 'Jangmo O', 'Hakamoo O', 'Kommo O']:
         pkmn = re.sub(' ', '-', pkmn[:-1]+pkmn[-1].lower())
     elif pkmn == 'Nidoran F':
-        pkmn = 'Nidoran ♀'
-    elif pkmn == 'Niforan M':
-        pkmn = 'Nidoran ♂'
+        pkmn = 'Nidoran♀'
+    elif pkmn == 'Nidoran M':
+        pkmn = 'Nidoran♂'
     if pkmn in form:
         result = form
     else:
