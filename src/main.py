@@ -1,17 +1,14 @@
 import json
 import re
-import urllib
-from collections import OrderedDict
 
 import telebot
 from telebot import types
-from bs4 import BeautifulSoup
 
 from functions import *
 
 
 token = open('src/token.txt', 'r').read()
-bot = telebot.TeleBot(token)
+bot = telebot.TeleBot('979765263:AAFQ41JFJBp9ghT4SP6hhtE4OnRDyQGNfkk')
 with open('src/texts.json', 'r') as f:
     t = json.load(f)
 with open('dist/pkmn.json', 'r') as f:

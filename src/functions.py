@@ -1,4 +1,9 @@
 import re
+import urllib
+
+import telebot
+from telebot import types
+from bs4 import BeautifulSoup
 
 def find_name(pkmn):
     """Convert input in a valid format for JSON"""
