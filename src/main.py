@@ -263,25 +263,14 @@ def usage(message):
     leaderboard = dictt['leaderboard']
     markup = dictt['markup']
     text = ''
-    base_text = '''
-{}. <b>{}</b>
-Usage: <code>{}</code>
-Raw: <code>{}</code>
-Raw%: <code>{}</code>
-Real: <code>{}</code>
-Real%: <code>{}</code>
-'''
+    base_text = '{}. <b>{}</b> (<i>{}</i>)\n'
 
-    for i in range(5):
+    for i in range(15):
         pkmn = leaderboard[i]
         text += base_text.format(
             pkmn['rank'],
             pkmn['pokemon'],
             pkmn['usage'],
-            pkmn['raw'],
-            pkmn['raw%'],
-            pkmn['real'],
-            pkmn['real%']
         )
 
     bot.edit_message_text(

@@ -434,24 +434,21 @@ def get_usage_vgc(page, *args):
         vgc_usage = args[0]
 
     leaderboard = []
-    maxx = page * 5
-    minn = maxx - 4
+    maxx = page * 15
+    minn = maxx - 14
     for i in range(minn, maxx+1):
         pkmn = vgc_usage[i]
         pkmn = re.sub(' ', '', pkmn)
         stats = re.split('\|', pkmn)
+        usage = str('%.2f' % float(stats[1][:-1])) + '%'
         dictt = {
             'rank': i,
             'pokemon': stats[0],
-            'usage': stats[1],
-            'raw': stats[2],
-            'raw%': stats[3],
-            'real': stats[4],
-            'real%': stats[5]
+            'usage': usage,
         }
         leaderboard.append(dictt)
 
-    pages = int((len(vgc_usage)-1) / 5)
+    pages = int((len(vgc_usage)-1) / 15)
     markup = set_page_buttons(page, pages)
 
     return {
