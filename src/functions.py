@@ -7,9 +7,9 @@ from telebot import types
 from bs4 import BeautifulSoup
 
 
-with open('src/texts.json', 'r') as f:
+with open('texts.json', 'r') as f:
     t = json.load(f)
-with open('dist/pkmn.json', 'r') as f:
+with open('pkmn.json', 'r') as f:
     data = json.load(f)
 
 
@@ -71,7 +71,7 @@ def check_name(pkmn, data):
                 if letter == letter2:
                     score1 += 12.5/len(pkmn)
             if len(name) == len(pkmn):
-                score1 *= 2
+                score1 += 2
 
             # SCORE 2
             # Second score is for abbreviations
@@ -84,17 +84,19 @@ def check_name(pkmn, data):
             for i in range(len(pkmn)):
                 for j in range(len(pkmn), i+1, -1):
                     comb_list.append(pkmn[i:j])
+            comb_list.sort(key=len, reverse=True)
 
-            startend = False
+            found = False
             for comb in comb_list:
                 if comb in name:                
+
                     score2 += (len(comb)/len(base))*37.50
                     name = name.replace(comb, '')
                 # Mega and Alolan Pokémon will never be able to obtain
                 # start bonus if string isn't splitted
                 spltd_form = re.split('_', base)
                 for elem in spltd_form:
-                    if not startend:
+                    if not found:
                         begin = re.search('^'+comb, elem)
                         end = re.search(comb+'$', elem)
                         if begin or end:

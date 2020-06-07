@@ -7,11 +7,11 @@ from telebot import types
 from functions import *
 
 
-token = open('src/token.txt', 'r').read()
-bot = telebot.TeleBot(token)
-with open('src/texts.json', 'r') as f:
+token = open('token.txt', 'r').read()
+bot = telebot.TeleBot('979765263:AAFTh7HBYceJf7AsewBjZpfevki_qzpSaY4')
+with open('texts.json', 'r') as f:
     t = json.load(f)
-with open('dist/pkmn.json', 'r') as f:
+with open('pkmn.json', 'r') as f:
     data = json.load(f)
 
 
