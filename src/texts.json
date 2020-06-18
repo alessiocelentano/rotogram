@@ -1,6 +1,6 @@
 {
-    "expanded_text": "<b><u>{}</u></b> <a href=\"{}\">{}</a>\n\n<b>National</b>: <i>{}</i>\n<b>{}</b>: <i>{}</i>\n<b>{}</b>: <i>{}</i>\n{}\n<b><u>Games data</u></b>\n<b>Gender: </b><i>{}</i>\n<b>Base friendship: </b><i>{}</i>\n<b>EV yield: </b><i>{}</i>\n<b>Catch rate: </b><i>{}</i>\n<b>Growth rate: </b><i>{}</i>\n<b>Egg groups: </b><i>{}</i>\n<b>Egg cycles: </b><i>{}</i>\n\n<b><u>About Pokémon</u></b>\n<b>Species: </b><i>{}</i>\n<b>Height: </b><i>{}</i>\n<b>Weight: </b><i>{}</i>\n<b>Name origin: </b><i>{}</i>\n<b>Other lang: </b><i>{}</i>\n\n<b><u>Base stats</u></b>:\n{}{}",
-    "reduced_text": "<b><u>{}</u></b> <a href=\"{}\">{}</a>\n\n<b>National</b>: <i>{}</i>\n<b>{}</b>: <i>{}</i>\n<b>{}</b>: <i>{}</i>\n{}\n<b><u>Base stats</u></b>:\n{}{}",
+    "expanded_text": "<b><u>{name}</u></b> <a href=\"{artwork}\">{emoji}</a>\n\n<b>National</b>: <i>{national}</i>\n<b>{typee_str}</b>: <i>{typee}</i>\n<b>{ab_str}</b>: <i>{ability}</i>\n{evo_text}\n<b><u>Games data</u></b>\n<b>Gender: </b><i>{gender}</i>\n<b>Base friendship: </b><i>{base_friendship}</i>\n<b>EV yield: </b><i>{ev_yield}</i>\n<b>Catch rate: </b><i>{catch_rate}</i>\n<b>Growth rate: </b><i>{growth_rate}</i>\n<b>Egg groups: </b><i>{egg_group}</i>\n<b>Egg cycles: </b><i>{egg_cycles}</i>\n\n<b><u>About Pokémon</u></b>\n<b>Species: </b><i>{species}</i>\n<b>Height: </b><i>{height}</i>\n<b>Weight: </b><i>{weight}</i>\n<b>Name origin: </b><i>{name_origin}</i>\n<b>Other lang: </b><i>{other_lang}</i>\n\n<b><u>Base stats</u></b>:\n{base_stats}{legend}",
+	"reduced_text": "<b><u>{name}</u></b> <a href=\"{artwork}\">{emoji}</a>\n\n<b>National</b>: <i>{national}</i>\n<b>{typee_str}</b>: <i>{typee}</i>\n<b>{ab_str}</b>: <i>{ability}</i>\n{evo_text}\n\n<b><u>Base stats</u></b>:\n{base_stats}{legend}",
     "emoji_dict": {
         "Grass": "🌱",
         "Fire": "🔥",
@@ -28,5 +28,7 @@
     "legend": "<i>Move (Type)\nCategory, Method</i>",
     "minmax": "<i>Min/max stats at level 100</i>",
     "limit": "⚡️⚡️😵⚡️😵 <b>ZZZZZZRTTT</b> 😵⚡️⚡️😵⚡️\nOh Arceus, do you want to drive me crazy? Well don't do it anymore, there are no Pokémon with more than 25 characters in the name",
-    "nomatch": "Write in a language understandable to humans (and Pokémon)"
+    "nomatch": "Write in a language understandable to humans (and Pokémon)",
+    "moveset": "<a href=\"{}\">{}</a> <b>{}</b> ({})\n<i>{}, {}</i>\n",
+    "usage": "{}. <b>{}</b> (<i>{}</i>)\n"
 }

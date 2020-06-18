@@ -2,138 +2,129 @@ import json
 import re
 import urllib
 
-import telebot
-from telebot import types
+from pyrogram import InlineKeyboardMarkup, InlineKeyboardButton
 from bs4 import BeautifulSoup
 
 
-with open('texts.json', 'r') as f:
-    t = json.load(f)
-with open('pkmn.json', 'r') as f:
-    data = json.load(f)
+texts = json.load(open('src/texts.json', 'r'))
+data = json.load(open('src/pkmn.json', 'r'))
+
+
+def bot_action(app, message, text, markup):
+    try:
+        app.edit_message_text(
+            chat_id=message.message.chat.id,
+            text=text,
+            message_id=message.message.message_id,
+            parse_mode='HTML',
+            reply_markup=markup
+        )
+        app.answer_callback_query(message.id)
+    except AttributeError:
+        app.send_message(
+            chat_id=message.chat.id,
+            text=text,
+            parse_mode='HTML',
+            reply_markup=markup
+        )
 
 
 def find_name(pkmn):
-    """Convert input in a valid format for JSON"""
-
     pkmn = pkmn.lower()
     pkmn = re.sub('♀', '_f', pkmn)  # For Nidoran♀
     pkmn = re.sub('♂', '_m', pkmn)  # For Nidoran♂
     pkmn = re.sub('[èé]', 'e', pkmn)  # For Flabébé
-    pkmn = re.sub('/data(@RotomgramBot|) ', '', pkmn)
+    pkmn = re.sub('/data(@RotomgramBot)* ', '', pkmn)
     pkmn = re.sub('[ -]', '_', pkmn)
     pkmn = re.sub('[^a-z_]', '', pkmn)
     return pkmn
 
 
 def check_name(pkmn, data):
-    """Check the user input"""
-
+    # Valid input: Pokemon
     if pkmn in data:
-        # Valid input: it returns a dict with Pokémon data
         form = list(data[pkmn].keys())[0] # Basically first form
         return {'pkmn': pkmn, 'form': list(data[pkmn].keys())[0]}
 
-    # Search into Pokémon forms
+    # Valid input: Pokemon form
     for key in data:
         for form in data[key]:
             if form == pkmn:
-                # Valid input: it returns a dict with Pokémon data
                 return {'pkmn': key, 'form': form}
 
+    # Invalid input: characters limit
     if len(pkmn) > 25:
-        # Invalid input: it returns error message
-        return t['limit']
+        return texts['limit']
 
-    # If input doesn't match with no Pokémon
-    # It returns three best match
-    # The algorithm is plitted in two parts (and two scores)
+    # Otherwise, it returns three best matches
+    return best_matches(pkmn, data)
 
+
+def best_matches(pkmn, data):
     score_dict = {}
     for key in data:
         for form in data[key]:
+            if key not in form:
+                name = key + ' ' + form
+            else:
+                name = form
             score1 = 0
             score2 = 0
-            if key not in form:
-                # For readibility
-                # e.g.: Mega Charizard X has Charizard in the name
-                #       so it's understandable
-                #       Low Key Form isn't clear (It's a Toxtricity form)
-                #       in this case, it returns "Toxtricity (Low key Form)"
-                form = key + ' (' + form + ')'
-            # For the algorithm the parenthesis are useless
-            name = re.sub('[()]', '', form)
+
             # SCORE 1
-            # First score is for typing errors
-            # Equal characters with the same index increase the score
-            # Maximum: 12.5% (25% with length bonus)
+            # Typing errors
             for letter, letter2 in zip(name, pkmn):
                 if letter == letter2:
-                    score1 += 12.5/len(pkmn)
-            if len(name) == len(pkmn):
-                score1 += 2
+                    score1 += 50/len(name)
+            if len(pkmn)-1 <= len(name) <= len(pkmn)+1:
+                score1 *= 2
 
             # SCORE 2
-            # Second score is for abbreviations
-            # First, it gets a list of all combinations of the input
-            # Note: the combinations consist of at least 3 consecutive letters
-            # All combinations that match with the input increase the score
-            # Maximum 37.5% (75% with start/end bonus)
-            base = name # To increase the score proportionally
+            # Consecutive characters
             comb_list = []
             for i in range(len(pkmn)):
-                for j in range(len(pkmn), i+1, -1):
+                for j in range(len(pkmn), i+2, -1):
                     comb_list.append(pkmn[i:j])
             comb_list.sort(key=len, reverse=True)
 
-            found = False
             for comb in comb_list:
                 if comb in name:                
-
-                    score2 += (len(comb)/len(base))*37.50
+                    score2 += (len(comb)/len(name))*100
                     name = name.replace(comb, '')
-                # Mega and Alolan Pokémon will never be able to obtain
-                # start bonus if string isn't splitted
-                spltd_form = re.split('_', base)
-                for elem in spltd_form:
-                    if not found:
-                        begin = re.search('^'+comb, elem)
-                        end = re.search(comb+'$', elem)
-                        if begin or end:
-                            score2 *= 2*(len(comb)/len(pkmn))
-                            found = True
-                            break
-            score_dict[key+'/'+form] = score1 + score2
+
+            if score1 > score2:
+                score_dict[key+'/'+form] = score1
+            else:
+                score_dict[key+'/'+form] = score2
 
     for key, value in list(score_dict.items()):
-        # Delete low scores
         if value < 5:
             del score_dict[key]
-
-    # Return 3 best matches
     if len(score_dict) < 3:
-        return t['nomatch']
+        return texts['nomatch']
+
     result = []
-    summ = sum(list(score_dict.values()))
     while len(result) < 3:
         maxx = 0
         max_dict = {}
-        for key, value in list(score_dict.items()):
-            if value > maxx:
-                max_dict = {key: value}
-                maxx = value
+        for pkmn, score in list(score_dict.items()):
+            if score > maxx:
+                max_dict = {pkmn: score}
+                maxx = score
         for key, value in list(max_dict.items()):
             del score_dict[key]
             pkmn = re.split('/', key)[0]
             form = re.split('/', key)[1]
-            percent = str('%.2f' % value) + '%'
-            result.append((pkmn, form, percent))
+            percentage = str('%.2f' % value) + '%'
+            result.append({
+                'pkmn': pkmn,
+                'form': form,
+                'percentage': percentage}
+            )
     return result
 
 
 def form_name(pkmn, form):
-    """Return Pokémon form name"""
-
     pkmn = re.sub('_', ' ', pkmn.title())
     if pkmn in ['Ho Oh', 'Jangmo O', 'Hakamoo O', 'Kommo O']:
         pkmn = re.sub(' ', '-', pkmn[:-1]+pkmn[-1].lower())
@@ -142,94 +133,32 @@ def form_name(pkmn, form):
     elif pkmn == 'Nidoran M':
         pkmn = 'Nidoran♂'
     if pkmn in form:
-        # For readibility
-        # e.g.: Mega Charizard X has Charizard in the name
-        #       so it's understandable
         result = form
     else:
-        # Low Key Form isn't clear (It's a Toxtricity form)
-        # in this case, it returns "Toxtricity (Low key Form)"
         result = pkmn + ' (' + form + ')'
     return result
 
 
-def set_message(pkmn, *args):
-    """Set Home message"""
-
-    def set_rating(base):
-        """Create a legend with moon emoticons
-        The higher the statistic, the more full moons there will be
-        """
-
-        rating_n = 0
-        rating_emoji = ''
-        tiers = [0, 9, 19, 39, 79, 89, 99, 114, 129, 149, 256]
-        for i in tiers:
-            if base < i:
-                while rating_n >= 2:
-                    rating_emoji += '🌕'
-                    rating_n -= 2
-                if rating_n == 1:
-                    rating_emoji += '🌗'
-                while len(rating_emoji) != 5:
-                    rating_emoji += '🌑'
-                break
-            else:
-                rating_n += 1
-        return rating_emoji
-
-    if True not in args:
-        base_text = t['reduced_text']
-
-    else:
-        # If True is passed in set_message, it returns all informations
-        # Below, convert JSON additional data in user-friendly message
-        base_text = t['expanded_text']
-        base_friendship = pkmn['base_friendship']['value']
-        catch_rate = pkmn['catch_rate']['value']
-        growth_rate = pkmn['growth_rate']
-        egg_cycles = pkmn['egg_cycles']
-        species = pkmn['species']
-
-        gender = ''
-        if pkmn['gender']['genderless']:
-            gender += 'Genderless'
+def set_rating(base):
+    rating_n = 0
+    rating_emoji = ''
+    tiers = [0, 9, 19, 39, 79, 89, 99, 114, 129, 149, 256]
+    for i in tiers:
+        if base < i:
+            while rating_n >= 2:
+                rating_emoji += '🌕'
+                rating_n -= 2
+            if rating_n == 1:
+                rating_emoji += '🌗'
+            while len(rating_emoji) != 5:
+                rating_emoji += '🌑'
+            break
         else:
-            for i, j in list(pkmn['gender'].items()):
-                if j == '100%':
-                    gender = i + ': ' + j + '\n'
-                elif type(j) == bool:
-                    continue
-                else:
-                    gender += i + ': ' + j + '\n'
-            gender = gender[:-1]
+            rating_n += 1
+    return rating_emoji
 
-        ev_yield = ''
-        for i in pkmn['ev_yield']:
-            ev_yield += ' / ' + pkmn['ev_yield'][i] + ' ' + i.title()
-        ev_yield = ev_yield[3:]
 
-        egg_groups = ''
-        for i in pkmn['egg_groups']:
-            egg_groups += ' / ' + i
-        egg_groups = egg_groups[3:]
-
-        other_lang = ''
-        for i, j in pkmn['other_lang'].items():
-            other_lang += '\n' + i.title() + ': ' + j
-        other_lang = other_lang[1:]
-
-        name_origin = ''
-        for i, j in pkmn['name_origin'].items():
-            name_origin += ', ' + i + ' (' + j + ')'
-        name_origin = name_origin[2:]
-
-        tmp = pkmn['height']
-        height = tmp['si'] + ' (' + tmp['usc'] + ')'
-        tmp = pkmn['weight']
-        weight = tmp['si'] + ' (' + tmp['usc'] + ')'
-
-    # Convert JSON base data in user-friendly message
+def get_base_data(pkmn, pkmn_name):
     ability = ''
     for i, j in pkmn['abilities'].items():
         if i == 'hidden_ability':
@@ -290,7 +219,7 @@ def set_message(pkmn, *args):
             maxx,
             rating
         )
-    legend = t['minmax']
+    legend = texts['minmax']
 
     typee = ''
     for i in pkmn['type'].values():
@@ -301,52 +230,112 @@ def set_message(pkmn, *args):
     else:
         typee_str = 'Types'
 
-    if args:
-        if type(args[-1]) != str:
-            name = pkmn['name']
-        else:
-            name = args[-1]
+    if pkmn_name:
+        if type(pkmn_name) != str:
+            pkmn_name = pkmn['name']
     else:
-        name = pkmn['name']
-    emoji_dict = t['emoji_dict']
+        pkmn_name = pkmn['name']
+    emoji_dict = texts['emoji_dict']
     first_type = re.split(' / ', typee)[0]
     emoji = emoji_dict[first_type]
     national = pkmn['national']
     artwork = pkmn['artwork']
 
-    if True in args:
-        # If True is passed in set_message, it returns all informations
-        text = base_text.format(
-            name, artwork, emoji, national,
-            typee_str, typee, ab_str, ability,
-            evo_text, gender, base_friendship, ev_yield,
-            catch_rate, growth_rate, egg_groups, egg_cycles,
-            species, height, weight, name_origin,
-            other_lang, base_stats, legend
-        )
+    return {
+        'ability': ability,
+        'ab_str': ab_str,
+        'evo_text': evo_text,
+        'base_stats': base_stats,
+        'legend': legend,
+        'typee': typee,
+        'typee_str': typee_str,
+        'name': pkmn_name,
+        'emoji': emoji,
+        'national': national,
+        'artwork': artwork
+    }
+
+
+def get_advanced_data(pkmn):
+    base_friendship = pkmn['base_friendship']['value']
+    catch_rate = pkmn['catch_rate']['value']
+    growth_rate = pkmn['growth_rate']
+    egg_cycles = pkmn['egg_cycles']
+    species = pkmn['species']
+
+    gender = ''
+    if pkmn['gender']['genderless']:
+        gender += 'Genderless'
     else:
-        # Otherwise, it returns basic informations
-        text = base_text.format(
-            name, artwork, emoji, national,
-            typee_str, typee, ab_str, ability,
-            evo_text, base_stats, legend
-        )
-    return text
+        for i, j in list(pkmn['gender'].items()):
+            if j == '100%':
+                gender = i + ': ' + j + '\n'
+            elif type(j) == bool:
+                continue
+            else:
+                gender += i + ': ' + j + '\n'
+        gender = gender[:-1]
+
+    ev_yield = ''
+    for i in pkmn['ev_yield']:
+        ev_yield += ' / ' + pkmn['ev_yield'][i] + ' ' + i.title()
+    ev_yield = ev_yield[3:]
+
+    egg_groups = ''
+    for i in pkmn['egg_groups']:
+        egg_groups += ' / ' + i
+    egg_groups = egg_groups[3:]
+
+    other_lang = ''
+    for i, j in pkmn['other_lang'].items():
+        other_lang += '\n' + i.title() + ': ' + j
+    other_lang = other_lang[1:]
+
+    name_origin = ''
+    for i, j in pkmn['name_origin'].items():
+        name_origin += ', ' + i + ' (' + j + ')'
+    name_origin = name_origin[2:]
+
+    tmp = pkmn['height']
+    height = tmp['si'] + ' (' + tmp['usc'] + ')'
+    tmp = pkmn['weight']
+    weight = tmp['si'] + ' (' + tmp['usc'] + ')'
+
+    return {
+        'base_friendship': base_friendship,
+        'catch_rate': catch_rate,
+        'growth_rate': growth_rate,
+        'egg_cycles': egg_cycles,
+        'species': species,
+        'gender': gender,
+        'ev_yield': ev_yield,
+        'egg_group': egg_groups,
+        'other_lang': other_lang,
+        'name_origin': name_origin,
+        'height': height,
+        'weight': weight
+    }
+
+
+def set_message(pkmn, reduced=None, *args):
+    if reduced:
+        text = texts['reduced_text']
+        base_data = get_base_data(pkmn, args)
+        return text.format(**base_data)
+    else:
+        text = texts['expanded_text']
+        base_data = get_base_data(pkmn, args)
+        advanced_data = get_advanced_data(pkmn)
+        return text.format(**base_data, **advanced_data)
 
 
 def set_moveset(pkmn, form, page):
-    """Set moveset message
-    with page it split moveset in multiple pages of 10 moves each
-    """
-
-    # Get the range
     maxx = page * 10
     minn = maxx - 9
     index = 0
 
-    text = t['legend'] + '\n\n'
-    base_text = '<a href="{}">{}</a> <b>{}</b> ({})\n  \
-        <i>{}, {}</i>\n'
+    text = texts['legend'] + '\n\n'
+    base_text = texts['moveset']
 
     move_list = [move for move in data[pkmn][form]['moveset']]
     info_list = list(data[pkmn][form]['moveset'].values())
@@ -363,48 +352,42 @@ def set_moveset(pkmn, form, page):
                 method = info['method']
             text += base_text.format(
                 data[pkmn][form]['artwork'],
-                t['emoji_dict'][info['type']],
+                texts['emoji_dict'][info['type']],
                 info['name'],
                 info['type'],
                 info['cat'],
                 method
             )
 
-    # Number of pages. 10 moves for each page
-    # So if we have 68 moves, we need 7 pages
-    pages = int(index / 10) + 1
-
+    pages = int(index // 10)
+    pages += 1 if pages % 10 != 0 else 0
     markup = set_page_buttons(page, pages, pkmn, form)
-
     return {'text': text, 'markup': markup}
 
 
+def find_game_name(game):
+    if game == 'firered':
+        game = 'Fire Red'
+    elif game == 'leafgreen':
+        game = 'Leaf Green'
+    elif game == 'heartgold':
+        game = 'Heart Gold'
+    elif game == 'soulsilver':
+        game = 'Soul Silver'
+    elif game == 'omegaruby':
+        game = 'Omega Ruby'
+    elif game == 'alphasapphire':
+        game = 'Alpha Sapphire'
+    elif game == 'letsgopikachu':
+        game = 'Let\'s Go, Pikachu!'
+    elif game == 'letsgoeevee':
+        game = 'Let\'s Go, Eevee!'
+    else:
+        game = game.title()
+    return game
+
+
 def get_locations(data, pkmn):
-    """Get Pokémon location in every game of the core series"""
-
-    def find_game_name(game):
-        """Convert JSON format into real name"""
-
-        if game == 'firered':
-            game = 'Fire Red'
-        elif game == 'leafgreen':
-            game = 'Leaf Green'
-        elif game == 'heartgold':
-            game = 'Heart Gold'
-        elif game == 'soulsilver':
-            game = 'Soul Silver'
-        elif game == 'omegaruby':
-            game = 'Omega Ruby'
-        elif game == 'alphasapphire':
-            game = 'Alpha Sapphire'
-        elif game == 'letsgopikachu':
-            game = 'Let\'s Go, Pikachu!'
-        elif game == 'letsgoeevee':
-            game = 'Let\'s Go, Eevee!'
-        else:
-            game = game.title()
-        return game
-
     text = ''
     form = list(data[pkmn].keys())[0]
     loc_dict = data[pkmn][form]['location']
@@ -430,11 +413,6 @@ def get_locations(data, pkmn):
 
 
 def get_usage_vgc(page, *args):
-    """Get usage of Pokémon in VGC20.
-    It does web scraping in the official Smogon web site with
-    Pokémon Showdown usage (https://www.smogon.com/stats/)
-    """
-
     if not args:
         # Get usage history soup
         headers = {'User-Agent': 'Mozilla/5.0'}
@@ -444,10 +422,8 @@ def get_usage_vgc(page, *args):
         html = response.read()
         soup = BeautifulSoup(html, 'html.parser')
 
-        # From the previous soup, find the last uploaded data
-        # Then, go in VGC20 section
         link = soup.find_all('a')[-1].attrs['href']
-        # 1860 in the link below is the rank
+        # 1760 in the link below is the rank
         # There are other 2 rank, but since the bot look for data every time
         # it would be very slow. So it take usage of higher rank
         url = 'https://www.smogon.com/stats/{}gen8vgc2020-1760.txt'.format(link)
@@ -457,7 +433,6 @@ def get_usage_vgc(page, *args):
         soup = BeautifulSoup(html, 'html.parser')
 
         # Data in the site is organized in a table
-        # So RegEx are used
         txt = soup.text
         pkmn_list = re.split('\|......\|', txt)
         del pkmn_list[0]
@@ -492,7 +467,6 @@ def get_usage_vgc(page, *args):
 
 
 def set_page_buttons(page, pages, *args):
-    markup = types.InlineKeyboardMarkup(5)
     try:
         pkmn = args[0]
         form = args[1]
@@ -514,57 +488,50 @@ def set_page_buttons(page, pages, *args):
         ]
 
     # Initialize buttons
-    begin = types.InlineKeyboardButton(
+    markup_list = []
+    begin = InlineKeyboardButton(
         text='<<1',
         callback_data=callback_data_list[0]
     )
-    pre = types.InlineKeyboardButton(
+    pre = InlineKeyboardButton(
         text=str(page-1),
         callback_data=callback_data_list[1]
     )
-    page_button = types.InlineKeyboardButton(
+    page_button = InlineKeyboardButton(
         text='•'+str(page)+'•',
         callback_data=callback_data_list[2]
     )
-    suc = types.InlineKeyboardButton(
+    suc = InlineKeyboardButton(
         text=str(page+1),
         callback_data=callback_data_list[3]
     )
-    end = types.InlineKeyboardButton(
+    end = InlineKeyboardButton(
         text=str(pages)+'>>',
         callback_data=callback_data_list[4]
     )
 
     # Create a page index that display, when possible,
     # First page, previous page, current page, next page, last page
-    if page == pages:
-        if page > 2:
-            markup.add(begin, pre, page_button)
-        elif page > 1:
-            markup.add(pre, page_button)
-        else:
-            markup.add(page_button)
-    elif page > 2:
-        if page < pages-1:
-            markup.add(begin, pre, page_button, suc, end)
-        elif page < pages:
-            markup.add(begin, pre, page_button, suc)
-    elif page > 1:
-        if page < pages-1:
-            markup.add(pre, page_button, suc, end)
-        elif page < pages:
-            markup.add(pre, page_button, suc)
-    else:
-        if page < pages-1:
-            markup.add(page_button, suc, end)
-        else:
-            markup.add(page_button, suc)
+    markup_list.append([])
+    if 1 < page-1:
+        markup_list[-1].append(begin)
+    if page != 1:
+        markup_list[-1].append(pre)
+    if markup_list[-1] or page != pages:
+        markup_list[-1].append(page_button)
+    if page != pages:
+        markup_list[-1].append(suc)
+    if pages > page+1:
+        markup_list[-1].append(end)
+    if not markup_list[-1]:
+        markup_list.remove(markup_list[-1])
 
     if len(callback_data_list) == 6:
-        back = types.InlineKeyboardButton(
-            text='🔙 Back to basic infos',
-            callback_data=callback_data_list[5]
-        )
-        markup.add(back)
+        markup_list.append([
+            InlineKeyboardButton(
+                text='🔙 Back to basic infos',
+                callback_data=callback_data_list[5]
+            )
+        ])
 
-    return markup
+    return InlineKeyboardMarkup(markup_list)

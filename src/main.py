@@ -1,303 +1,208 @@
 import json
 import re
 
-import telebot
-from telebot import types
+from pyrogram import Client, Filters
+from pyrogram import InlineKeyboardMarkup, InlineKeyboardButton
 
-from functions import *
-
-
-token = open('token.txt', 'r').read()
-bot = telebot.TeleBot('979765263:AAFTh7HBYceJf7AsewBjZpfevki_qzpSaY4')
-with open('texts.json', 'r') as f:
-    t = json.load(f)
-with open('pkmn.json', 'r') as f:
-    data = json.load(f)
+import functions as func
 
 
-# It's updated when /usage command is used
-# When inline buttons are used, get usage from this list
+token = open('src/token.txt', 'r').read()
+app = Client(
+    session_name='Rotomgram'
+)
+
+texts = json.load(open('src/texts.json', 'r'))
+data =  json.load(open('src/pkmn.json', 'r'))
+
 usage_dict = {'vgc': None}
 
 
-@bot.message_handler(commands=['start'])
-def start(message):
-    """Simply the start command"""
+# ===== Home =====
+@app.on_message(Filters.command('start'))
+def start(app, message):
+    app.send_message(
+        chat_id=message.chat.id,
+        text=texts['start_message'],
+        parse_mode='HTML'
+    )
 
-    cid = message.chat.id
-    text = t['start_message']
-    bot.send_message(cid, text, parse_mode='HTML')
 
-
-@bot.callback_query_handler(lambda call: 'basic_infos' in call.data)
-@bot.message_handler(commands=['data'])
-def pkmn_search(message):
-    """It shows basic information about the Pokémon"""
-
-    markup = types.InlineKeyboardMarkup(2)
+# ===== Basic Infos =====
+@app.on_callback_query(Filters.create(lambda _, query: 'basic_infos' in query.data))
+@app.on_message(Filters.command('data'))
+def pkmn_search(app, message):
     try:
-        # Run this if a button is pressed
-        cid = message.message.chat.id
-        mid = message.message.message_id
+        if message.text == '/data':
+            app.send_message(message.chat.id, texts['error1'], parse_mode='HTML')
+            return None
+        pkmn = func.find_name(message.text)
+        result = func.check_name(pkmn, data)
+
+        if type(result) == str:
+            app.send_message(message.chat.id, result)
+            return None
+        elif type(result) == list:
+            best_matches(app, message, result)
+            return None
+        else:
+            pkmn = result['pkmn']
+            form = result['form']
+    except AttributeError:
         pkmn = re.split('/', message.data)[1]
         form = re.split('/', message.data)[2]
 
-        if pkmn in form:
-            # For readibility
-            # e.g.: Mega Charizard X has Charizard in the name
-            #       so it's understandable
-            text = set_message(data[pkmn][form])
-        else:
-            # e.g.: Low Key Form isn't clear (It's a Toxtricity form)
-            #       in this case, it returns "Toxtricity (Low key Form)"
-            base_form = re.sub('_', ' ', pkmn.title())
-            name = base_form + ' (' + data[pkmn][form]['name'] + ')'
-            text = set_message(data[pkmn][form], name)
 
-        expand = types.InlineKeyboardButton(
+    if pkmn in form:
+        text = func.set_message(data[pkmn][form], reduced=True)
+    else:
+        base_form = re.sub('_', ' ', pkmn.title())
+        name = base_form + ' (' + data[pkmn][form]['name'] + ')'
+        text = func.set_message(data[pkmn][form], name, reduced=True)
+
+    markup_list = [[
+        InlineKeyboardButton(
             text='➕ Expand',
             callback_data='all_infos/'+pkmn+'/'+form
         )
-        moveset = types.InlineKeyboardButton(
+    ],
+    [
+        InlineKeyboardButton(
             text='⚔️ Moveset',
             callback_data='moveset/'+pkmn+'/'+form
-        )
-        locations = types.InlineKeyboardButton(
+        ),
+        InlineKeyboardButton(
             text='🏠 Locations',
             callback_data='locations/'+pkmn+'/'+form
         )
-        markup.add(expand)
-        markup.add(moveset, locations)
-
-        for alt_form in data[pkmn]:
-            if alt_form != form:
-                form_button = types.InlineKeyboardButton(
+    ]]
+    for alt_form in data[pkmn]:
+        if alt_form != form:
+            markup_list.append([
+                InlineKeyboardButton(
                     text=data[pkmn][alt_form]['name'],
                     callback_data='basic_infos/'+pkmn+'/'+alt_form
                 )
-                markup.add(form_button)
+            ])
+    markup = InlineKeyboardMarkup(markup_list)
 
-    except AttributeError:
-        # Run this if /data is used
-        pkmn = find_name(message.text)
-        cid = message.chat.id
-        if message.text == '/data':
-            text = t['error1']
-        else:
-            result = check_name(pkmn, data)
-            if type(result) == str:
-                # Invalid input: 25 characters limit exceeded
-                text = result
+    func.bot_action(app, message, text, markup)
 
-            elif 'pkmn' in result:
-                # Valid input: return Pokémon infocard
-                pkmn = result['pkmn']
-                form = result['form']
-                if pkmn in form:
-                    # For readibility
-                    # e.g.: Mega Charizard X has Charizard in the name
-                    #       so it's understandable
-                    text = set_message(data[pkmn][form])
-                else:
-                    # e.g.: Low Key Form isn't clear (It's a Toxtricity form)
-                    #       in this case, it returns "Toxtricity (Low key Form)"
-                    base_form = re.sub('_', ' ', pkmn.title())
-                    name = base_form + ' (' + data[pkmn][form]['name'] + ')'
-                    text = set_message(data[pkmn][form], name)
 
-                expand = types.InlineKeyboardButton(
-                    text='➕ Expand',
-                    callback_data='all_infos/'+pkmn+'/'+form
-                )
-                moveset = types.InlineKeyboardButton(
-                    text='⚔️ Moveset',
-                    callback_data='moveset/'+pkmn+'/'+form
-                )
-                locations = types.InlineKeyboardButton(
-                    text='🏠 Locations',
-                    callback_data='locations/'+pkmn+'/'+form
-                )
-                markup.add(expand)
-                markup.add(moveset, locations)
-                # If Pokémon has alternative forms, it creates its button
-                for alt_form in data[pkmn]:
-                    if alt_form != form:
-                        form_button = types.InlineKeyboardButton(
-                            text=data[pkmn][alt_form]['name'],
-                            callback_data='basic_infos/'+pkmn+'/'+alt_form
-                        )
-                        markup.add(form_button)
-            else:
-                # Invalid input: it returns 3 best matches
-                text = t['results']
-                index = 1
-                for pkmn, form, percent in result:
-                    form = data[pkmn][form]['name']
-                    name = form_name(pkmn.title(), form)
-                    if index == 1:
-                        n = '1️⃣'
-                    elif index == 2:
-                        n = '2️⃣'
-                    else:
-                        n = '3️⃣'
-                    text += '\n' + n + ' <b>' + name + '</b> (<i>' + percent + '</i>)'
-                    if index == 1:
-                        text += ' [<b>⭐️ Top result</b>]'
-                    index += 1
-
-    try:
-        # Buttons
-        
-        # It interrupt button loading circle
-        bot.answer_callback_query(message.id)
-        bot.edit_message_text(
-            text=text,
-            chat_id=cid,
-            message_id=mid,
-            parse_mode='HTML',
-            reply_markup=markup
+def best_matches(app, message, result):
+    text = texts['results']
+    emoji_list = ['1️⃣', '2️⃣', '3️⃣']
+    index = 0
+    for dictt in result:
+        pkmn = dictt['pkmn']
+        form = dictt['form']
+        percentage = dictt['percentage']
+        form_name = data[pkmn][form]['name']
+        name = func.form_name(pkmn.title(), form_name)
+        text += '\n{} <b>{}</b> (<i>{}</i>)'.format(
+            emoji_list[index],
+            name,
+            percentage
         )
-    except AttributeError:
-        # Command
-        bot.send_message(
-            chat_id=cid,
-            text=text,
-            parse_mode='HTML',
-            reply_markup=markup
-        )
+        if index == 0:
+            text += ' [<b>⭐️ Top result</b>]'
+        index += 1
+    app.send_message(message.chat.id, text, parse_mode='HTML')
 
 
-@bot.callback_query_handler(lambda call: 'all_infos' in call.data)
-def all_infos(call):
-    """Show all information about the Pokémon by pressing "Expand" button"""
-
-    cid = call.message.chat.id
-    mid = call.message.message_id
+@app.on_callback_query(Filters.create(lambda _, query: 'all_infos' in query.data))
+def all_infos(app, call):
     pkmn = re.split('/', call.data)[1]
     form = re.split('/', call.data)[2]
     
     if pkmn in form:
-        # For readibility
-        # e.g.: Mega Charizard X has Charizard in the name
-        #       so it's understandable
-        text = set_message(data[pkmn][form], True)
+        text = func.set_message(data[pkmn][form], reduced=False)
     else:
-        # e.g.: Low Key Form isn't clear (It's a Toxtricity form)
-        #       in this case, it returns "Toxtricity (Low key Form)"
         base_form = re.sub('_', ' ', pkmn.title())
         name = base_form + ' (' + data[pkmn][form]['name'] + ')'
-        text = set_message(data[pkmn][form], True, name)
+        text = func.set_message(data[pkmn][form], name, reduced=False)
 
-    markup = types.InlineKeyboardMarkup(2)
-    reduce = types.InlineKeyboardButton(
-        text='➖ Reduce',
-        callback_data='basic_infos/'+pkmn+'/'+form
-    )
-    moveset = types.InlineKeyboardButton(
-        text='⚔️ Moveset',
-        callback_data='moveset/'+pkmn+'/'+form
-    )
-    locations = types.InlineKeyboardButton(
-        text='🏠 Locations',
-        callback_data='locations/'+pkmn+'/'+form
-    )
-    markup.add(reduce)
-    markup.add(moveset, locations)
+    markup_list = [[
+        InlineKeyboardButton(
+            text='➖ Reduce',
+            callback_data='basic_infos/'+pkmn+'/'+form
+        )
+    ],
+    [
+        InlineKeyboardButton(
+            text='⚔️ Moveset',
+            callback_data='moveset/'+pkmn+'/'+form
+        ),
+        InlineKeyboardButton(
+            text='🏠 Locations',
+            callback_data='locations/'+pkmn+'/'+form
+        )
+    ]]
+    for alt_form in data[pkmn]:
+        if alt_form != form:
+            markup_list.append([
+                InlineKeyboardButton(
+                    text=data[pkmn][alt_form]['name'],
+                    callback_data='basic_infos/'+pkmn+'/'+alt_form
+                )
+            ])
+    markup = InlineKeyboardMarkup(markup_list)
 
-    bot.answer_callback_query(call.id) # It interrupt button loading circle
-    bot.edit_message_text(
-        text=text,
-        chat_id=cid,
-        message_id=mid,
-        parse_mode='HTML',
-        reply_markup=markup
-    )
+    func.bot_action(app, call, text, markup)
 
 
-@bot.callback_query_handler(lambda call: 'moveset' in call.data)
-def moveset(call):
-    """Show Pokémon moveset"""
-
-    cid = call.message.chat.id
-    mid = call.message.message_id
+@app.on_callback_query(Filters.create(lambda _, query: 'moveset' in query.data))
+def moveset(app, call):
     pkmn = re.split('/', call.data)[1]
     form = re.split('/', call.data)[2]
     if len(re.split('/', call.data)) == 4:
-        page = re.split('/', call.data)[3]
+        page = int(re.split('/', call.data)[3])
     else:
         page = 1
-    dictt = set_moveset(pkmn, form, int(page))
+    dictt = func.set_moveset(pkmn, form, page)
 
-    bot.answer_callback_query(call.id) # It interrupt button loading circle
-    bot.edit_message_text(
-        text=dictt['text'],
-        chat_id=cid,
-        message_id=mid,
-        parse_mode='HTML',
-        reply_markup=dictt['markup']
-    )
+    func.bot_action(app, call, dictt['text'], dictt['markup'])
 
 
-@bot.callback_query_handler(lambda call: 'locations' in call.data)
-def locations(call):
-    """Show Pokémon location in each core game"""
-
-    cid = call.message.chat.id
-    mid = call.message.message_id
+@app.on_callback_query(Filters.create(lambda _, query: 'locations' in query.data))
+def locations(app, call):
     pkmn = re.split('/', call.data)[1]
     form = re.split('/', call.data)[2]
-    text = get_locations(data, pkmn)
-    markup = types.InlineKeyboardMarkup(1)
-    moveset = types.InlineKeyboardButton(
-        text='⚔️ Moveset',
-        callback_data='moveset/'+pkmn+'/'+form
-    )
-    info = types.InlineKeyboardButton(
-        text='🔙 Back to basic infos',
-        callback_data='basic_infos/'+pkmn+'/'+form
-    )
-    markup.add(moveset, info)
 
-    bot.answer_callback_query(call.id) # It interrupt button loading circle
-    bot.edit_message_text(
-        text=text,
-        chat_id=cid,
-        message_id=mid,
-        parse_mode='HTML',
-        reply_markup=markup
-    )
+    text = func.get_locations(data, pkmn)
 
-
-@bot.callback_query_handler(lambda call: 'usage' in call.data)
-@bot.message_handler(commands=['usage'])
-def usage(message):
-    """Show usage leaderboard"""
-
-    try:
-        # Buttons
-        cid = message.message.chat.id
-        mid = message.message.message_id
-        page = re.split('/', message.data)[1]
-        dictt = get_usage_vgc(int(page), usage_dict['vgc'])
-
-    except AttributeError:
-        # Command
-        cid = message.chat.id
-        page = 1
-        msg = bot.send_message(
-            chat_id=cid,
-            text='<i>Connecting to Pokémon Showdown database...</i>',
-            parse_mode='HTML'
+    markup = InlineKeyboardMarkup([[
+        InlineKeyboardButton(
+            text='⚔️ Moveset',
+            callback_data='moveset/'+pkmn+'/'+form
         )
-        mid = msg.message_id
-        dictt = get_usage_vgc(int(page))
+    ],
+    [
+        InlineKeyboardButton(
+            text='🔙 Back to basic infos',
+            callback_data='basic_infos/'+pkmn+'/'+form
+        )
+    ]])
+
+    func.bot_action(app, call, text, markup)
+
+
+@app.on_callback_query(Filters.create(lambda _, query: 'usage' in query.data))
+@app.on_message(Filters.command('usage'))
+def usage(app, message):
+    try:
+        page = int(re.split('/', message.data)[1])
+        dictt = func.get_usage_vgc(int(page), usage_dict['vgc'])
+    except AttributeError:
+        page = 1
+        text = '<i>Connecting to Pokémon Showdown database...</i>'
+        message = app.send_message(message.chat.id, text, parse_mode='HTML')
+        dictt = func.get_usage_vgc(int(page))
         usage_dict['vgc'] = dictt['vgc_usage']
 
     leaderboard = dictt['leaderboard']
-    markup = dictt['markup']
+    base_text = texts['usage']
     text = ''
-    base_text = '{}. <b>{}</b> (<i>{}</i>)\n'
-
     for i in range(15):
         pkmn = leaderboard[i]
         text += base_text.format(
@@ -305,41 +210,22 @@ def usage(message):
             pkmn['pokemon'],
             pkmn['usage'],
         )
+    markup = dictt['markup']
 
-    try:
-        # It interrupt button loading circle
-        bot.answer_callback_query(message.id)
-    except AttributeError:
-        pass
-    bot.edit_message_text(
-        text=text,
-        chat_id=cid,
-        message_id=mid,
-        parse_mode='HTML',
-        reply_markup=markup
+    func.bot_action(app, message, text, markup)
+
+
+@app.on_message(Filters.command('about'))
+def about(app, message):
+    text = texts['about']
+    markup = InlineKeyboardMarkup(
+        InlineKeyboardButton(
+            text='Github',
+            url='https://github.com/alessiocelentano/rotomgram'
+        )
     )
 
-
-@bot.message_handler(commands=['about'])
-def about(message):
-    """About the Pokémon"""
-
-    cid = message.chat.id
-    text = t['about']
-    markup = types.InlineKeyboardMarkup()
-    github = types.InlineKeyboardButton(
-        text='Github',
-        url='https://github.com/alessiocelentano/Rotomgram'
-    )
-    markup.add(github)
-
-    bot.send_message(
-        chat_id=cid,
-        text=text,
-        disable_web_page_preview=True,
-        reply_markup=markup,
-        parse_mode='HTML'
-    )
+    func.bot_action(app, message, text, markup)
 
 
-bot.polling(none_stop=True)
+app.run()
