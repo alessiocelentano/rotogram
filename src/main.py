@@ -16,6 +16,7 @@ texts = json.load(open('src/texts.json', 'r'))
 data =  json.load(open('src/pkmn.json', 'r'))
 
 usage_dict = {'vgc': None}
+raid_dict = {}
 
 
 # ===== Home =====
