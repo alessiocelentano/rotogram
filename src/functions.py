@@ -75,23 +75,21 @@ def best_matches(pkmn, data):
             # Typing errors
             for letter, letter2 in zip(name, pkmn):
                 if letter == letter2:
-                    score1 += 50/len(name)
-            if len(pkmn)-1 <= len(name) <= len(pkmn)+1:
-                score1 *= 2
+                    score1 += 100/len(name)
 
             # SCORE 2
-            # Consecutive characters
-            comb_list = []
-            for i in range(len(pkmn)):
-                for j in range(len(pkmn), i+2, -1):
-                    comb_list.append(pkmn[i:j])
-            comb_list.sort(key=len, reverse=True)
-
-            for comb in comb_list:
-                if comb in name:                
-                    score2 += (len(comb)/len(name))*100
-                    name = name.replace(comb, '')
-
+            # Additional characters
+            input_index = 0
+            data_index = 0
+            while input_index < len(pkmn):
+                if pkmn[input_index] == name[data_index]:
+                    if len(pkmn) > len(name):
+                        score2 += 100/len(pkmn)
+                    else:
+                        score2 += 100/len(name)
+                    data_index += 1
+                input_index += 1
+             
             if score1 > score2:
                 score_dict[key+'/'+form] = score1
             else:
