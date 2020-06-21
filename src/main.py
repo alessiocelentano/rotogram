@@ -5,9 +5,9 @@ from pyrogram import Client, Filters
 from pyrogram import InlineKeyboardMarkup, InlineKeyboardButton
 
 import functions as func
+import raid_dynamax as raid
 
 
-token = open('src/token.txt', 'r').read()
 app = Client(
     session_name='Rotomgram'
 )
@@ -29,7 +29,7 @@ def start(app, message):
     )
 
 
-# ===== Basic Infos =====
+# ===== Data command =====
 @app.on_callback_query(Filters.create(lambda _, query: 'basic_infos' in query.data))
 @app.on_message(Filters.command('data'))
 def pkmn_search(app, message):
@@ -188,6 +188,7 @@ def locations(app, call):
     func.bot_action(app, call, text, markup)
 
 
+# ===== Usage command =====
 @app.on_callback_query(Filters.create(lambda _, query: 'usage' in query.data))
 @app.on_message(Filters.command('usage'))
 def usage(app, message):
@@ -216,6 +217,7 @@ def usage(app, message):
     func.bot_action(app, message, text, markup)
 
 
+# ===== About command =====
 @app.on_message(Filters.command('about'))
 def about(app, message):
     text = texts['about']
@@ -227,6 +229,44 @@ def about(app, message):
     )
 
     func.bot_action(app, message, text, markup)
+
+
+# ===== Raid commands =====
+@app.on_message(Filters.command('addcode'))
+def call_add_fc(app, message):
+    raid.add_fc(app, message, texts)
+
+@app.on_message(Filters.command('mycode'))
+def call_show_my_fc(app, message):
+    raid.show_my_fc(app, message, texts)
+
+@app.on_message(Filters.command('newraid'))
+def call_new_raid(app, message):
+    raid.new_raid(app, message, texts)
+
+@app.on_callback_query(Filters.create(lambda _, query: 'stars' in query.data))
+def call_stars(app, message):
+    raid.stars(app, message, texts)
+
+@app.on_callback_query(Filters.create(lambda _, query: 'join' in query.data))
+def call_join(app, message):
+    raid.join(app, message, texts)
+
+@app.on_callback_query(Filters.create(lambda _, query: 'done' in query.data))
+def call_done(app, message):
+    raid.done(app, message, texts)
+
+@app.on_callback_query(Filters.create(lambda _, query: 'yes' in query.data))
+def call_confirm(app, message):
+    raid.confirm(app, message, texts)
+
+@app.on_callback_query(Filters.create(lambda _, query: 'no' in query.data))
+def call_back(app, message):
+    raid.back(app, message, texts)
+
+@app.on_callback_query(Filters.create(lambda _, query: 'pin' in query.data))
+def call_pin(app, message):
+    raid.pin(app, message, texts)
 
 
 app.run()
