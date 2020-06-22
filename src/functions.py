@@ -81,7 +81,7 @@ def best_matches(pkmn, data):
             # Additional characters
             input_index = 0
             data_index = 0
-            while input_index < len(pkmn):
+            while input_index < len(pkmn) and data_index < len(name):
                 if pkmn[input_index] == name[data_index]:
                     if len(pkmn) > len(name):
                         score2 += 100/len(pkmn)
