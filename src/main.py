@@ -20,7 +20,7 @@ raid_dict = {}
 
 
 # ===== Home =====
-@app.on_message(Filters.command('start'))
+@app.on_message(Filters.command(['start', 'start@RotomgramBot']))
 def start(app, message):
     app.send_message(
         chat_id=message.chat.id,
@@ -31,10 +31,10 @@ def start(app, message):
 
 # ===== Data command =====
 @app.on_callback_query(Filters.create(lambda _, query: 'basic_infos' in query.data))
-@app.on_message(Filters.command('data'))
+@app.on_message(Filters.command(['data', 'data@RotomgramBot']))
 def pkmn_search(app, message):
     try:
-        if message.text == '/data':
+        if message.text == '/data' or message.text == '/data@RotomgramBot':
             app.send_message(message.chat.id, texts['error1'], parse_mode='HTML')
             return None
         pkmn = func.find_name(message.text)
@@ -190,7 +190,7 @@ def locations(app, call):
 
 # ===== Usage command =====
 @app.on_callback_query(Filters.create(lambda _, query: 'usage' in query.data))
-@app.on_message(Filters.command('usage'))
+@app.on_message(Filters.command(['usage', 'usage@RotomgramBot']))
 def usage(app, message):
     try:
         page = int(re.split('/', message.data)[1])
@@ -218,29 +218,33 @@ def usage(app, message):
 
 
 # ===== About command =====
-@app.on_message(Filters.command('about'))
+@app.on_message(Filters.command(['about', 'about@RotomgramBot']))
 def about(app, message):
     text = texts['about']
-    markup = InlineKeyboardMarkup(
+    markup = InlineKeyboardMarkup([[
         InlineKeyboardButton(
             text='Github',
             url='https://github.com/alessiocelentano/rotomgram'
         )
-    )
+    ]])
 
-    func.bot_action(app, message, text, markup)
+    app.send_message(
+        chat_id=message.chat.id,
+        text=text, 
+        reply_markup=markup
+    )
 
 
 # ===== Raid commands =====
-@app.on_message(Filters.command('addcode'))
+@app.on_message(Filters.command(['addcode', 'addcode@RotomgramBot']))
 def call_add_fc(app, message):
     raid.add_fc(app, message, texts)
 
-@app.on_message(Filters.command('mycode'))
+@app.on_message(Filters.command(['mycode', 'mycode@RotomgramBot']))
 def call_show_my_fc(app, message):
     raid.show_my_fc(app, message, texts)
 
-@app.on_message(Filters.command('newraid'))
+@app.on_message(Filters.command(['newraid', 'newraid@RotomgramBot']))
 def call_new_raid(app, message):
     raid.new_raid(app, message, texts)
 
