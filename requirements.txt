@@ -1,1 +1,1 @@
-pyTelegramBotAPI==3.6.6
+Pyrogram==0.17.1
