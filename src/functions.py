@@ -229,8 +229,7 @@ def get_base_data(pkmn, pkmn_name):
         typee_str = 'Types'
 
     if pkmn_name:
-        if type(pkmn_name) != str:
-            pkmn_name = pkmn['name']
+        pkmn_name = pkmn_name[0]
     else:
         pkmn_name = pkmn['name']
     emoji_dict = texts['emoji_dict']
@@ -315,7 +314,7 @@ def get_advanced_data(pkmn):
     }
 
 
-def set_message(pkmn, reduced=None, *args):
+def set_message(pkmn, *args, reduced=None):
     if reduced:
         text = texts['reduced_text']
         base_data = get_base_data(pkmn, args)
