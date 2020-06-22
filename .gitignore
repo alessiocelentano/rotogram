@@ -2,5 +2,6 @@ Procfile
 src/__pycache__/
 src/config.ini
 src/Rotomgram.session
+src/Rotomgram.session-journal
 src/Rotomgram_Beta.session
 src/friendcodes.json
