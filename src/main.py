@@ -9,7 +9,7 @@ import raid_dynamax as raid
 
 
 app = Client(
-    session_name='Rotomgram'
+    session_name='Rotomgram_Beta'
 )
 
 texts = json.load(open('src/texts.json', 'r'))
@@ -271,6 +271,19 @@ def call_back(app, message):
 @app.on_callback_query(Filters.create(lambda _, query: 'pin' in query.data))
 def call_pin(app, message):
     raid.pin(app, message, texts)
+
+
+# Presentation
+@app.on_message()
+def bot_added(app, message):
+    if message.new_chat_members:
+        for new_member in message.new_chat_members:
+            if new_member.id == 932107343:
+                text = texts['added']
+                app.send_message(
+                    chat_id=message.chat.id,
+                    text=text
+                )
 
 
 app.run()
