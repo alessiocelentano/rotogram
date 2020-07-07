@@ -1,25 +1,29 @@
-# Rotomgram
-Rotomgram is a Telegram Bot written in Python (pyTelegramBotAPI) that provides all informations about Pokémon. It's accessible through this link https://t.me/RotomgramBot or writing @RotomgramBot on Telegram search bar
+![Logo](assets/logo.png)
 
-![Logo](assets/rotomgramwhite18-9.png)
+## What is Rotomgram?
+Rotomgram is a Telegram Bot that provides all informations about Pokémon. It's accessible through this link https://t.me/RotomgramBot or writing @RotomgramBot on Telegram search bar
 
 ## How it works?
-The bot has one main command: /data. Using /data <PokémonName> Rotomgram sends in the chat these informations:
+The bot has 3 main commands:
+
+### /data
+/data is the main command of the bot acts as Pokedex on Telegram. Writing "/data PokemonName", it returns:
 * Main data (Name, Dex number, Type, Ability)
-* Base stats and rating using emoticons
-* Official artwork
 * Other informations about it (such as EV yield, catch rate, egg groups, etc) accessible through "Expand" inline button
+* Base stats
+* Official artwork
 * Moveset
 * Location
 * Minimum/Maximum statistics at level 100e
 * Evolutionary methods
 * Alternative forms informations
+* Infos about its alternative forms
 
-The other important command is /usage, that return Pokémon Showdown VGC leaderboard usage
+### /newraid
+This command provides a tool for manage Pokemon Sword & Shield Raid Dynamax. Using "/newraid PokemonName", you can search for players in a group. When the Raid it's ready, clicking on "Close" it generate a random password visible at only the participants of the Raid.
 
-Other commands (such as /ability <ability>, /move <move>, etc) send information about that specific thing and the Pokémon that can have/learn it (Work in progress)
-
-![Chat Screenshot](assets/Screenshot.png)
+### /usage
+Finally, this command is very easy. It simply returns VGC usage
 
 ## Credits
 APIs have not been used to build this bot. So, some thanks are due:
