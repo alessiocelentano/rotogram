@@ -45,5 +45,6 @@
 	"no_fc": "😮 Oh, it looks like you haven't registered your Friend Code. Use this syntax:\n/addcode <code>1234-5678-9012</code>",
 	"fc_list": "📄 <b>GROUP FC LIST</b>\n",
 	"not_admin": "You cannot use this command because you are not an admin",
-	"added": "⚡️ Yooo. Thanks for adding me, I'm Rotomgram. My trainer merged me with a Telegram Bot, so I can give you a lot of informations about the Pokemon world! These are my commands: \n \n/start: Command list \n/data PokemonName: Get information about that Pokémon \n/usage: Get current VGC usage on Pokémon Showdown \n/addcode YourFC: Add your Friend Code in my database \n/mycode: Show your FC \n/newraid PokemonName: Find partners for a new Raid \n/about: Informations about me 🤩"
+	"added": "⚡️ Yooo. Thanks for adding me, I'm Rotomgram. My trainer merged me with a Telegram Bot, so I can give you a lot of informations about the Pokemon world! These are my commands: \n \n/start: Command list \n/data PokemonName: Get information about that Pokémon \n/usage: Get current VGC usage on Pokémon Showdown \n/addcode YourFC: Add your Friend Code in my database \n/mycode: Show your FC \n/newraid PokemonName: Find partners for a new Raid \n/about: Informations about me 🤩",
+	"stats": "👤 <b>Users</b>: {}\n{}\n👥<b>Groups</b>: {}\n{}"
 }

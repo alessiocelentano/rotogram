@@ -13,10 +13,40 @@ app = Client(
 )
 
 texts = json.load(open('src/texts.json', 'r'))
-data =  json.load(open('src/pkmn.json', 'r'))
+data = json.load(open('src/pkmn.json', 'r'))
+stats = json.load(open('src/stats.json', 'r'))
 
 usage_dict = {'vgc': None}
 raid_dict = {}
+
+
+# ===== Bot stats =====
+@app.on_message(Filters.text)
+def get_bot_data(app, message):
+    cid = str(message.chat.id)
+    if message.chat.type == 'private':
+        stats['users'][cid] = {}
+        name = message.chat.first_name
+        try:
+            name = message.chat.first_name + ' ' + message.chat.last_name
+        except TypeError:
+            name = message.chat.first_name
+        stats['users'][cid]['name'] = name
+        try:
+            stats['users'][cid]['username'] = message.chat.username
+        except AttributeError:
+            stats['users'][cid]['username'] = None
+
+    elif message.chat.type in ['group', 'supergroup']:
+        stats['groups'][cid] = {}
+        stats['groups'][cid]['title'] = message.chat.title
+        try:
+            stats['groups'][cid]['username'] = message.chat.username
+        except AttributeError:
+            stats['groups'][cid]['username'] = None
+
+    json.dump(stats, open('src/stats.json', 'w'), indent=4)
+    message.continue_propagation()
 
 
 # ===== Home =====
@@ -284,6 +314,36 @@ def bot_added(app, message):
                     chat_id=message.chat.id,
                     text=text
                 )
+    else:
+        message.continue_propagation()
+
+
+@app.on_message(Filters.command(['stats', 'stats@RotomgramBot']))
+def get_stats(app, message):
+    if message.from_user.id == 312012637:
+        users_text = ''
+        for user in stats['users']:
+            users_text += stats['users'][user]['name']
+            if 'username' in stats['users'][user]:
+                users_text += ' (@' + stats['users'][user]['username'] + ')'
+            users_text += '\n'
+
+        groups_text = ''
+        for group in stats['groups']:
+            groups_text += stats['groups'][group]['title']
+            if 'username' in stats['groups'][group]:
+                groups_text += ' (@' + stats['groups'][group]['username'] + ')'
+            groups_text += '\n'
+
+        text = texts['stats'].format(
+            len(stats['users']), users_text,
+            len(stats['groups']), groups_text
+        )
+        app.send_message(
+            chat_id=message.chat.id,
+            text=text
+        )
+
 
 
 app.run()
