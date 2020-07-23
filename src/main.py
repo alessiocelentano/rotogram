@@ -324,14 +324,14 @@ def get_stats(app, message):
         users_text = ''
         for user in stats['users']:
             users_text += stats['users'][user]['name']
-            if 'username' in stats['users'][user]:
+            if stats['users'][user]['username']:
                 users_text += ' (@' + stats['users'][user]['username'] + ')'
             users_text += '\n'
 
         groups_text = ''
         for group in stats['groups']:
             groups_text += stats['groups'][group]['title']
-            if 'username' in stats['groups'][group]:
+            if stats['groups'][group]['username']:
                 groups_text += ' (@' + stats['groups'][group]['username'] + ')'
             groups_text += '\n'
 
@@ -343,7 +343,6 @@ def get_stats(app, message):
             chat_id=message.chat.id,
             text=text
         )
-
 
 
 app.run()
