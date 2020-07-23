@@ -35,7 +35,7 @@ def get_bot_data(app, message):
         try:
             stats['users'][cid]['username'] = message.chat.username
         except AttributeError:
-            stats['users'][cid]['username'] = None
+            pass
 
     elif message.chat.type in ['group', 'supergroup']:
         stats['groups'][cid] = {}
@@ -43,7 +43,7 @@ def get_bot_data(app, message):
         try:
             stats['groups'][cid]['username'] = message.chat.username
         except AttributeError:
-            stats['groups'][cid]['username'] = None
+            pass
 
     json.dump(stats, open('src/stats.json', 'w'), indent=4)
     message.continue_propagation()
@@ -343,7 +343,6 @@ def get_stats(app, message):
             chat_id=message.chat.id,
             text=text
         )
-
 
 
 app.run()
