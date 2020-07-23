@@ -40,7 +40,7 @@
 	"not_creator": "Only the creator of the Raid can use this button",
 	"raid_closed": "\n\n<b>Closed Raid</b>",
 	"not_player": "Only raid participants can see the password",
-	"not_available": "⚡️ This is a Raid command! Solrock's Cosmic Power won't let you to capture that Gigamax, so search partners in Telegram groups. Add this bot in a group and type /newraid <code>PokemonName</code>. Don't you have a group? Join @MissFlinch",
+	"not_available": "⚡️ This is a Raid command! Solrock's Cosmic Power won't let you to capture that Gigamax, so search partners in Telegram groups. Add this bot in a group and type /newraid <code>PokemonName</code>",
 	"no_fcs": "😮 No Friend Codes? FCs are used next to your name in the /newraid command. It can be useful 😉",
 	"no_fc": "😮 Oh, it looks like you haven't registered your Friend Code. Use this syntax:\n/addcode <code>1234-5678-9012</code>",
 	"fc_list": "📄 <b>GROUP FC LIST</b>\n",
