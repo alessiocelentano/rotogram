@@ -47,6 +47,7 @@ def get_bot_data(app, message):
             pass
 
     json.dump(stats, open('src/stats.json', 'w'), indent=4)
+    print(stats)
     message.continue_propagation()
 
 
