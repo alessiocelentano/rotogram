@@ -20,8 +20,9 @@ usage_dict = {'vgc': None}
 raid_dict = {}
 
 
-# ===== Bot stats =====
-@app.on_message(Filters.text)
+# ===== Stats =====
+@app.on_message(Filters.private and Filters.text and Filters.create(lambda _, message: message.chat.id not in stats['users']))
+@app.on_message(Filters.group and Filters.text and Filters.create(lambda _, message: message.chat.id not in stats['groups']))
 def get_bot_data(app, message):
     cid = str(message.chat.id)
     if message.chat.type == 'private':
@@ -47,6 +48,33 @@ def get_bot_data(app, message):
 
     json.dump(stats, open('src/stats.json', 'w'), indent=4)
     message.continue_propagation()
+
+
+@app.on_message(Filters.command(['stats', 'stats@RotomgramBot']))
+def get_stats(app, message):
+    if message.from_user.id == 312012637:
+        users_text = ''
+        for user in stats['users']:
+            users_text += stats['users'][user]['name']
+            if stats['users'][user]['username']:
+                users_text += ' (@' + stats['users'][user]['username'] + ')'
+            users_text += '\n'
+
+        groups_text = ''
+        for group in stats['groups']:
+            groups_text += stats['groups'][group]['title']
+            if stats['groups'][group]['username']:
+                groups_text += ' (@' + stats['groups'][group]['username'] + ')'
+            groups_text += '\n'
+
+        text = texts['stats'].format(
+            len(stats['users']), users_text,
+            len(stats['groups']), groups_text
+        )
+        app.send_message(
+            chat_id=message.chat.id,
+            text=text
+        )
 
 
 # ===== Home =====
@@ -303,46 +331,16 @@ def call_pin(app, message):
     raid.pin(app, message, texts)
 
 
-# Presentation
-@app.on_message()
+# ===== Presentation =====
+@app.on_message(Filters.create(lambda _, message: message.new_chat_members))
 def bot_added(app, message):
-    if message.new_chat_members:
-        for new_member in message.new_chat_members:
-            if new_member.id == 932107343:
-                text = texts['added']
-                app.send_message(
-                    chat_id=message.chat.id,
-                    text=text
-                )
-    else:
-        message.continue_propagation()
-
-
-@app.on_message(Filters.command(['stats', 'stats@RotomgramBot']))
-def get_stats(app, message):
-    if message.from_user.id == 312012637:
-        users_text = ''
-        for user in stats['users']:
-            users_text += stats['users'][user]['name']
-            if stats['users'][user]['username']:
-                users_text += ' (@' + stats['users'][user]['username'] + ')'
-            users_text += '\n'
-
-        groups_text = ''
-        for group in stats['groups']:
-            groups_text += stats['groups'][group]['title']
-            if stats['groups'][group]['username']:
-                groups_text += ' (@' + stats['groups'][group]['username'] + ')'
-            groups_text += '\n'
-
-        text = texts['stats'].format(
-            len(stats['users']), users_text,
-            len(stats['groups']), groups_text
-        )
-        app.send_message(
-            chat_id=message.chat.id,
-            text=text
-        )
+    for new_member in message.new_chat_members:
+        if new_member.id == 932107343:
+            text = texts['added']
+            app.send_message(
+                chat_id=message.chat.id,
+                text=text
+            )
 
 
 app.run()
