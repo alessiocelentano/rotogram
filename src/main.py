@@ -275,6 +275,19 @@ def usage(app, message):
     func.bot_action(app, message, text, markup)
 
 
+# ===== FAQ command =====
+@app.on_message(Filters.command(['faq', 'faq@RotomgramBot']))
+def faq(app, message):
+    text = texts['faq']
+    app.send_message(
+        chat_id=message.chat.id,
+        text=text, 
+        parse_mode='HTML',
+        disable_web_page_preview=True
+    )
+
+
+
 # ===== About command =====
 @app.on_message(Filters.command(['about', 'about@RotomgramBot']))
 def about(app, message):
