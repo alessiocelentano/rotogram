@@ -9,7 +9,7 @@ import raid_dynamax as raid
 
 
 app = Client(
-    session_name='Rotomgram_Beta'
+    session_name='Rotomgram'
 )
 
 texts = json.load(open('src/texts.json', 'r'))
@@ -41,6 +41,7 @@ def get_bot_data(app, message):
     elif message.chat.type in ['group', 'supergroup']:
         stats['groups'][cid] = {}
         stats['groups'][cid]['title'] = message.chat.title
+        stats['groups'][cid]['members'] = message.chat.members_count
         try:
             stats['groups'][cid]['username'] = message.chat.username
         except AttributeError:
@@ -66,6 +67,7 @@ def get_stats(app, message):
             groups_text += stats['groups'][group]['title']
             if stats['groups'][group]['username']:
                 groups_text += ' (@' + stats['groups'][group]['username'] + ')'
+            groups_text += ' [{}]'.format(stats['groups'][group]['members'])
             groups_text += '\n'
 
         text = texts['stats'].format(
