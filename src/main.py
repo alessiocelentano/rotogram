@@ -21,8 +21,8 @@ raid_dict = {}
 
 
 # ===== Stats =====
-@app.on_message(Filters.private and Filters.text and Filters.create(lambda _, message: message.chat.id not in stats['users']))
-@app.on_message(Filters.group and Filters.text and Filters.create(lambda _, message: message.chat.id not in stats['groups']))
+@app.on_message(Filters.private & Filters.create(lambda _, message: str(message.chat.id) not in stats['users']))
+@app.on_message(Filters.group & Filters.create(lambda _, message: str(message.chat.id) not in stats['groups']))
 def get_bot_data(app, message):
     cid = str(message.chat.id)
     if message.chat.type == 'private':
@@ -45,9 +45,11 @@ def get_bot_data(app, message):
             stats['groups'][cid]['username'] = message.chat.username
         except AttributeError:
             pass
+        stats['groups'][cid]['members'] = app.get_chat(cid).members_count
 
     json.dump(stats, open('src/stats.json', 'w'), indent=4)
     print(stats)
+    print('\n\n')
     message.continue_propagation()
 
 
@@ -62,15 +64,19 @@ def get_stats(app, message):
             users_text += '\n'
 
         groups_text = ''
+        members = 0
         for group in stats['groups']:
             groups_text += stats['groups'][group]['title']
             if stats['groups'][group]['username']:
                 groups_text += ' (@' + stats['groups'][group]['username'] + ')'
+            if 'members' in stats['groups'][group]:
+                groups_text += ' [{}]'.format(stats['groups'][group]['members'])
+                members += stats['groups'][group]['members']
             groups_text += '\n'
 
         text = texts['stats'].format(
             len(stats['users']), users_text,
-            len(stats['groups']), groups_text
+            len(stats['groups']), members, groups_text
         )
         app.send_message(
             chat_id=message.chat.id,
