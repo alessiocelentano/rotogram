@@ -56,27 +56,13 @@ def get_bot_data(app, message):
 @app.on_message(Filters.command(['stats', 'stats@RotomgramBot']))
 def get_stats(app, message):
     if message.from_user.id == 312012637:
-        users_text = ''
-        for user in stats['users']:
-            users_text += stats['users'][user]['name']
-            if stats['users'][user]['username']:
-                users_text += ' (@' + stats['users'][user]['username'] + ')'
-            users_text += '\n'
-
-        groups_text = ''
         members = 0
         for group in stats['groups']:
-            groups_text += stats['groups'][group]['title']
-            if stats['groups'][group]['username']:
-                groups_text += ' (@' + stats['groups'][group]['username'] + ')'
-            if 'members' in stats['groups'][group]:
-                groups_text += ' [{}]'.format(stats['groups'][group]['members'])
-                members += stats['groups'][group]['members']
-            groups_text += '\n'
-
+            members += stats['groups'][group]['members']
         text = texts['stats'].format(
-            len(stats['users']), users_text,
-            len(stats['groups']), members, groups_text
+            len(stats['users']),
+            len(stats['groups']),
+            members
         )
         app.send_message(
             chat_id=message.chat.id,
