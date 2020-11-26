@@ -1,2 +1,2 @@
-Pyrogram==0.17.1
-beautifulsoup4==4.9.1
+Pyrogram==1.0.7
+pokepy==0.6.1
