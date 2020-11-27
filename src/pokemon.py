@@ -12,6 +12,7 @@ def get_base_data(pkmn):
     species = pk.get_pokemon_species(pkmn)
 
     name = species.name.title()
+    artwork_link = pkmn_data.sprites.front_default.replace("pokemon", "pokemon/other/official-artwork")
     emoji = typing_emoji(pkmn_data)
     dex_number = species.order
     types = [ty.type.name.title() for ty in pkmn_data.types]
@@ -24,8 +25,7 @@ def get_base_data(pkmn):
     stats = {stat.stat.name: stat.base_stat for stat in pkmn_data.stats}
     rating = stats_rating_emoji(stats)
 
-    # TODO: Artworks link
-    text = f"""<u>{name}</u> <a href="LINK">{emoji}</a>\n
+    text = f"""<u>{name}</u> <a href="{artwork_link}">{emoji}</a>\n
 <b>National</b>: {dex_number}
 <b>Type</b>: {types_text}
 <b>Abilities</b>: {abilities_text}
