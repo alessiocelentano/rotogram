@@ -3,14 +3,11 @@ import re
 import pokepy as pk
 
 from evolutions import get_evolutions
-from abilities import get_abilities
 from emoji import typing_emoji, stats_rating_emoji
+from misc import get_abilities, gender_percentage, stat_abbr
 
 
-def get_base_data(pkmn):
-    pkmn_data = pk.get_pokemon(pkmn)
-    species = pk.get_pokemon_species(pkmn)
-
+def get_base_data(pkmn_data, species):
     name = species.name.title()
     artwork_link = pkmn_data.sprites.front_default.replace("pokemon", "pokemon/other/official-artwork")
     emoji = typing_emoji(pkmn_data)
@@ -24,13 +21,13 @@ def get_base_data(pkmn):
     evolution_text = get_evolution_text(evolutions)
     stats = {stat.stat.name: stat.base_stat for stat in pkmn_data.stats}
     rating = stats_rating_emoji(stats)
-
     text = f"""<u>{name}</u> <a href="{artwork_link}">{emoji}</a>\n
 <b>National</b>: {dex_number}
 <b>Type</b>: {types_text}
 <b>Abilities</b>: {abilities_text}
 <b>Hidden Ability</b>: {hidden_ability}
 {evolution_text}
+{}
 <b><u>Base stats</u></b>:
 {stats["hp"]} HP {rating["hp"]}
 {stats["attack"]} ATK {rating["attack"]}
@@ -42,76 +39,38 @@ def get_base_data(pkmn):
     return text
 
 
+def get_advanced_data(pkmn_data, species):
+    gender = species.gender_rate
+    gender_percentage = gender_percentage(gender)
+    base_friendship = species.base_happiness
+    ev_yield = {stat_abbr(stat.stat.name):stat.effort for stat in pkmn_data.stats if stat.effort != 0}
+    ev_yield_text = " / ".join([str(ev_yield[stat] + " " + stat) for stat in ev_yield])
+    catch_rate = species.capture_rate
+    growth_rate = species.growth_rate.name.title()
+    egg_groups = [group.name.title() for group in species.egg_groups]
+    egg_groups_text = " / ".join(egg_groups)
+    egg_cycles = species.hatch_counter
+    genus = species.genera[0].genus + " Pokémon"
+    height = str(pkmn_data.height / 10) + " m"
+    weight = str(pkmn_data.weight / 10) + " kg"
+    text = f"""<b><u>Games data</u></b>
+<b>Gender</b>: {gender_percentage}
+<b>Base friendship</b>: {base_friendship}
+<b>EV yield</b>: {ev_yield_text}
+<b>Catch rate</b>: {catch_rate}
+<b>Growth rate</b>: {growth_rate}
+<b>Egg groups</b>: {egg_groups_text}
+<b>Egg cycles</b>: {egg_cycles}\n
+<b><u>About Pokémon</u></b>
+<b>Species</b>: {genus}
+<b>Height</b>: {height}
+<b>Weight</b>: {weight}
 """
-def get_advanced_data(pkmn):
-    base_friendship = pkmn["base_friendship"]["value"]
-    catch_rate = pkmn["catch_rate"]["value"]
-    growth_rate = pkmn["growth_rate"]
-    egg_cycles = pkmn["egg_cycles"]
-    species = pkmn["species"]
-
-    gender = ""
-    if pkmn["gender"]["genderless"]:
-        gender += "Genderless"
-    else:
-        for i, j in list(pkmn["gender"].items()):
-            if j == "100%":
-                gender = i + ": " + j + "\n"
-            elif type(j) == bool:
-                continue
-            else:
-                gender += i + ": " + j + "\n"
-        gender = gender[:-1]
-
-    ev_yield = ""
-    for i in pkmn["ev_yield"]:
-        ev_yield += " / " + pkmn["ev_yield"][i] + " " + i.title()
-    ev_yield = ev_yield[3:]
-
-    egg_groups = ""
-    for i in pkmn["egg_groups"]:
-        egg_groups += " / " + i
-    egg_groups = egg_groups[3:]
-
-    other_lang = ""
-    for i, j in pkmn["other_lang"].items():
-        other_lang += "\n" + i.title() + ": " + j
-    other_lang = other_lang[1:]
-
-    name_origin = ""
-    for i, j in pkmn["name_origin"].items():
-        name_origin += ", " + i + " (" + j + ")"
-    name_origin = name_origin[2:]
-
-    tmp = pkmn["height"]
-    height = tmp["si"] + " (" + tmp["usc"] + ")"
-    tmp = pkmn["weight"]
-    weight = tmp["si"] + " (" + tmp["usc"] + ")"
-
-    return {
-        "base_friendship": base_friendship,
-        "catch_rate": catch_rate,
-        "growth_rate": growth_rate,
-        "egg_cycles": egg_cycles,
-        "species": species,
-        "gender": gender,
-        "ev_yield": ev_yield,
-        "egg_group": egg_groups,
-        "other_lang": other_lang,
-        "name_origin": name_origin,
-        "height": height,
-        "weight": weight
-    }
 
 
 def set_message(pkmn, *args, reduced=None):
-    if reduced:
-        text = texts["reduced_text"]
-        base_data = get_base_data(pkmn, args)
-        return text.format(**base_data)
-    else:
-        text = texts["expanded_text"]
-        base_data = get_base_data(pkmn, args)
-        advanced_data = get_advanced_data(pkmn)
-        return text.format(**base_data, **advanced_data)
-"""
+    pkmn_data = pk.get_pokemon(pkmn)
+    species = pk.get_pokemon_species(pkmn)
+    extra_text = get_advanced_data(pkmn_data, species) if reduced else ""
+    return get_base_data(pkmn_data, species).format(extra_text)
+
