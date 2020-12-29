@@ -13,7 +13,7 @@ pk = pokepy.V2Client()
 
 
 # ===== Home =====
-@app.on_message(filters.command(["start", "start@RotomgramBot"]))
+@app.on_message(filters.command(["start", "start@MadBoy_Rotomgram2_Bot"]))
 def start(app, message):
     app.send_message(
         chat_id=message.chat.id,
@@ -24,10 +24,10 @@ def start(app, message):
 
 # ===== Data command =====
 @app.on_callback_query(filters.create(lambda _, query: "basic_infos" in query.data))
-@app.on_message(filters.command(["data", "data@RotomgramBot"]))
+@app.on_message(filters.command(["data", "data@MadBoy_Rotomgram2_Bot"]))
 def pkmn_search(app, message):
     try:
-        if re.match("/data(@RotomgramBot)*", message.text):
+        if re.match("/data(@MadBoy_Rotomgram2_Bot)*", message.text):
             app.send_message(message.chat.id, texts["error1"], parse_mode="HTML")
             return None
         pkmn = message.text
@@ -168,9 +168,39 @@ def locations(app, call):
     func.bot_action(app, call, text, markup)
 
 
+# ==== Types List =====
+def ptype_buttons(user_id):
+    keyboard = ([[
+        InlineKeyboardButton('Normal',callback_data=f"type_normal_{user_id}"),
+        InlineKeyboardButton('Fighting',callback_data=f"type_fighting_{user_id}"),
+        InlineKeyboardButton('Flying',callback_data=f"type_flying_{user_id}")]])
+    keyboard += ([[
+        InlineKeyboardButton('Poison',callback_data=f"type_poison_{user_id}"),
+        InlineKeyboardButton('Ground',callback_data=f"type_ground_{user_id}"),
+        InlineKeyboardButton('Rock',callback_data=f"type_rock_{user_id}")]])
+    keyboard += ([[
+        InlineKeyboardButton('Bug',callback_data=f"type_bug_{user_id}"),
+        InlineKeyboardButton('Ghost',callback_data=f"type_ghost_{user_id}"),
+        InlineKeyboardButton('Steel',callback_data=f"type_steel_{user_id}")]])
+    keyboard += ([[
+        InlineKeyboardButton('Fire',callback_data=f"type_fire_{user_id}"),
+        InlineKeyboardButton('Water',callback_data=f"type_water_{user_id}"),
+        InlineKeyboardButton('Grass',callback_data=f"type_grass_{user_id}")]])
+    keyboard += ([[
+        InlineKeyboardButton('Electric',callback_data=f"type_electric_{user_id}"),
+        InlineKeyboardButton('Psychic',callback_data=f"type_psychic_{user_id}"),
+        InlineKeyboardButton('Ice',callback_data=f"type_ice_{user_id}")]])
+    keyboard += ([[
+        InlineKeyboardButton('Dragon',callback_data=f"type_dragon_{user_id}"),
+        InlineKeyboardButton('Fairy',callback_data=f"type_fairy_{user_id}"),
+        InlineKeyboardButton('Dark',callback_data=f"type_dark_{user_id}")]])
+    keyboard += ([[
+        InlineKeyboardButton('Delete',callback_data=f"hexa_delete_{user_id}")]])
+    return keyboard
+
 # ===== Usage command =====
 @app.on_callback_query(filters.create(lambda _, query: "usage" in query.data))
-@app.on_message(filters.command(["usage", "usage@RotomgramBot"]))
+@app.on_message(filters.command(["usage", "usage@MadBoy_Rotomgram2_Bot"]))
 def usage(app, message):
     try:
         page = int(re.split("/", message.data)[1])
@@ -198,7 +228,7 @@ def usage(app, message):
 
 
 # ===== FAQ command =====
-@app.on_message(filters.command(["faq", "faq@RotomgramBot"]))
+@app.on_message(filters.command(["faq", "faq@MadBoy_Rotomgram2_Bot"]))
 def faq(app, message):
     app.send_message(
         chat_id=message.chat.id,
@@ -209,7 +239,7 @@ def faq(app, message):
 
 
 # ===== About command =====
-@app.on_message(filters.command(["about", "about@RotomgramBot"]))
+@app.on_message(filters.command(["about", "about@MadBoy_Rotomgram2_Bot"]))
 def about(app, message):
     markup = InlineKeyboardMarkup([[
         InlineKeyboardButton(
