@@ -13,7 +13,7 @@ pk = pokepy.V2Client()
 
 
 # ===== Home =====
-@app.on_message(filters.command(["start", "start@RotomgramBot"]))
+@app.on_message(filters.command(["start", "start@MadBoy_Rotomgram2_Bot"]))
 def start(app, message):
     app.send_message(
         chat_id=message.chat.id,
@@ -24,10 +24,10 @@ def start(app, message):
 
 # ===== Data command =====
 @app.on_callback_query(filters.create(lambda _, query: "basic_infos" in query.data))
-@app.on_message(filters.command(["data", "data@RotomgramBot"]))
+@app.on_message(filters.command(["data", "data@MadBoy_Rotomgram2_Bot"]))
 def pkmn_search(app, message):
     try:
-        if re.match("/data(@RotomgramBot)*", message.text):
+        if re.match("/data(@MadBoy_Rotomgram2_Bot)*", message.text):
             app.send_message(message.chat.id, texts["error1"], parse_mode="HTML")
             return None
         pkmn = message.text
@@ -168,37 +168,10 @@ def locations(app, call):
     func.bot_action(app, call, text, markup)
 
 
-# ===== Usage command =====
-@app.on_callback_query(filters.create(lambda _, query: "usage" in query.data))
-@app.on_message(filters.command(["usage", "usage@RotomgramBot"]))
-def usage(app, message):
-    try:
-        page = int(re.split("/", message.data)[1])
-        dictt = func.get_usage_vgc(int(page), usage_dict["vgc"])
-    except AttributeError:
-        page = 1
-        text = "<i>Connecting to Pokémon Showdown database...</i>"
-        message = app.send_message(message.chat.id, text, parse_mode="HTML")
-        dictt = func.get_usage_vgc(int(page))
-        usage_dict["vgc"] = dictt["vgc_usage"]
-
-    leaderboard = dictt["leaderboard"]
-    base_text = texts["usage"]
-    text = ""
-    for i in range(15):
-        pkmn = leaderboard[i]
-        text += base_text.format(
-            pkmn["rank"],
-            pkmn["pokemon"],
-            pkmn["usage"],
-        )
-    markup = dictt["markup"]
-
-    func.bot_action(app, message, text, markup)
 
 
 # ===== FAQ command =====
-@app.on_message(filters.command(["faq", "faq@RotomgramBot"]))
+@app.on_message(filters.command(["faq", "faq@MadBoy_Rotomgram2_Bot"]))
 def faq(app, message):
     app.send_message(
         chat_id=message.chat.id,
@@ -209,12 +182,12 @@ def faq(app, message):
 
 
 # ===== About command =====
-@app.on_message(filters.command(["about", "about@RotomgramBot"]))
+@app.on_message(filters.command(["about", "about@MadBoy_Rotomgram2_Bot"]))
 def about(app, message):
     markup = InlineKeyboardMarkup([[
         InlineKeyboardButton(
             text="Github",
-            url="https://github.com/alessiocelentano/rotomgram"
+            url="https://github.com/madboy482/rotomgram"
         )
     ]])
 
