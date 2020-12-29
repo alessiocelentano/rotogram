@@ -1,26 +1,90 @@
 import json
 import re
 
-import pokepy
-from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram import Client, Filters
+from pyrogram import (InlineKeyboardMarkup,
+                      InlineKeyboardButton,
+                      CallbackQuery)
+
+import functions as func
+import raid_dynamax as raid
+
+from Config import Config
+
+app = Client(
+    api_id=Config.aid,
+    api_hash=Config.ahash,
+    bot_token=Config.bot_token,
+    session_name='rotomgram'
+)
+
+texts = json.load(open('src/texts.json', 'r'))
+data = json.load(open('src/pkmn.json', 'r'))
+stats = json.load(open('src/stats.json', 'r'))
+jtype = json.load(open('src/type.json', 'r'))
+
+usage_dict = {'vgc': None}
+raid_dict = {}
 
 
-texts = json.load(open("src/texts.json", "r"))
-usage_dict = {"vgc": None}
-app = Client("Debug")
-pk = pokepy.V2Client()
+# ===== Stats =====
+@app.on_message(Filters.private & Filters.create(lambda _, message: str(message.chat.id) not in stats['users']))
+@app.on_message(Filters.group & Filters.create(lambda _, message: str(message.chat.id) not in stats['groups']))
+def get_bot_data(app, message):
+    cid = str(message.chat.id)
+    if message.chat.type == 'private':
+        stats['users'][cid] = {}
+        name = message.chat.first_name
+        try:
+            name = message.chat.first_name + ' ' + message.chat.last_name
+        except TypeError:
+            name = message.chat.first_name
+        stats['users'][cid]['name'] = name
+        try:
+            stats['users'][cid]['username'] = message.chat.username
+        except AttributeError:
+            pass
+
+    elif message.chat.type in ['group', 'supergroup']:
+        stats['groups'][cid] = {}
+        stats['groups'][cid]['title'] = message.chat.title
+        try:
+            stats['groups'][cid]['username'] = message.chat.username
+        except AttributeError:
+            pass
+        stats['groups'][cid]['members'] = app.get_chat(cid).members_count
+
+    json.dump(stats, open('src/stats.json', 'w'), indent=4)
+    print(stats)
+    print('\n\n')
+    message.continue_propagation()
+
+
+@app.on_message(Filters.command(['stats', 'stats@MadBoy_Rotomgram2_Bot']))
+def get_stats(app, message):
+    if message.from_user.id in Config.sudo:
+        members = 0
+        for group in stats['groups']:
+            members += stats['groups'][group]['members']
+        text = texts['stats'].format(
+            len(stats['users']),
+            len(stats['groups']),
+            members
+        )
+        app.send_message(
+            chat_id=message.chat.id,
+            text=text
+        )
 
 
 # ===== Home =====
-@app.on_message(filters.command(["start", "start@MadBoy_Rotomgram2_Bot"]))
+@app.on_message(Filters.command(['start', 'start@MadBoy_Rotomgram2_Bot']))
 def start(app, message):
     app.send_message(
         chat_id=message.chat.id,
-        text=texts["start_message"],
-        parse_mode="HTML"
+        text=texts['start_message'],
+        parse_mode='HTML'
     )
-
 
     
 # ==== Type Pokemon =====
