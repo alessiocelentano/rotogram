@@ -45,7 +45,7 @@ def stats_rating_emoji(stats):
         rating_emoji = ""
         rating_n = 0
         for i in tiers:
-            if base < i:
+            if stats[stat] < i:
                 while rating_n >= 2:
                     rating_emoji += "🌕"
                     rating_n -= 2
@@ -57,4 +57,4 @@ def stats_rating_emoji(stats):
             else:
                 rating_n += 1
         emoji_dict[stat] = rating_emoji
-    return rating_emoji
+    return emoji_dict
