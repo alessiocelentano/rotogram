@@ -6,17 +6,17 @@ def get_evolutions_text(evolutions):
     if evolutions["pre_evo"]:
         name = evolutions["pre_evo"]["name"]
         trigger = " / ".join(evolutions["pre_evo"]["trigger"])
-        text += f"It evolves from <b>{name}</b> (<i>trigger</i>)\n"
+        text += f"It evolves from <b>{name}</b> (<i>{trigger}</i>)\n"
     if evolutions["evos"]:
         for i in range(len(evolutions["evos"])):
             name = evolutions["evos"][i]["name"]
-            if i == 1:
+            trigger = " / ".join(evolutions["evos"][i]["trigger"])
+            if i == 0:
                 text += f"It evolves into <b>{name}</b> (<i>{trigger}</i>)"
-            elif i == len(evolutions["evos"]):
+            elif i == len(evolutions["evos"]) - 1:
                 text += f" or into <b>{name}</b> (<i>{trigger}</i>)"
             else:
                 text += f", into <b>{name}</b> (<i>{trigger}</i>)"
-        text += "\n"
     return text
 
 
@@ -33,9 +33,9 @@ def get_evolutions(pk, species):
     chain = get_chain(pk, species)
     for key in evolution_chain:
         if key == "pre_evo":
-            pre_evo_species = species.evolves_from_species.name
+            pre_evo_species = species.evolves_from_species
             if pre_evo_species:
-                pre_evo = pk.get_pokemon_species(pre_evo_species).names[7].name
+                pre_evo = pk.get_pokemon_species(pre_evo_species.name).names[7].name
             else:
                 continue
         method_list = []

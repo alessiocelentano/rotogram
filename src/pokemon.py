@@ -51,7 +51,7 @@ def get_advanced_data(pkmn_data, species):
     genus = species.genera[0].genus + " Pokémon"
     height = str(pkmn_data.height / 10) + " m"
     weight = str(pkmn_data.weight / 10) + " kg"
-    text = f"""<b><u>Games data</u></b>
+    text = f"""\n<b><u>Games data</u></b>
 <b>Gender</b>: {gender_percentage}
 <b>Base friendship</b>: {base_friendship}
 <b>EV yield</b>: {ev_yield_text}
@@ -62,7 +62,7 @@ def get_advanced_data(pkmn_data, species):
 <b><u>About Pokémon</u></b>
 <b>Species</b>: {genus}
 <b>Height</b>: {height}
-<b>Weight</b>: {weight}
+<b>Weight</b>: {weight}\n
 """
 
 
