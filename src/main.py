@@ -17,14 +17,14 @@ app = Client("Debug")
 pk = pokepy.V2Client()
 
 
-@app.on_callback_query(filters.create(lambda _, query: "infos" in query.data))
+@app.on_callback_query(filters.create(lambda _, __, query: "infos" in query.data))
 @app.on_message(filters.command(["data", "data@RotomgramBot"]))
 def pkmn_search(app, message):
     try:
         # on_message
         pkmn = re.sub("/data(@rotogrambot)* ", "", message.text)
-        text = pokemon_text(pk, pkmn, reduced=1)
-        markup = data_markup(pkmn, reduced=1)
+        text = pokemon_text(pk, pkmn, expanded=0)
+        markup = data_markup(pkmn, expanded=0)
         app.send_message(
             chat_id=message.chat.id,
             text=text,
@@ -32,12 +32,11 @@ def pkmn_search(app, message):
             reply_markup=markup
         )
     except AttributeError:
-        print(AttributeError)
         # on_callback_query
-        reduced = re.split("/", message.data)[1]
+        expanded = re.split("/", message.data)[1]
         pkmn = re.split("/", message.data)[2]
-        text = message.set_message(data[pkmn][form], reduced=reduced)
-        markup = data_markup(pkmn, reduced=reduced)
+        text = pokemon_text(pk, pkmn, expanded=expanded)
+        markup = data_markup(pkmn, expanded=expanded)
         app.answer_callback_query(message.id)
         app.edit_message_text(
             chat_id=message.message.chat.id,
@@ -48,7 +47,7 @@ def pkmn_search(app, message):
         )
 
 
-@app.on_callback_query(filters.create(lambda _, query: "moveset" in query.data))
+@app.on_callback_query(filters.create(lambda _, __, query: "moveset" in query.data))
 def moveset(app, call):
     pkmn = re.split("/", call.data)[2]
     pkmn_data = pk.get_pokemon(pkmn)
@@ -68,7 +67,7 @@ def moveset(app, call):
     )
 
 
-@app.on_callback_query(filters.create(lambda _, query: "locations" in query.data))
+@app.on_callback_query(filters.create(lambda _, __, query: "locations" in query.data))
 def locations(app, call):
     pkmn = re.split("/", call.data)[2]
     pkmn_data = pk.get_pokemon(pkmn)

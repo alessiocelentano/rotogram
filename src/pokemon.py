@@ -62,13 +62,14 @@ def get_advanced_data(pkmn_data, species):
 <b><u>About Pokémon</u></b>
 <b>Species</b>: {genus}
 <b>Height</b>: {height}
-<b>Weight</b>: {weight}\n
+<b>Weight</b>: {weight}
 """
+    return text
 
 
-def pokemon_text(pk, pkmn, reduced=None):
+def pokemon_text(pk, pkmn, expanded):
     pkmn_data = pk.get_pokemon(pkmn)
     species = pk.get_pokemon_species(pkmn)
-    extra_data = get_advanced_data(pkmn_data, species) if not reduced else ""
+    extra_data = get_advanced_data(pkmn_data, species) if expanded else ""
     return get_base_data(pk, pkmn_data, species, extra_data)
 
