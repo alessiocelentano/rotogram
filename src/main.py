@@ -21,6 +21,7 @@ pk = pokepy.V2Client()
 def main(app, inline_query):
     try:
         pokemon = pk.get_pokemon_species(inline_query.query)
+        thumb_url = pk.get_pokemon(inline_query.query).sprites.front_default.replace("pokemon", "pokemon/other/official-artwork")
         name = pokemon.names[7].name
         inline_query.answer(
             results=[
@@ -29,8 +30,7 @@ def main(app, inline_query):
                     input_message_content=InputTextMessageContent(
                         pokemon_text(pk, name, expanded=0)
                     ),
-                    # TODO: Add thumbnails
-                    # thumb_url="https://i.imgur.com/JyxrStE.png",
+                    thumb_url=thumb_url,
                     reply_markup=data_markup(name, expanded=0)
                 )
             ],
@@ -38,7 +38,7 @@ def main(app, inline_query):
         )
     except Exception:
         # TODO: add help button
-        pass
+        inline_query.answer(results=[])
 
 
 @app.on_callback_query(filters.create(lambda _, __, query: "infos" in query.data))
