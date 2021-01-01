@@ -17,8 +17,31 @@ app = Client("Debug")
 pk = pokepy.V2Client()
 
 
+@app.on_inline_query()
+def main(app, inline_query):
+    try:
+        pokemon = pk.get_pokemon_species(inline_query.query)
+        name = pokemon.names[7].name
+        inline_query.answer(
+            results=[
+                InlineQueryResultArticle(
+                    title=name,
+                    input_message_content=InputTextMessageContent(
+                        pokemon_text(pk, name, expanded=0)
+                    ),
+                    # TODO: Add thumbnails
+                    # thumb_url="https://i.imgur.com/JyxrStE.png",
+                    reply_markup=data_markup(name, expanded=0)
+                )
+            ],
+            cache_time=1
+        )
+    except Exception:
+        # TODO: add help button
+        pass
+
+
 @app.on_callback_query(filters.create(lambda _, __, query: "infos" in query.data))
-@app.on_message(filters.command(["data", "data@RotomgramBot"]))
 def pkmn_search(app, message):
     try:
         # on_message
