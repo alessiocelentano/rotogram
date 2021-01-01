@@ -1,5 +1,3 @@
-__pycache__
-Procfile
-config.ini
-*.session-journal
-*.session
+.idea/
+__pycache__/
+*.session*
