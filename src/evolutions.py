@@ -47,11 +47,16 @@ def get_evolutions(pk, species):
                         method_list = [method.trigger.name.title() for method in stage.evolution_details]
                         evolution_chain["pre_evo"]["name"] = pre_evo
                         evolution_chain["pre_evo"]["trigger"] = method_list
-                    else:
-                        for next_stage in stage.evolves_to:
-                            name = pk.get_pokemon_species(next_stage.species.name).names[7].name
-                            method_list = [method.trigger.name.title() for method in next_stage.evolution_details]
-                            evolution_chain["evos"].append({"name": name, "trigger": method_list})
+                    else:  # Next stage if it exists
+                        try:
+                            for next_stage in stage.evolves_to:
+                                name = pk.get_pokemon_species(next_stage.species.name).names[7].name
+                                method_list = [method.trigger.name.title() for method in next_stage.evolution_details]
+                                evolution_chain["evos"].append({"name": name, "trigger": method_list})
+                            else:  # stage hasn't evolutions (for Pokemon with only one stage)
+                                return evolution_chain
+                        except AttributeError:  # stage hasn't evolutions (for sub-stage)
+                            return evolution_chain
                     break
             else:
                 chain = chain[0].evolves_to
