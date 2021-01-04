@@ -1,11 +1,9 @@
-import json
 import re
 
 import pokepy
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.types import InlineQueryResultArticle, InputTextMessageContent
-from pyrogram.types import InlineQuery, User
 
 from pokemon import pokemon_text
 from moveset import moveset_text
@@ -34,13 +32,32 @@ def main(app, inline_query):
                     reply_markup=data_markup(name, expanded=0)
                 )
             ],
-            cache_time=1
+            cache_time=5
         )
     except Exception:
-        # TODO: add help button
-        inline_query.answer(results=[])
+        inline_query.answer(
+            results=[],
+            switch_pm_text="Help",
+            switch_pm_parameter="start",
+            cache_time=5
+        )
 
 
+@app.on_message(filters.command("start"))
+def start(app, message):
+    text = """⚡️ <b><u>What is Rotogram?</u></b>
+Rotomgram is a bot which acts as a helper for trainers on Telegram. \
+You can check information of Pokemon, Showdown usage and more as quickly as possible, without ever leaving Telegram\n
+🛠 <b><u>Usage</u></b>
+Just write Pokemon name after @rotogrambot (e.g.: @rotogrambot Rotom)\n
+@alessiocelentano | <a href="t.me/rotogram">Follow us</a> | <a href="github.com/alessiocelentano/rotogram">GitHub</a>"""
+    app.send_message(
+        chat_id=message.from_user.id,
+        text=text
+    )
+
+
+"""
 @app.on_callback_query(filters.create(lambda _, __, query: "infos" in query.data))
 def pkmn_search(app, message):
     try:
@@ -114,33 +131,7 @@ def locations(app, call):
     ]])
 
     func.bot_action(app, call, text, markup)
-
-
-@app.on_message(filters.command(["faq", "faq@RotomgramBot"]))
-def faq(app, message):
-    app.send_message(
-        chat_id=message.chat.id,
-        text=texts["faq"],
-        parse_mode="HTML",
-        disable_web_page_preview=True
-    )
-
-
-@app.on_message(filters.command(["about", "about@RotomgramBot"]))
-def about(app, message):
-    markup = InlineKeyboardMarkup([[
-        InlineKeyboardButton(
-            text="Github",
-            url="https://github.com/alessiocelentano/rotomgram"
-        )
-    ]])
-
-    app.send_message(
-        chat_id=message.chat.id,
-        text=texts["about"],
-        reply_markup=markup,
-        disable_web_page_preview=True
-    )
+"""
 
 
 app.run()

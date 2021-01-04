@@ -17,4 +17,3 @@ def moveset_text(pkmn_data, maxx, minn):
         clss = move["class"]
         text += f"<a href=\"{artwork}\">{emoji}</a> <b>{name}</b> ({typee})\n<i>{clss}</i>\n"
     return text
-
