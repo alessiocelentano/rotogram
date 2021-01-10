@@ -1,4 +1,4 @@
-from evolutions import get_evolutions, get_evolutions_text
+from evolutions import get_evolutions
 from emoji import typing_emoji, stats_rating_emoji
 from misc import get_abilities, get_gender_percentage, stat_abbr
 
@@ -13,18 +13,19 @@ def get_base_data(pk, pkmn_data, species, extra_data):
     abilities = get_abilities(pkmn_data)
     abilities_text = " / ".join(abilities["abilities"])
     hidden_ability = abilities["hidden_ability"] if abilities["hidden_ability"] else "---"
-    evolutions = get_evolutions(pk, species)
-    evolution_text = get_evolutions_text(evolutions)
+    evolution_text = get_evolutions(pk, species)  # TODO: add methods
     stats = {stat.stat.name: stat.base_stat for stat in pkmn_data.stats}
     rating = stats_rating_emoji(stats)
-    text = f"""<u>{name}</u> <a href="{artwork_link}">{emoji}</a>\n
-<b>National</b>: {dex_number}
+    text = f"""<b><u>{name}</u></b> <a href="{artwork_link}">{emoji}</a>\n
+<b>National Dex number</b>: {dex_number}
 <b>Type</b>: {types_text}
 <b>Abilities</b>: {abilities_text}
 <b>Hidden Ability</b>: {hidden_ability}
+
+<b><u>Evolutions</u></b>
 {evolution_text}
 {extra_data}
-<b><u>Base stats</u></b>:
+<b><u>Base stats</u></b>
 {stats["hp"]} HP {rating["hp"]}
 {stats["attack"]} ATK {rating["attack"]}
 {stats["defense"]} DEF {rating["defense"]}
