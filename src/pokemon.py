@@ -1,5 +1,3 @@
-import re
-
 from evolutions import get_evolutions, get_evolutions_text
 from emoji import typing_emoji, stats_rating_emoji
 from misc import get_abilities, get_gender_percentage, stat_abbr
@@ -38,8 +36,7 @@ def get_base_data(pk, pkmn_data, species, extra_data):
 
 
 def get_advanced_data(pkmn_data, species):
-    gender = species.gender_rate
-    gender_percentage = get_gender_percentage(species, gender)
+    gender_percentage = get_gender_percentage(species)
     base_friendship = species.base_happiness
     ev_yield = {stat_abbr(stat.stat.name):stat.effort for stat in pkmn_data.stats if stat.effort != 0}
     ev_yield_text = " / ".join([str(ev_yield[stat]) + " " + stat for stat in ev_yield])

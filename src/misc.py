@@ -8,13 +8,13 @@ def get_abilities(pkmn_data):
     return ability_dict
 
 
-def get_gender_percentage(species, gender):
+def get_gender_percentage(species):
     if species.gender_rate == -1:
-        gender = "Genderless"
+        return "Genderless"
     else:
         female = species.gender_rate / 8 * 100
         male = 100 - female
-        gender = f"male: {male}%\nfemale: {female}%"
+        return f"male: {male}%\nfemale: {female}%"
 
 
 def stat_abbr(stat):
