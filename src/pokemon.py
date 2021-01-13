@@ -13,7 +13,7 @@ def get_base_data(pk, pkmn_data, species, extra_data):
     abilities = get_abilities(pkmn_data)
     abilities_text = " / ".join(abilities["abilities"])
     hidden_ability = abilities["hidden_ability"] if abilities["hidden_ability"] else "---"
-    evolution_text = get_evolutions(pk, species)  # TODO: add methods
+    evolution_text = get_evolutions(pk, species)
     stats = {stat.stat.name: stat.base_stat for stat in pkmn_data.stats}
     rating = stats_rating_emoji(stats)
     text = f"""<b><u>{name}</u></b> <a href="{artwork_link}">{emoji}</a>\n
