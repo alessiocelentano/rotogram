@@ -39,22 +39,19 @@ def typing_emoji(pkmn_data):
 
 
 def stats_rating_emoji(stats):
-    tiers = [0, 9, 19, 39, 79, 89, 99, 114, 129, 149, 256]
     emoji_dict = {}
     for stat in stats:
-        rating_emoji = ""
-        rating_n = 0
-        for i in tiers:
-            if stats[stat] < i:
-                while rating_n >= 2:
-                    rating_emoji += "🌕"
-                    rating_n -= 2
-                if rating_n == 1:
-                    rating_emoji += "🌗"
-                while len(rating_emoji) != 5:
-                    rating_emoji += "🌑"
-                break
-            else:
-                rating_n += 1
+        if stats[stat] < 20:
+            rating_emoji = "🔴"
+        elif stats[stat] < 50:
+            rating_emoji = "🟠🟠"
+        elif stats[stat] < 80:
+            rating_emoji = "🟡🟡🟡"
+        elif stats[stat] < 100:
+            rating_emoji = "🟢🟢🟢🟢"
+        elif stats[stat] < 130:
+            rating_emoji = "🔵🔵🔵🔵🔵"
+        else:
+            rating_emoji = "🟣🟣🟣🟣🟣🟣"
         emoji_dict[stat] = rating_emoji
     return emoji_dict
