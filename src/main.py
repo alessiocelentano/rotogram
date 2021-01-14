@@ -1,3 +1,5 @@
+import re
+
 import pokepy
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -41,6 +43,21 @@ def main(app, inline_query):
         )
 
 
+@app.on_callback_query(filters.create(lambda _, __, query: "infos" in query.data))
+def expand(app, query):
+    expanded = int(re.split("/", query.data)[1])
+    pkmn = re.split("/", query.data)[2]
+    text = pokemon_text(pk, pkmn, expanded=expanded)
+    markup = data_markup(pkmn, expanded=expanded)
+    app.answer_callback_query(query.id)
+    app.edit_inline_text(
+        inline_message_id=query.inline_message_id,
+        text=text,
+        parse_mode="HTML",
+        reply_markup=markup
+    )
+
+
 @app.on_message(filters.command("start"))
 def start(app, message):
     text = """⚡️ <b><u>What is Rotogram?</u></b>
@@ -54,36 +71,7 @@ Just write Pokemon name after @rotogrambot (e.g.: @rotogrambot Rotom)\n
         text=text
     )
 
-
 """
-@app.on_callback_query(filters.create(lambda _, __, query: "infos" in query.data))
-def pkmn_search(app, message):
-    try:
-        # on_message
-        pkmn = re.sub("/data(@rotogrambot)* ", "", message.text)
-        text = pokemon_text(pk, pkmn, expanded=0)
-        markup = data_markup(pkmn, expanded=0)
-        app.send_message(
-            chat_id=message.chat.id,
-            text=text,
-            parse_mode='HTML',
-            reply_markup=markup
-        )
-    except AttributeError:
-        # on_callback_query
-        expanded = re.split("/", message.data)[1]
-        pkmn = re.split("/", message.data)[2]
-        text = pokemon_text(pk, pkmn, expanded=expanded)
-        markup = data_markup(pkmn, expanded=expanded)
-        app.answer_callback_query(message.id)
-        app.edit_message_text(
-            chat_id=message.message.chat.id,
-            text=text,
-            message_id=message.message.message_id,
-            parse_mode='HTML',
-            reply_markup=markup
-        )
-
 
 @app.on_callback_query(filters.create(lambda _, __, query: "moveset" in query.data))
 def moveset(app, call):

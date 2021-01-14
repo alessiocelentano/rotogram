@@ -14,7 +14,7 @@ def get_gender_percentage(species):
     else:
         female = species.gender_rate / 8 * 100
         male = 100 - female
-        return f"male: {male}%\nfemale: {female}%"
+        return f"{male}% / {female}%"
 
 
 def stat_abbr(stat):

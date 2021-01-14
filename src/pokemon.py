@@ -16,11 +16,17 @@ def get_base_data(pk, pkmn_data, species, extra_data):
     evolution_text = get_evolutions(pk, species)
     stats = {stat.stat.name: stat.base_stat for stat in pkmn_data.stats}
     rating = stats_rating_emoji(stats)
-    text = f"""<b><u>{name}</u></b> <a href="{artwork_link}">{emoji}</a>\n
+    genus = species.genera[7].genus
+    height = str(pkmn_data.height / 10) + " m"
+    weight = str(pkmn_data.weight / 10) + " kg"
+    text = f"""<b><u>{name}</u></b> <a href="{artwork_link}">{emoji}</a>
+<b>Species</b>: {genus}
 <b>National Dex number</b>: {dex_number}
 <b>Type</b>: {types_text}
 <b>Abilities</b>: {abilities_text}
 <b>Hidden Ability</b>: {hidden_ability}
+<b>Height</b>: {height}
+<b>Weight</b>: {weight}
 
 <b><u>Evolutions</u></b>
 {evolution_text}
@@ -39,28 +45,21 @@ def get_base_data(pk, pkmn_data, species, extra_data):
 def get_advanced_data(pkmn_data, species):
     gender_percentage = get_gender_percentage(species)
     base_friendship = species.base_happiness
-    ev_yield = {stat_abbr(stat.stat.name):stat.effort for stat in pkmn_data.stats if stat.effort != 0}
+    ev_yield = {stat_abbr(stat.stat.name): stat.effort for stat in pkmn_data.stats if stat.effort != 0}
     ev_yield_text = " / ".join([str(ev_yield[stat]) + " " + stat for stat in ev_yield])
     catch_rate = species.capture_rate
-    growth_rate = species.growth_rate.name.title()
-    egg_groups = [group.names[7].name for group in species.egg_groups]
+    growth_rate = species.growth_rate.name.title().replace("-", " ")
+    egg_groups = [group.name.title().replace("-", " ") for group in species.egg_groups]
     egg_groups_text = " / ".join(egg_groups)
     egg_cycles = species.hatch_counter
-    genus = species.genera[0].genus + " Pokémon"
-    height = str(pkmn_data.height / 10) + " m"
-    weight = str(pkmn_data.weight / 10) + " kg"
     text = f"""\n<b><u>Games data</u></b>
-<b>Gender</b>: {gender_percentage}
+<b>Gender (male/female)</b>: {gender_percentage}
 <b>Base friendship</b>: {base_friendship}
 <b>EV yield</b>: {ev_yield_text}
 <b>Catch rate</b>: {catch_rate}
 <b>Growth rate</b>: {growth_rate}
 <b>Egg groups</b>: {egg_groups_text}
-<b>Egg cycles</b>: {egg_cycles}\n
-<b><u>About Pokémon</u></b>
-<b>Species</b>: {genus}
-<b>Height</b>: {height}
-<b>Weight</b>: {weight}
+<b>Egg cycles</b>: {egg_cycles}
 """
     return text
 
@@ -70,4 +69,3 @@ def pokemon_text(pk, pkmn, expanded):
     species = pk.get_pokemon_species(pkmn)
     extra_data = get_advanced_data(pkmn_data, species) if expanded else ""
     return get_base_data(pk, pkmn_data, species, extra_data)
-
