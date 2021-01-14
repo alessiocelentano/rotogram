@@ -31,12 +31,17 @@ def main(app, inline_query):
     matches = [pkmn for pkmn in pokemon_list if inline_query.query in pkmn.lower()]
     results = []
     for pkmn in matches:
-        name = pk.get_pokemon_species(pkmn).names[7].name
-        thumb_url = pk.get_pokemon(pkmn).sprites.front_default.replace("pokemon", "pokemon/other/official-artwork")
+        pkmn_data = pk.get_pokemon(pkmn)
+        species = pk.get_pokemon_species(pkmn)
+        name = species.names[7].name
+        thumb_url = pkmn_data.sprites.front_default.replace("pokemon", "pokemon/other/official-artwork")
         markup = data_markup(name, expanded=0)
+        typing = " / ".join([ty.type.name.title() for ty in pkmn_data.types])
+        genus = species.genera[7].genus
         results.append(
             InlineQueryResultArticle(
                 title=name,
+                description=f"{genus}\nType: {typing}",
                 input_message_content=InputTextMessageContent("Loading..."),
                 thumb_url=thumb_url,
                 reply_markup=markup
