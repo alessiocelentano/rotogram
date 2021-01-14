@@ -4,7 +4,7 @@ from misc import get_abilities, get_gender_percentage, stat_abbr
 
 
 def get_base_data(pk, pkmn_data, species, extra_data):
-    name = species.name.title()
+    name = species.names[7].name
     artwork_link = pkmn_data.sprites.front_default.replace("pokemon", "pokemon/other/official-artwork")
     emoji = typing_emoji(pkmn_data)
     dex_number = species.order
@@ -43,7 +43,7 @@ def get_advanced_data(pkmn_data, species):
     ev_yield_text = " / ".join([str(ev_yield[stat]) + " " + stat for stat in ev_yield])
     catch_rate = species.capture_rate
     growth_rate = species.growth_rate.name.title()
-    egg_groups = [group.name.title() for group in species.egg_groups]
+    egg_groups = [group.names[7].name for group in species.egg_groups]
     egg_groups_text = " / ".join(egg_groups)
     egg_cycles = species.hatch_counter
     genus = species.genera[0].genus + " Pokémon"
