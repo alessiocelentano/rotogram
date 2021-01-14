@@ -13,34 +13,50 @@ from markup import data_markup, moveset_markup
 
 app = Client("Debug")
 pk = pokepy.V2Client()
+user_dict = {}
+with open("pkmn.txt") as f:
+    pokemon_list = [pkmn[:-1] for pkmn in f.readlines()]
 
 
 @app.on_inline_query()
 def main(app, inline_query):
-    try:
-        pokemon = pk.get_pokemon_species(inline_query.query)
-        thumb_url = pk.get_pokemon(inline_query.query).sprites.front_default.replace("pokemon", "pokemon/other/official-artwork")
-        name = pokemon.names[7].name
-        inline_query.answer(
-            results=[
-                InlineQueryResultArticle(
-                    title=name,
-                    input_message_content=InputTextMessageContent(
-                        pokemon_text(pk, name, expanded=0)
-                    ),
-                    thumb_url=thumb_url,
-                    reply_markup=data_markup(name, expanded=0)
-                )
-            ],
-            cache_time=5
-        )
-    except Exception:
+    if len(inline_query.query) < 3:
         inline_query.answer(
             results=[],
             switch_pm_text="Help",
             switch_pm_parameter="start",
             cache_time=5
         )
+        return
+    matches = [pkmn for pkmn in pokemon_list if inline_query.query in pkmn.lower()]
+    results = []
+    for pkmn in matches:
+        name = pk.get_pokemon_species(pkmn).names[7].name
+        thumb_url = pk.get_pokemon(pkmn).sprites.front_default.replace("pokemon", "pokemon/other/official-artwork")
+        markup = data_markup(name, expanded=0)
+        results.append(
+            InlineQueryResultArticle(
+                title=name,
+                input_message_content=InputTextMessageContent("Loading..."),
+                thumb_url=thumb_url,
+                reply_markup=markup
+            )
+        )
+    user_dict[inline_query.from_user.id] = {results[i].id: results[i].title for i in range(len(results))}
+    inline_query.answer(results=results, cache_time=1)
+
+
+@app.on_chosen_inline_result()
+def chosen(app, inline_query):
+    name = user_dict[inline_query.from_user.id][inline_query.result_id]
+    text = pokemon_text(pk, name, expanded=0)
+    markup = data_markup(name, expanded=0)
+    app.edit_inline_text(
+        inline_message_id=inline_query.inline_message_id,
+        text=text,
+        parse_mode="HTML",
+        reply_markup=markup
+    )
 
 
 @app.on_callback_query(filters.create(lambda _, __, query: "infos" in query.data))
