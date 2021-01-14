@@ -1,5 +1,4 @@
-def typing_emoji(pkmn_data):
-    typing = pkmn_data.types[0].type.name.title()
+def typing_emoji(typing):
     if typing == "Grass":
         return "🌱"
     elif typing == "Fire":

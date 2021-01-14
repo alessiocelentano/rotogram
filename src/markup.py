@@ -18,7 +18,8 @@ def data_markup(pkmn, expanded):
             text="⚔️ Moveset",
             callback_data="moveset/1/" + pkmn
             # 1 => page number, 10 moves each page (see set_moveset())
-        ),
+        )
+    ], [
         InlineKeyboardButton(
             text="🏠 Locations",
             callback_data="locations/" + pkmn
@@ -26,28 +27,30 @@ def data_markup(pkmn, expanded):
     ]])
 
 
-def moveset_markup(pkmn, page, pages):
+def moveset_markup(pk, pkmn, page):
+    pkmn_data = pk.get_pokemon(pkmn)
+    pages = (len(pkmn_data.moves) // 10) + 1
     # Initialize buttons
     markup_list = []
     begin = InlineKeyboardButton(
-        text='<<1',
-        callback_data='usage/'+'1'
+        text="<<1",
+        callback_data="moveset/1/"+pkmn
     )
     pre = InlineKeyboardButton(
         text=str(page-1),
-        callback_data='usage/'+str(page-1)
+        callback_data="moveset/"+str(page-1)+"/"+pkmn
     )
     page_button = InlineKeyboardButton(
-        text='•'+str(page)+'•',
-        callback_data='usage/'+str(page)
+        text="•"+str(page)+"•",
+        callback_data="moveset/"+str(page)+"/"+pkmn
     )
     suc = InlineKeyboardButton(
         text=str(page+1),
-        callback_data='usage/'+str(page+1)
+        callback_data="moveset/"+str(page+1)+"/"+pkmn
     )
     end = InlineKeyboardButton(
-        text=str(pages)+'>>',
-        callback_data='usage/'+str(pages)
+        text=str(pages)+">>",
+        callback_data="moveset/"+str(pages)+"/"+pkmn
     )
 
     # Create a page index that display, when possible,
@@ -68,8 +71,8 @@ def moveset_markup(pkmn, page, pages):
 
     markup_list.append([
         InlineKeyboardButton(
-            text='🔙 Back to basic infos',
-            callback_data="basic_infos/" + pkmn
+            text="🔙 Back",
+            callback_data="infos/0/" + pkmn
         )
     ])
 

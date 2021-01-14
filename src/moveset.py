@@ -1,19 +1,20 @@
-def moveset_text(pkmn_data, maxx, minn):
-    text = "<i>Move (Type)\nCategory, Method</i>\n\n"
+from emoji import typing_emoji
+
+
+def moveset_text(pk, pkmn, page):
+    pkmn_data = pk.get_pokemon(pkmn)
+    pages = (len(pkmn_data.moves) // 10) + 1
+    maxx = page * 10
+    minn = maxx - 10
     artwork = pkmn_data.sprites.front_default.replace("pokemon", "pokemon/other/official-artwork")
-    move_list = []
-    for move in pkmn_data.moves:
-        move_list.append({
-            "name": move.move.name.title(),
-            "type": move.move.type.title(),
-            "class": move.move.damaga_class.title(),
-            "emoji": typing_emoji(pkmn_data)
-        })
+    text = f"<a href=\"{artwork}\">💥</a><u><b> Moveset ({page}/{pages})</b></u>\n\n"
     for i in range(minn, maxx):
-        emoji = move["emoji"]
-        move = move_list[i]
-        name = move["name"]
-        typee = move["type"]
-        clss = move["class"]
-        text += f"<a href=\"{artwork}\">{emoji}</a> <b>{name}</b> ({typee})\n<i>{clss}</i>\n"
+        if i < len(pkmn_data.moves):
+            move = pk.get_move(pkmn_data.moves[i].move.name)
+            name = move.names[7].name
+            # typee = move.type.name.title()
+            clss = move.damage_class.name.title()
+            # emoji = typing_emoji(typee)
+            # text += f"<a href=\"{artwork}\">{emoji}</a> <b>{name}</b> ({typee})\n<i>{clss}</i>\n"
+            text += f"<b>{name}</b> ({clss})\n"
     return text

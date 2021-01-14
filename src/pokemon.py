@@ -6,10 +6,10 @@ from misc import get_abilities, get_gender_percentage, stat_abbr
 def get_base_data(pk, pkmn_data, species, extra_data):
     name = species.names[7].name
     artwork_link = pkmn_data.sprites.front_default.replace("pokemon", "pokemon/other/official-artwork")
-    emoji = typing_emoji(pkmn_data)
     dex_number = species.order
     types = [ty.type.name.title() for ty in pkmn_data.types]
     types_text = " / ".join(types)
+    emoji = typing_emoji(types[0])
     abilities = get_abilities(pkmn_data)
     abilities_text = " / ".join(abilities["abilities"])
     hidden_ability = abilities["hidden_ability"] if abilities["hidden_ability"] else "---"

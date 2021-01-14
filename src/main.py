@@ -58,6 +58,21 @@ def expand(app, query):
     )
 
 
+@app.on_callback_query(filters.create(lambda _, __, query: "moveset" in query.data))
+def moveset(app, query):
+    page = int(re.split("/", query.data)[1])
+    pkmn = re.split("/", query.data)[2]
+    text = moveset_text(pk, pkmn, page)
+    markup = moveset_markup(pk, pkmn, page)
+    app.answer_callback_query(query.id)
+    app.edit_inline_text(
+        inline_message_id=query.inline_message_id,
+        text=text,
+        parse_mode="HTML",
+        reply_markup=markup
+    )
+
+
 @app.on_message(filters.command("start"))
 def start(app, message):
     text = """⚡️ <b><u>What is Rotogram?</u></b>
@@ -72,26 +87,6 @@ Just write Pokemon name after @rotogrambot (e.g.: @rotogrambot Rotom)\n
     )
 
 """
-
-@app.on_callback_query(filters.create(lambda _, __, query: "moveset" in query.data))
-def moveset(app, call):
-    pkmn = re.split("/", call.data)[2]
-    pkmn_data = pk.get_pokemon(pkmn)
-    page = int(re.split("/", call.data)[1])
-    pages = (len(pkmn_data.moves) // 10) + 1
-    maxx = page * 10
-    minn = maxx - 10
-    text = set_moveset(pkmn_data, maxx, minn)
-    markup = moveset_markup(pkmn, page, pages)
-    app.answer_callback_query(message.id)
-    app.edit_message_text(
-        chat_id=message.message.chat.id,
-        text=text,
-        message_id=message.message.message_id,
-        parse_mode='HTML',
-        reply_markup=markup
-    )
-
 
 @app.on_callback_query(filters.create(lambda _, __, query: "locations" in query.data))
 def locations(app, call):
