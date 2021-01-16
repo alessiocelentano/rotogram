@@ -8,7 +8,7 @@ from pyrogram.types import InlineQueryResultArticle, InputTextMessageContent
 from pokemon import pokemon_text
 from moveset import moveset_text
 from locations import locations_text
-from markup import data_markup, moveset_markup
+from markup import data_markup, moveset_markup, locations_markup
 
 
 app = Client("Debug")
@@ -28,7 +28,7 @@ def main(app, inline_query):
             cache_time=5
         )
         return
-    matches = [pkmn for pkmn in pokemon_list if inline_query.query in pkmn.lower()]
+    matches = [pkmn for pkmn in pokemon_list if inline_query.query.lower() in pkmn.lower()]
     results = []
     for pkmn in matches:
         pkmn_data = pk.get_pokemon(pkmn)
@@ -42,13 +42,13 @@ def main(app, inline_query):
             InlineQueryResultArticle(
                 title=name,
                 description=f"{genus}\nType: {typing}",
-                input_message_content=InputTextMessageContent("Loading..."),
+                input_message_content=InputTextMessageContent(f"🔄 Loading..."),
                 thumb_url=thumb_url,
                 reply_markup=markup
             )
         )
     user_dict[inline_query.from_user.id] = {results[i].id: results[i].title for i in range(len(results))}
-    inline_query.answer(results=results, cache_time=1)
+    inline_query.answer(results=results, cache_time=3)
 
 
 @app.on_chosen_inline_result()
@@ -94,6 +94,19 @@ def moveset(app, query):
     )
 
 
+@app.on_callback_query(filters.create(lambda _, __, query: "locations" in query.data))
+def locations(app, query):
+    pkmn = re.split("/", query.data)[1]
+    text = locations_text(pk, pkmn)
+    markup = locations_markup(pkmn)
+    app.edit_inline_text(
+        inline_message_id=query.inline_message_id,
+        text=text,
+        parse_mode="HTML",
+        reply_markup=markup
+    )
+
+
 @app.on_message(filters.command("start"))
 def start(app, message):
     text = """⚡️ <b><u>What is Rotogram?</u></b>
@@ -106,34 +119,6 @@ Just write Pokemon name after @rotogrambot (e.g.: @rotogrambot Rotom)\n
         chat_id=message.from_user.id,
         text=text
     )
-
-"""
-
-@app.on_callback_query(filters.create(lambda _, __, query: "locations" in query.data))
-def locations(app, call):
-    pkmn = re.split("/", call.data)[2]
-    pkmn_data = pk.get_pokemon(pkmn)
-    page = int(re.split("/", call.data)[1])
-    pages = (len(pkmn_data.moves) // 10) + 1
-    maxx = page * 10
-    minn = maxx - 10
-    text = get_locations(data, pkmn)
-
-    markup = InlineKeyboardMarkup([[
-        InlineKeyboardButton(
-            text="⚔️ Moveset",
-            callback_data="moveset/"+pkmn+"/"+form
-        )
-    ],
-    [
-        InlineKeyboardButton(
-            text="🔙 Back to basic infos",
-            callback_data="basic_infos/"+pkmn+"/"+form
-        )
-    ]])
-
-    func.bot_action(app, call, text, markup)
-"""
 
 
 app.run()

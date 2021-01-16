@@ -77,3 +77,13 @@ def moveset_markup(pk, pkmn, page):
     ])
 
     return InlineKeyboardMarkup(markup_list)
+
+
+def locations_markup(pkmn):
+    return InlineKeyboardMarkup([[
+        InlineKeyboardButton(
+            text="🔙 Back",
+            callback_data="infos/0/" + pkmn
+        )
+    ]])
+
