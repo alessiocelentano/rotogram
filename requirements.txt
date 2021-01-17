@@ -1,2 +1,3 @@
 Pyrogram==1.0.7
+TgCrypto==1.2.2
 pokepy==0.6.1
