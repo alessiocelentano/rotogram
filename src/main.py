@@ -14,7 +14,7 @@ from markup import data_markup, moveset_markup, locations_markup
 app = Client("Debug")
 pk = pokepy.V2Client()
 user_dict = {}
-with open("pkmn.txt") as f:
+with open("src/pkmn.txt") as f:
     pokemon_list = [pkmn[:-1] for pkmn in f.readlines()]
 
 
