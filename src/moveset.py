@@ -12,9 +12,8 @@ def moveset_text(pk, pkmn, page):
         if i < len(pkmn_data.moves):
             move = pk.get_move(pkmn_data.moves[i].move.name)
             name = move.names[7].name
-            # typee = move.type.name.title()
             clss = move.damage_class.name.title()
-            # emoji = typing_emoji(typee)
-            # text += f"<a href=\"{artwork}\">{emoji}</a> <b>{name}</b> ({typee})\n<i>{clss}</i>\n"
-            text += f"<b>{name}</b> ({clss})\n"
+            typee = move.type.name.title()
+            emoji = typing_emoji(typee)
+            text += f"<a href=\"{artwork}\">{emoji}</a> <b>{name}</b> ({clss})\n"
     return text
