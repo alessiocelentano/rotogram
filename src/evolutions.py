@@ -91,6 +91,8 @@ def add_line(pk, species, chain, text, stage_n):
         try:
             if stage.evolves_to:  # It's empty in base stages
                 text = add_line(pk, species, stage.evolves_to, text, stage_n+1)
+            elif stage_n == 1:
+                return "<i>No evolution available for this Pokémon</i>\n"
         except AttributeError:  # It doesn't exist in last stages
             continue
     return text
