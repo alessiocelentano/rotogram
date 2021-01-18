@@ -1,9 +1,11 @@
 import re
+import time
 
 import pokepy
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.types import InlineQueryResultArticle, InputTextMessageContent
+from pyrogram.errors import FloodWait
 
 from pokemon import pokemon_text
 from moveset import moveset_text
@@ -56,12 +58,17 @@ def chosen(app, inline_query):
     name = user_dict[inline_query.from_user.id][inline_query.result_id]
     text = pokemon_text(pk, name, expanded=0)
     markup = data_markup(name, expanded=0)
-    app.edit_inline_text(
-        inline_message_id=inline_query.inline_message_id,
-        text=text,
-        parse_mode="HTML",
-        reply_markup=markup
-    )
+    while True:
+        try:
+            app.edit_inline_text(
+                inline_message_id=inline_query.inline_message_id,
+                text=text,
+                parse_mode="HTML",
+                reply_markup=markup
+            )
+            break
+        except FloodWait as fw:
+            time.sleep(fw.x)
 
 
 @app.on_callback_query(filters.create(lambda _, __, query: "infos" in query.data))
