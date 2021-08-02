@@ -82,7 +82,7 @@ def get_prefix(stage_n):
 
 def add_line(pk, species, chain, text, stage_n):
     for stage in chain:
-        name = pk.get_pokemon_species(stage.species.name).names[7].name
+        name = pk.get_pokemon_species(stage.species.name)[0].names[7].name
         if name == species.names[7].name:
             name = name.join(["<u>", "</u>"])
         prefix = get_prefix(stage_n)
@@ -101,7 +101,7 @@ def add_line(pk, species, chain, text, stage_n):
 def get_chain(pk, species):
     url = species.evolution_chain.url
     chain_id = re.findall("[^v][0-9]+", url)[0]
-    chain = [pk.get_evolution_chain(chain_id).chain]
+    chain = [pk.get_evolution_chain(chain_id)[0].chain]
     return chain
 
 

@@ -28,7 +28,7 @@ def data_markup(pkmn, expanded):
 
 
 def moveset_markup(pk, pkmn, page):
-    pkmn_data = pk.get_pokemon(pkmn)
+    pkmn_data = pk.get_pokemon(pkmn)[0]
     pages = (len(pkmn_data.moves) // 10) + 1
     # Initialize buttons
     markup_list = []
