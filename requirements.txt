@@ -1,3 +1,3 @@
-Pyrogram==1.0.7
+Pyrogram==1.2.9
 TgCrypto==1.2.2
-pokepy==0.6.1
+pokepy==0.4.0
