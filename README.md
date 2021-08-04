@@ -34,7 +34,7 @@ You can clone the bot:
 
 ```bash
 # Clone this repository
-$ git clone https://github.com/alessiocelentano/rotogram
+$ git clone https://github.com/Nastybox/rotogram
 
 # Go into the repository
 $ cd rotogram
