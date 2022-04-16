@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <img src="assets/logo-circle.png" alt="Rotogram" width="200"></a>
+  <img src="assets/rotogram.png" alt="Rotogram" width="200"></a>
 	<br>
 		Rotogram
 	</br>
