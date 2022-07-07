@@ -1,136 +1,72 @@
 import re
-import json
 
-import pokepy
-from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from pyrogram.types import InlineQueryResultArticle, InputTextMessageContent
+from pyrogram import filters
 
-from pokemon import pokemon_text
-from moveset import moveset_text
-from locations import locations_text
-from markup import data_markup, moveset_markup, locations_markup
+from client import client, pokemon_client
+from inline_search import (has_minimum_characters, show_help_button,
+                           get_matching_pokemon, create_inline_query_results)
+from create_page import create_datapage_text, create_datapage_markup
+import script
+import const
 
 
-app = Client("rotogram")
-pk = pokepy.V2Client()
-user_dict = {}
-with open("src/pkmn.json") as f:
-    data = json.load(f)
+user_query_dict = dict()
 
 
-@app.on_inline_query()
-def main(app, inline_query):
-    if len(inline_query.query) < 3:
-        inline_query.answer(
-            results=[],
-            switch_pm_text="Help",
-            switch_pm_parameter="start",
-            cache_time=5
-        )
+@client.on_message(filters.command('start'))
+async def start(client, message):
+    await client.send_message(
+        chat_id=message.from_user.id,
+        text=script.start
+    )
+
+
+@client.on_inline_query()
+async def inline_search(client, inline_query):
+    if not has_minimum_characters(inline_query.query):
+        await show_help_button(inline_query)
         return
-    matches = [pkmn.lower() for pkmn in data if inline_query.query.lower() in pkmn.lower()]
-    form_list = []
-    results = []
-    for pkmn in matches:
-        species = pk.get_pokemon_species(pkmn)[0]
-        for form in data[pkmn]:
-            pkmn_data = pk.get_pokemon(form)[0]
-            name_id = re.findall("[0-9]+", pkmn_data.forms[0].url)[-1]
-            name_list = [name.name for name in pk.get_pokemon_form(name_id)[0].names if name.language.name == "en"]
-            if name_list:
-                name = name_list[0]
-            else:
-                name = [name.name for name in species.names if name.language.name == "en"][0]
-            thumb_url = pkmn_data.sprites.front_default.replace("pokemon", "pokemon/other/official-artwork")
-            markup = data_markup(name, expanded=0)
-            typing = " / ".join([ty.type.name.title() for ty in pkmn_data.types])
-            genus = species.genera[7].genus
-            form_list.append(form)
-            results.append(
-                InlineQueryResultArticle(
-                    title=name,
-                    description=f"{genus}\nType: {typing}",
-                    input_message_content=InputTextMessageContent(f"🔄 Loading..."),
-                    thumb_url=thumb_url,
-                    reply_markup=markup
-                )
-            )
-    user_dict[inline_query.from_user.id] = {r.id: form for r, form in zip(results, form_list)}
-    inline_query.answer(results=results, cache_time=3)
+    match_list = get_matching_pokemon(inline_query.query.lower())
+    results = create_inline_query_results(match_list)
+    store_user_current_results(results, match_list, inline_query.from_user.id)
+    await inline_query.answer(
+        results=results,
+        cache_time=const.CACHE_TIME
+    )
 
 
-@app.on_chosen_inline_result()
-def chosen(app, inline_query):
-    form = user_dict[inline_query.from_user.id][inline_query.result_id]
-    species = [sp for sp in data if form in data[sp] or sp == form][0]
-    text = pokemon_text(pk, species, form, expanded=0)
-    markup = data_markup(form, expanded=0)
-    app.edit_inline_text(
+@client.on_chosen_inline_result()
+async def create_page(app, inline_query):
+    species_name = user_query_dict[inline_query.from_user.id][inline_query.result_id]
+    species = pokemon_client.get_pokemon_species(species_name).pop()
+    text = create_datapage_text(species, is_expanded=False)
+    markup = create_datapage_markup(species.name, is_expanded=False)
+    await app.edit_inline_text(
         inline_message_id=inline_query.inline_message_id,
         text=text,
-        parse_mode="HTML",
         reply_markup=markup
     )
 
 
-@app.on_callback_query(filters.create(lambda _, __, query: "infos" in query.data))
-def expand(app, query):
-    expanded = int(re.split("/", query.data)[1])
-    form = re.split("/", query.data)[2]
-    species = [sp for sp in data if form in data[sp] or sp == form][0]
-    text = pokemon_text(pk, species, form, expanded=expanded)
-    markup = data_markup(form, expanded=expanded)
-    app.answer_callback_query(query.id)
-    app.edit_inline_text(
+@client.on_callback_query(filters.create(lambda _, __, query: 'infos' in query.data))
+async def expand(app, query):
+    # first value (underscore) is useless, it's just used to call expand()
+    _, is_expanded, species_name = re.split('/', query.data)
+    is_expanded = int(is_expanded)
+    species = pokemon_client.get_pokemon_species(species_name).pop()
+    text = create_datapage_text(species, is_expanded=is_expanded)
+    markup = create_datapage_markup(species.name, is_expanded=is_expanded)
+    await app.answer_callback_query(query.id)  # Delete the loading circle
+    await app.edit_inline_text(
         inline_message_id=query.inline_message_id,
         text=text,
-        parse_mode="HTML",
         reply_markup=markup
     )
 
 
-@app.on_callback_query(filters.create(lambda _, __, query: "moveset" in query.data))
-def moveset(app, query):
-    page = int(re.split("/", query.data)[1])
-    form = re.split("/", query.data)[2]
-    text = moveset_text(pk, form, page)
-    markup = moveset_markup(pk, form, page)
-    app.answer_callback_query(query.id)
-    app.edit_inline_text(
-        inline_message_id=query.inline_message_id,
-        text=text,
-        parse_mode="HTML",
-        reply_markup=markup
-    )
+def store_user_current_results(results, match_list, user_id):
+    user_query_dict[user_id] = {r.id: species_name for r, species_name in zip(results, match_list)}
 
 
-@app.on_callback_query(filters.create(lambda _, __, query: "locations" in query.data))
-def locations(app, query):
-    form = re.split("/", query.data)[1]
-    text = locations_text(pk, form)
-    markup = locations_markup(form)
-    app.edit_inline_text(
-        inline_message_id=query.inline_message_id,
-        text=text,
-        parse_mode="HTML",
-        reply_markup=markup
-    )
-
-
-@app.on_message(filters.command("start"))
-def start(app, message):
-    text = """⚡️ <b><u>What is Rotogram?</u></b>
-Rotomgram is a bot which acts as a helper for trainers on Telegram. \
-You can check information of Pokemon, Showdown usage and more as quickly as possible, without ever leaving Telegram\n
-🛠 <b><u>Usage</u></b>
-Just write Pokemon name after @rotogrambot (e.g.: @rotogrambot Rotom)\n
-@alessiocelentano | <a href="t.me/rotogram">Follow us</a> | <a href="github.com/alessiocelentano/rotogram">GitHub</a>"""
-    app.send_message(
-        chat_id=message.from_user.id,
-        text=text
-    )
-
-
-if __name__ == "__main__":
-    app.run()
+if __name__ == '__main__':
+    client.run()

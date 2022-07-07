@@ -1,32 +1,29 @@
-def get_abilities(pkmn_data):
-    ability_dict = {"abilities": [], "hidden_ability": None}
-    for ability in pkmn_data.abilities:
-        if ability.is_hidden:
-            ability_dict["hidden_ability"] = ability.ability.name.title().replace("-", " ")
-        else:
-            ability_dict["abilities"].append(ability.ability.name.title().replace("-", " "))
-    return ability_dict
+from client import pokemon_client
 
 
-def get_gender_percentage(species):
-    if species.gender_rate == -1:
-        return "Genderless"
-    else:
-        female = species.gender_rate / 8 * 100
-        male = 100 - female
-        return f"{male}% / {female}%"
+def get_english_genus(genus_name_list):
+    for name in genus_name_list:
+        if name.language.name == 'en': return name.genus
 
 
-def stat_abbr(stat):
-    if stat == "hp":
-        return "HP"
-    if stat == "attack":
-        return "ATK"
-    if stat == "defense":
-        return "DEF"
-    if stat == "special-attack":
-        return "SPA"
-    if stat == "special-defense":
-        return "SPD"
-    if stat == "speed":
-        return "SPE"
+def get_english_name_of(element):
+    for name in element.names:
+        if name.language.name == 'en': return name.name
+
+
+def get_default_pokemon_from_species(species):
+    for variety in species.varieties:
+        if not variety.is_default: continue
+        pokemon_name = variety.pokemon.name
+        return pokemon_client.get_pokemon(pokemon_name).pop()
+
+
+def get_formatted_typing(pokemon):
+    types = [t.type.name for t in pokemon.types]
+    return ' / '.join(types).title()
+
+
+def get_thumb_url(pokemon):
+    thumb_url = pokemon.sprites.front_default
+    return thumb_url.replace('pokemon', 'pokemon/other/home')
+    # return thumb_url.replace('pokemon', 'pokemon/other/home/shiny')
