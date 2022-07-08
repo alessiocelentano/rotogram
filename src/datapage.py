@@ -54,7 +54,7 @@ def get_abilities(pokemon, hidden_ability=False):
 
 def get_formatted_evolution_chain(species):
     chain = get_chain_obj(species)
-    chain_dict = serialize_evolutions(chain)
+    chain_dict = serialize_evolutions(chain, species.name)
     if len(chain_dict) == 1:
         return script.no_evolutions
     return chain_dict
@@ -67,15 +67,16 @@ def get_chain_obj(species):
     return chain
 
 
-def serialize_evolutions(stage, stage_index=1):
+def serialize_evolutions(stage, stage_searched_name, stage_index=1):
     text = ''
     species = pokemon_client.get_pokemon_species(stage.species.name).pop()
     stage_name = get_english_name_of(species)
     methods = get_evolution_method(stage.evolution_details)
     if 'evolves_to' in dir(stage):
         for stage in stage.evolves_to:
-            text += serialize_evolutions(stage, stage_index=stage_index+1)
-    if species.name == stage: stage_name = stage_name.join(['<u>', '</u>'])
+            text += serialize_evolutions(stage, stage_searched_name, stage_index=stage_index+1)
+    if species.name == stage_searched_name:
+        stage_name = stage_name.join(['<u>', '</u>'])
     arrow_prefix = add_arrows_scheme(stage_index)
     return f'{arrow_prefix}{stage_name} {methods}\n{text}'
 
