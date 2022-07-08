@@ -1,6 +1,5 @@
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
 from client import pokemon_client
+
 from misc import (get_english_genus, get_english_name_of,
                   get_default_pokemon_from_species,
                   get_thumb_url, get_formatted_typing)
@@ -8,11 +7,11 @@ import script
 import const
 
 
-def create_datapage_text(species, is_expanded=False):
+def get_text(species, is_expanded=False, is_shiny=False):
     data = dict()
     pokemon = get_default_pokemon_from_species(species)
     data['name'] = get_english_name_of(species)
-    data['artwork_link'] = get_thumb_url(pokemon)
+    data['artwork_link'] = get_thumb_url(pokemon, is_shiny)
     data['types'] = get_formatted_typing(pokemon)
     data['abilities'] = get_formatted_abilities(pokemon)
     data['hidden_ability'] = get_formatted_abilities(pokemon, hidden_ability=True)
@@ -36,7 +35,7 @@ def create_datapage_text(species, is_expanded=False):
         egg_groups = [group.name.title().replace("-", " ") for group in species.egg_groups]
         data['egg_groups_text'] = " / ".join(egg_groups)
         data['egg_cycles'] = species.hatch_counter
-    return script.pokemon_page(data)
+    return script.pokemon_page(data, is_expanded)
 
 
 def get_formatted_abilities(pokemon, hidden_ability=False):
@@ -55,20 +54,10 @@ def get_abilities(pokemon, hidden_ability=False):
 
 def get_formatted_evolution_chain(species):
     chain = get_chain_obj(species)
-    chain_dict = prettify_chain(chain)
+    chain_dict = serialize_evolutions(chain)
     if len(chain_dict) == 1:
-        return '<i>It is not known to evolve into or from any other Pokémon</i>\n'
-    stage_index = 1
-    text = ''
-    for stage in chain_dict:
-        stage_name = chain_dict[stage]['name']
-        method = chain_dict[stage]['method']
-        if species.name == stage:
-            stage_name = stage_name.join(['<u>', '</u>'])
-        arrow_prefix = add_arrows_scheme(stage_index)
-        text += f'{arrow_prefix}{stage_name} {method}\n'
-        stage_index += 1
-    return text
+        return script.no_evolutions
+    return chain_dict
 
 
 def get_chain_obj(species):
@@ -78,21 +67,17 @@ def get_chain_obj(species):
     return chain
 
 
-def prettify_chain(chain, pre_evolution=None):
-    species = pokemon_client.get_pokemon_species(chain.species.name).pop()
-    species_name = get_english_name_of(species)
-    methods = get_evolution_method(chain.evolution_details)
-    chain_dict = {
-        species.name: {
-            'name': species_name,
-            'pre_evolution': pre_evolution,
-            'method': methods
-        }
-    }
-    if 'evolves_to' in dir(chain):
-        for stage in chain.evolves_to:
-            chain_dict.update(prettify_chain(stage, pre_evolution=species_name))
-    return chain_dict
+def serialize_evolutions(stage, stage_index=1):
+    text = ''
+    species = pokemon_client.get_pokemon_species(stage.species.name).pop()
+    stage_name = get_english_name_of(species)
+    methods = get_evolution_method(stage.evolution_details)
+    if 'evolves_to' in dir(stage):
+        for stage in stage.evolves_to:
+            text += serialize_evolutions(stage, stage_index=stage_index+1)
+    if species.name == stage: stage_name = stage_name.join(['<u>', '</u>'])
+    arrow_prefix = add_arrows_scheme(stage_index)
+    return f'{arrow_prefix}{stage_name} {methods}\n{text}'
 
 
 def get_evolution_method(method_list):
@@ -190,25 +175,3 @@ def get_short_stat_name(stat):
     if stat == "special-attack": return "SPA"
     if stat == "special-defense": return "SPD"
     if stat == "speed": return "SPE"
-
-
-def create_datapage_markup(species_name, is_expanded=False):
-    return InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton(
-                text=script.reduce if is_expanded else script.expand,
-                callback_data=f'infos/{int(not is_expanded)}/{species_name}'
-            )
-        ], [
-            InlineKeyboardButton(
-                text=script.moveset,
-                callback_data=f'moveset/1/{species_name}'
-                # 1 => page number, 10 moves each page (see set_moveset())
-            )
-        ], [
-            InlineKeyboardButton(
-                text=script.location,
-                callback_data=f'locations/{species_name}'
-            )
-        ]
-    ])

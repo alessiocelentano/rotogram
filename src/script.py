@@ -12,11 +12,30 @@ Just write Pokemon name after @rotogrambot (e.g.: @rotogrambot Rotom)\n
 <a href='t.me/rotogram'>Follow us</a> | \
 <a href='github.com/alessiocelentano/rotogram'>GitHub</a>
 '''
+shiny_accepted = f'''
+You accepted a strange gift.
+It contains a message:
+
+"<i>Yo trainer, try to search some Pokémon on Rotogram with this new item.
+It contains two commands: /set_shiny and /unset_shiny.
+By default is setted on. Follow me on @rotogram for more news like this.
+
+with {const.HEART} ,
+- the developer</i>"
+'''
+
 loading = f'{const.LOADING_CIRCLE}  Loading...'
+shiny_page_loading = f'{const.GLYPH_NOT_FOUND} L?ad?ng...?'
 reduce = f'{const.MINUS}  Reduce'
 expand = f'{const.PLUS}  Expand'
-moveset = f'{const.SWORDS}  Moveset'
+movepool = f'{const.SWORDS}  Moves'
 location = f'{const.HOUSE}  Locations'
+back = f'{const.BACK} Back'
+accept_shiny_button = f'{const.TICK} ACCEPT GIFT'
+set_shiny_command = 'Shiny images setted successfully!'
+unset_shiny_command = 'Shiny images unsetted successfully!'
+no_evolutions = '<i>It is not known to evolve into or from any other Pokémon</i>\n'
+
 shedinja_method = '''\
 evolve Nincada having one Poké Ball in bag and one empty slot in party
 '''
@@ -38,43 +57,21 @@ interact with Scroll of Darkness/Waters
 '''
 
 
-def pokemon_page(data):
-    genus_line = f'<b>Species</b>: {data["genus"]} ' if 'genus' in data else ''
-    dex_number_line = f'<b>National Pokedex Number</b>: {data["dex_number"]} ' if 'dex_number' in data else ''
-    height_line = f'<b>Height</b>: {data["height"]} ' if 'height' in data else ''
-    weight_line = f'<b>Weight</b>: {data["weight"]} ' if 'weight' in data else ''
-    gender_line = f'<b>Gender (male/female)</b>: {data["gender_percentage"]} ' if 'gender_percentage' in data else ''
-    base_friendship_line = f'<b>Base friendship</b>: {data["base_friendship"]} ' if 'base_friendship' in data else ''
-    ev_yield_line = f'<b>EV yield</b>: {data["ev_yield_text"]} ' if 'ev_yield_text' in data else ''
-    catch_rate_line = f'<b>Catch rate</b>: {data["catch_rate"]} ' if 'catch_rate' in data else ''
-    growth_rate_line = f'<b>Growth rate</b>: {data["growth_rate"]} ' if 'growth_rate' in data else ''
-    egg_groups_line = f'<b>Egg groups</b>: {data["egg_groups_text"]} ' if 'egg_groups_text' in data else ''
-    egg_cycles_line = f'<b>Egg cycles</b>: {data["egg_cycles"]} ' if 'egg_cycles' in data else ''
-    expand_data = ''
+def pokemon_page(data, is_expanded=False):
     # Just check one variable. If that line is not empty, expand_data has to be prompted
-    if genus_line:
-        pokedex_data_title = '<u><b>Pokédex data</b></u>'
-        game_data_title = '<u><b>Game data</b></u>'
-        expand_data = '\n'.join(['', pokedex_data_title, genus_line, dex_number_line,
-                                 height_line, weight_line, gender_line, '',
-                                 game_data_title, base_friendship_line, ev_yield_line,
-                                 catch_rate_line, growth_rate_line, egg_groups_line,
-                                 egg_cycles_line, ''])
-
+    expand_text = get_expand_data(data) if is_expanded else ''
     type_title = 'Types' if '/' in data['types'] else 'Type'
     ability_title = 'Abilities' if '/' in data['abilities'] else 'Ability'
     hidden_ability_line = f'\n<b>Hidden Ability</b>: {data["hidden_ability"]}' if data['hidden_ability'] else ''
-
     return f'''
 <b><u>{data['name']}</u></b> <a href='{data['artwork_link']}'> \
 {const.TYPE_EMOJI[data['primary_type']]}</a> {const.TYPE_EMOJI[data['secondary_type']]}
 <b>{type_title}</b>: {data["types"]}
 <b>{ability_title}</b>: {data['abilities']} \
-{hidden_ability_line}
-
+{hidden_ability_line}\n
 <b><u>Evolutions</u></b>
 {data['evolution_family']} \
-{expand_data}
+{expand_text}
 <b><u>Base stats</u></b>
 {data['stats']['hp']} HP {data['stats_rating']['hp']}
 {data['stats']['attack']} ATK {data['stats_rating']['attack']}
@@ -82,4 +79,48 @@ def pokemon_page(data):
 {data['stats']['special-attack']} SPA {data['stats_rating']['special-attack']}
 {data['stats']['special-defense']} SPD {data['stats_rating']['special-defense']}
 {data['stats']['speed']} SPE {data['stats_rating']['speed']}
+'''
+
+
+def get_expand_data(data):
+    return f'''
+<u><b>Pokédex data</b></u>
+<b>Species</b>: {data["genus"]}
+<b>National Pokedex Number</b>: {data["dex_number"]}
+<b>Height</b>: {data["height"]}
+<b>Weight</b>: {data["weight"]}
+<b>Gender (male/female)</b>: {data["gender_percentage"]}\n
+<u><b>Game data</b></u>
+<b>Base friendship</b>: {data["base_friendship"]}
+<b>EV yield</b>: {data["ev_yield_text"]}
+<b>Catch rate</b>: {data["catch_rate"]}
+<b>Growth rate</b>: {data["growth_rate"]}
+<b>Egg groups</b>: {data["egg_groups_text"]}
+<b>Egg cycles</b>: {data["egg_cycles"]}
+'''
+
+
+shiny_page = f'''
+<b><u>{const.SHINY_PAGE_TITLE}</u></b> <a href='{const.SHINY_PAGE_THUMB_URL}'> \
+{const.TYPE_EMOJI["bird"]}</a> {const.TYPE_EMOJI["normal"]} \n
+<b><u>Evolutions</u></b>
+<i>This Pokémon does not even exist</i>\n
+<b><u>Base stats</u></b>
+33 HP {const.BLACK_CIRCLE * 2}
+136 ATK {const.BLACK_CIRCLE * 6}
+0 DEF {const.BLACK_CIRCLE * 10}
+6 SPCL {const.BLACK_CIRCLE * 1}
+29 SPE {const.BLACK_CIRCLE * 2}
+'''
+
+
+def add_movepool_title(current_page, total_pages, artwork):
+    return f' <a href=\'{artwork}\'>{const.RED_SPARK}</a> <u><b>Movepool ({current_page}/{total_pages})</b></u>\n'
+
+
+def add_movepool_line(name, class_, type_, power, accuracy):
+    return f'''
+– <b>{name}</b> – (<i>{class_}</i>)
+<b>Type</b>: {type_} {const.TYPE_EMOJI[type_.lower()]}
+<b>Power</b>: {power} | <b>Accuracy</b>: {accuracy}
 '''
