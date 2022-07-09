@@ -1,15 +1,13 @@
 from client import pokemon_client
 
 from misc import (get_english_genus, get_english_name_of,
-                  get_default_pokemon_from_species,
                   get_thumb_url, get_formatted_typing)
 import script
 import const
 
 
-def get_text(species, is_expanded=False, is_shiny=False):
+def get_text(species, pokemon, is_expanded=False, is_shiny=False):
     data = dict()
-    pokemon = get_default_pokemon_from_species(species)
     data['name'] = get_english_name_of(species)
     data['artwork_link'] = get_thumb_url(pokemon, is_shiny)
     data['types'] = get_formatted_typing(pokemon)
@@ -19,6 +17,7 @@ def get_text(species, is_expanded=False, is_shiny=False):
     data['primary_type'] = types[0]
     data['secondary_type'] = types[1] if len(types) > 1 else 'no'
     data['evolution_family'] = get_formatted_evolution_chain(species)
+    data['alternative_forms'] = get_formatted_alternative_forms(species, pokemon)
     data['stats'] = {stat.stat.name: stat.base_stat for stat in pokemon.stats}
     data['stats_rating'] = get_stats_rating_emoji(data['stats'])
     if is_expanded:
@@ -54,10 +53,10 @@ def get_abilities(pokemon, hidden_ability=False):
 
 def get_formatted_evolution_chain(species):
     chain = get_chain_obj(species)
-    chain_dict = serialize_evolutions(chain, species.name)
-    if len(chain_dict) == 1:
-        return script.no_evolutions
-    return chain_dict
+    if has_evolution(chain):
+        evolution_text = serialize_evolutions(chain, species.name)
+        return evolution_text
+    return script.no_evolutions
 
 
 def get_chain_obj(species):
@@ -70,15 +69,26 @@ def get_chain_obj(species):
 def serialize_evolutions(stage, stage_searched_name, stage_index=1):
     text = ''
     species = pokemon_client.get_pokemon_species(stage.species.name).pop()
-    stage_name = get_english_name_of(species)
     methods = get_evolution_method(stage.evolution_details)
-    if 'evolves_to' in dir(stage):
+    stage_name = get_english_name_of(species)
+
+    if has_evolution(stage):
         for stage in stage.evolves_to:
             text += serialize_evolutions(stage, stage_searched_name, stage_index=stage_index+1)
+
+    arrow_prefix = add_arrows_scheme(stage_index)
     if species.name == stage_searched_name:
         stage_name = stage_name.join(['<u>', '</u>'])
-    arrow_prefix = add_arrows_scheme(stage_index)
+
     return f'{arrow_prefix}{stage_name} {methods}\n{text}'
+
+
+def has_evolution(species):
+    return 'evolves_to' in dir(species) and species.evolves_to
+
+
+def serialize_pokemon_name(pokemon_name):
+    return pokemon_name.replace('-', ' ').title()
 
 
 def get_evolution_method(method_list):
@@ -144,6 +154,42 @@ def add_arrows_scheme(stage_index):
     if stage_index == 1: return ''
     if stage_index == 2: return '↳ '
     if stage_index == 3: return '   ↳ '
+
+
+def get_formatted_alternative_forms(species, pokemon):
+    text = ''
+    alternative_forms_dict = get_alternative_forms_dict(species, pokemon)
+    if alternative_forms_dict['megaevolution']:
+        text += '<b>Megaevolution</b> available\n'
+    if alternative_forms_dict['gigantamax']:
+        text += '<b>Gigantamax</b> available\n'
+    if alternative_forms_dict['other']:
+        text += '\n<u><b>Alternative form(s)</b></u>\n'
+        text += ', '.join([prettify_form_name(form.name) for form in alternative_forms_dict['other']])
+        text += '\n'
+    return text
+
+
+def get_alternative_forms_dict(species, pokemon):
+    alternative_forms_dict = {
+        'megaevolution': False,
+        'gigantamax': False,
+        'other': [],
+    }
+    for alternative_form in species.varieties:
+        if alternative_form.pokemon.name == pokemon.name:
+            continue
+        elif '-mega' in alternative_form.pokemon.name:
+            alternative_forms_dict['megaevolution'] = True
+        elif '-gmax' in alternative_form.pokemon.name:
+            alternative_forms_dict['gigantamax'] = True
+        else:
+            alternative_forms_dict['other'].append(alternative_form.pokemon)
+    return alternative_forms_dict
+
+
+def prettify_form_name(form_name):
+    return form_name.replace('-', ' ').title()
 
 
 def get_stats_rating_emoji(stats_dict):

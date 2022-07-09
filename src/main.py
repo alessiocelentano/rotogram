@@ -75,6 +75,7 @@ async def create_page(app, inline_query):
 
     try:
         species = pokemon_client.get_pokemon_species(species_name).pop()
+        pokemon = get_default_pokemon_from_species(species)
     except Exception:
         if is_shiny_keyword(species_name):
             await load_shiny_page(app, inline_query, is_shiny_unlocked(inline_query.from_user.id))
@@ -84,7 +85,7 @@ async def create_page(app, inline_query):
 
     await app.edit_inline_text(
         inline_message_id=inline_query.inline_message_id,
-        text=datapage.get_text(species, is_expanded=False, is_shiny=is_shiny),
+        text=datapage.get_text(species, pokemon, is_expanded=False, is_shiny=is_shiny),
         reply_markup=markup.get_datapage(species.name, is_expanded=False)
     )
 
@@ -100,6 +101,7 @@ async def expand(app, query):
 
     try:
         species = pokemon_client.get_pokemon_species(species_name).pop()
+        pokemon = get_default_pokemon_from_species(species)
     except Exception:
         if is_shiny_keyword(species_name):
             await load_shiny_page(app, query)
@@ -108,7 +110,7 @@ async def expand(app, query):
     await app.answer_callback_query(query.id)  # Delete the loading circle
     await app.edit_inline_text(
         inline_message_id=query.inline_message_id,
-        text=datapage.get_text(species, is_expanded=is_expanded, is_shiny=is_shiny),
+        text=datapage.get_text(species, pokemon, is_expanded=is_expanded, is_shiny=is_shiny),
         reply_markup=markup.get_datapage(species_name, is_expanded=is_expanded)
     )
 

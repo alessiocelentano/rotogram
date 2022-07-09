@@ -3,13 +3,13 @@ import const
 
 start = f'''
 {const.ZAP} <b><u>What is Rotogram?</u></b>
-Rotogram is a bot which acts as a helper for trainers on Telegram. \
-You can check information of Pokemon, Showdown usage and more \
+Rotogram is a bot which acts as a helper for trainers on Telegram.\
+You can check information of Pokemon, Showdown usage and more\
 as quickly as possible, without ever leaving Telegram\n
 {const.TOOL} <b><u>Usage</u></b>
 Just write Pokemon name after @rotogrambot (e.g.: @rotogrambot Rotom)\n
-@alessiocelentano | \
-<a href='t.me/rotogram'>Follow us</a> | \
+@alessiocelentano |\
+<a href='t.me/rotogram'>Follow us</a> |\
 <a href='github.com/alessiocelentano/rotogram'>GitHub</a>
 '''
 shiny_accepted = f'''
@@ -46,7 +46,7 @@ sirfetch_method = '''\
 land three critical hits in one battle
 '''
 runerigus_method = '''\
-travel under the stone bridge in Dusty Bowl after taking at least \
+travel under the stone bridge in Dusty Bowl after taking at least\
 49 damage from attacks without fainting
 '''
 alcremie_method = '''\
@@ -64,13 +64,14 @@ def pokemon_page(data, is_expanded=False):
     ability_title = 'Abilities' if '/' in data['abilities'] else 'Ability'
     hidden_ability_line = f'\n<b>Hidden Ability</b>: {data["hidden_ability"]}' if data['hidden_ability'] else ''
     return f'''
-<b><u>{data['name']}</u></b> <a href='{data['artwork_link']}'> \
+<b><u>{data['name']}</u></b> <a href='{data['artwork_link']}'>\
 {const.TYPE_EMOJI[data['primary_type']]}</a> {const.TYPE_EMOJI[data['secondary_type']]}
 <b>{type_title}</b>: {data["types"]}
-<b>{ability_title}</b>: {data['abilities']} \
+<b>{ability_title}</b>: {data['abilities']}\
 {hidden_ability_line}\n
 <b><u>Evolutions</u></b>
-{data['evolution_family']} \
+{data['evolution_family']}\
+{data['alternative_forms']}\
 {expand_text}
 <b><u>Base stats</u></b>
 {data['stats']['hp']} HP {data['stats_rating']['hp']}
@@ -101,8 +102,8 @@ def get_expand_data(data):
 
 
 shiny_page = f'''
-<b><u>{const.SHINY_PAGE_TITLE}</u></b> <a href='{const.SHINY_PAGE_THUMB_URL}'> \
-{const.TYPE_EMOJI["bird"]}</a> {const.TYPE_EMOJI["normal"]} \n
+<b><u>{const.SHINY_PAGE_TITLE}</u></b> <a href='{const.SHINY_PAGE_THUMB_URL}'>\
+{const.TYPE_EMOJI["bird"]}</a> {const.TYPE_EMOJI["normal"]}\n
 <b><u>Evolutions</u></b>
 <i>This Pokémon does not even exist</i>\n
 <b><u>Base stats</u></b>
