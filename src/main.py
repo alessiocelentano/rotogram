@@ -4,140 +4,177 @@ from pyrogram import filters
 
 from client import client, pokemon_client
 from inline import (has_minimum_characters, show_help_button,
-                    get_matching_pokemon, create_inline_query_results)
+                    get_matching_pokemon, get_query_results)
 import datapage
 import movepool
 import markup
 from shiny import is_shiny_keyword, load_shiny_page
-from misc import get_default_pokemon_from_species
 import script
 import const
 
 
-user_query_dict = dict()
+user_settings = {}
+user_query_results = {}
+
 
 
 @client.on_message(filters.command('start'))
 async def start(client, message):
-    store_user_data(message.from_user.id)
+    '''/start command:
+    it shows a brief description of the bot and the usage'''
+
+    user_id = message.from_user.id
+    if user_id not in user_settings:
+        create_user_settings(user_id)
+
+    text = script.start
+    if is_shiny_unlocked(user_id):
+        text += script.start_shiny_unlocked
+
     await client.send_message(
-        chat_id=message.from_user.id,
-        text=script.start
+        chat_id=user_id,
+        text=text
     )
 
 
-@client.on_message(filters.command('set_shiny'))
-async def set_shiny_command(client, message):
-    store_user_data(message.from_user.id)
-    if not is_shiny_unlocked(message.from_user.id): return
-    set_shiny(message.from_user.id)
-    await client.send_message(
-        chat_id=message.from_user.id,
-        text=script.set_shiny_command
-    )
+@client.on_message(filters.command('toggle_shiny'))
+async def toggle_shiny(client, message):
+    '''set/unset the Pokémon shiny form for the thumbnail'''
 
+    user_id = message.from_user.id
+    if user_id not in user_settings:
+        create_user_settings(user_id)
 
-@client.on_message(filters.command('unset_shiny'))
-async def unset_shiny_command(client, message):
-    store_user_data(message.from_user.id)
-    if not is_shiny_unlocked(message.from_user.id): return
-    unset_shiny(message.from_user.id)
-    await client.send_message(
-        chat_id=message.from_user.id,
-        text=script.unset_shiny_command
-    )
+    if is_shiny_unlocked(user_id):
+        if is_shiny_setted(user_id):
+            unset_shiny(user_id)
+            text = script.unset_shiny
+        else:
+            set_shiny(user_id)
+            text = script.set_shiny
+
+        await client.send_message(
+            chat_id=user_id,
+            text=text
+        )
 
 
 @client.on_inline_query()
 async def inline_search(client, inline_query):
-    store_user_data(inline_query.from_user.id)
+    '''Search Pokémon via inline mode.
+    It shows one or more query results based on the input.
+    e.g.:
+    @rotogrambot rotom'''
 
-    if not has_minimum_characters(inline_query.query):
+    user_id = inline_query.from_user.id
+    query_message = inline_query.query
+    if user_id not in user_settings:
+        create_user_settings(user_id)
+
+    if not has_minimum_characters(query_message):
         await show_help_button(inline_query)
         return
 
-    match_list = get_matching_pokemon(inline_query.query.lower())
-    is_shiny = user_query_dict[inline_query.from_user.id]['shiny']
-    results = create_inline_query_results(match_list, is_shiny=is_shiny)
+    match_list = get_matching_pokemon(query_message.lower())
+    query_results = get_query_results(match_list, is_shiny_setted=is_shiny_setted(user_id))
+    store_user_query_results(query_results, match_list, user_id)
 
-    store_user_current_results(results, match_list, inline_query.from_user.id)
     await inline_query.answer(
-        results=results,
+        results=query_results,
         cache_time=const.CACHE_TIME
     )
 
 
+def store_user_query_results(query_results, match_list, user_id):
+    user_query_results[user_id] = {}
+    for result, pokemon_name in zip(query_results, match_list):
+        user_query_results[user_id] |= {result.id: pokemon_name}
+
+
 @client.on_chosen_inline_result()
 async def create_page(app, inline_query):
-    store_user_data(inline_query.from_user.id)
-    pokemon_name = user_query_dict[inline_query.from_user.id][inline_query.result_id]
-    is_shiny = user_query_dict[inline_query.from_user.id]['shiny']
+    '''Create page of chosen Pokémon'''
 
-    try:
-        pokemon = pokemon_client.get_pokemon(pokemon_name).pop()
-    except Exception:
-        if is_shiny_keyword(pokemon_name):
-            await load_shiny_page(app, inline_query, is_shiny_unlocked(inline_query.from_user.id))
-        else:
-            await app.edit_inline_text(
-                inline_message_id=inline_query.inline_message_id,
-                text=script.pokemon_not_found
-            )
+    user_id = inline_query.from_user.id
+    result_id = inline_query.result_id
+    message_id = inline_query.inline_message_id
+    pokemon_name = user_query_results[user_id][result_id]
+    if user_id not in user_settings:
+        create_user_settings(user_id)
+
+    if is_shiny_keyword(pokemon_name):
+        await load_shiny_page(app, inline_query, is_shiny_unlocked=is_shiny_unlocked(user_id))
         return
 
+    pokemon = pokemon_client.get_pokemon(pokemon_name).pop()
+
     await app.edit_inline_text(
-        inline_message_id=inline_query.inline_message_id,
-        text=datapage.get_text(pokemon, is_expanded=False, is_shiny=is_shiny),
+        inline_message_id=message_id,
+        text=datapage.get_text(pokemon, is_expanded=False, is_shiny_setted=is_shiny_setted(user_id)),
         reply_markup=markup.get_datapage(pokemon_name, is_expanded=False)
     )
 
 
 @client.on_callback_query(filters.create(lambda _, __, query: 'infos' in query.data))
 async def expand(app, query):
-    store_user_data(query.from_user.id)
+    '''Expand/Reduce button:
+    get more/less data (such as Pokédex and other game data)'''
+
+    user_id = query.from_user.id
+    message_id = query.inline_message_id
+    if user_id not in user_settings:
+        create_user_settings(user_id)
 
     # first value (underscore) is useless, it's just used to call expand()
     _, is_expanded, pokemon_name = re.split('/', query.data)
     is_expanded = int(is_expanded)
-    is_shiny = user_query_dict[query.from_user.id]['shiny']
 
-    try:
-        pokemon = pokemon_client.get_pokemon(pokemon_name).pop()
-    except Exception:
-        if is_shiny_keyword(pokemon_name):
-            await load_shiny_page(app, query)
-            return
+    pokemon = pokemon_client.get_pokemon(pokemon_name).pop()
 
     await app.answer_callback_query(query.id)  # Delete the loading circle
     await app.edit_inline_text(
-        inline_message_id=query.inline_message_id,
-        text=datapage.get_text(pokemon, is_expanded=is_expanded, is_shiny=is_shiny),
+        inline_message_id=message_id,
+        text=datapage.get_text(pokemon, is_expanded=is_expanded, is_shiny_setted=is_shiny_setted(user_id)),
         reply_markup=markup.get_datapage(pokemon_name, is_expanded=is_expanded)
     )
 
 
 @client.on_callback_query(filters.create(lambda _, __, query: 'movepool' in query.data))
-async def get_movepool(app, query):
-    store_user_data(query.from_user.id)
+async def show_movepool(app, query):
+    '''Movepool button:
+    show all moves and their main parameters that a Pokémon can learn'''
 
+    user_id = query.from_user.id
+    message_id = query.inline_message_id
+    if user_id not in user_settings:
+        create_user_settings(user_id)
+
+    # first value (underscore) is useless, it's just used to call get_movepool()
     _, current_page, pokemon_name = re.split('/', query.data)
     current_page = int(current_page)
+
     pokemon = pokemon_client.get_pokemon(pokemon_name).pop()
 
     await app.answer_callback_query(query.id)  # Delete the loading circle
     await app.edit_inline_text(
-        inline_message_id=query.inline_message_id,
-        text=movepool.get_text(pokemon, current_page),
+        inline_message_id=message_id,
+        text=movepool.get_text(pokemon, current_page, is_shiny_setted=is_shiny_setted(user_id)),
         reply_markup=markup.get_movepool(pokemon, current_page)
     )
 
 
 @client.on_callback_query(filters.create(lambda _, __, query: 'shiny_prompt' == query.data))
-async def get_shiny_page(app, query):
-    store_user_data(query.from_user.id)
+async def show_shiny_page(app, query):
+    '''Show the hidden page for unlock shiny thumbnails'''
+
+    user_id = query.from_user.id
+    message_id = query.inline_message_id
+    if user_id not in user_settings:
+        create_user_settings(user_id)
+
     await app.answer_callback_query(query.id)  # Delete the loading circle
     await app.edit_inline_text(
-        inline_message_id=query.inline_message_id,
+        inline_message_id=message_id,
         text='???',
         reply_markup=markup.accept_shiny()
     )
@@ -145,45 +182,46 @@ async def get_shiny_page(app, query):
 
 @client.on_callback_query(filters.create(lambda _, __, query: 'accept_shiny' == query.data))
 async def accept_shiny(app, query):
-    store_user_data(query.from_user.id)
-    hide_missingno(query.from_user.id)
-    set_shiny(query.from_user.id)
+    '''Unlock shiny thumbnails'''    
+
+    user_id = query.from_user.id
+    message_id = query.inline_message_id
+    if user_id not in user_settings:
+        create_user_settings(user_id)
+
+    unlock_shiny(user_id)
+
     await app.edit_inline_text(
-        inline_message_id=query.inline_message_id,
+        inline_message_id=message_id,
         text=script.shiny_accepted
     )
 
 
-def store_user_data(user_id):
-    if user_id not in user_query_dict:
-        user_query_dict[user_id] = {
-            'shiny': False,
-            'is_missingno_found': False
-        }
-
-
-def store_user_current_results(results, match_list, user_id):
-    user_query_dict[user_id] |= {r.id: species_name for r, species_name in zip(results, match_list)}
+def create_user_settings(user_id):
+    user_settings[user_id] = {
+        'shiny': False,
+        'is_shiny_unlocked': False
+    }
 
 
 def is_shiny_setted(user_id):
-    return user_query_dict[user_id]['shiny'] is True
-
-
-def is_shiny_unlocked(user_id):
-    return user_query_dict[user_id]['is_missingno_found'] is True
+    return user_settings[user_id]['shiny'] is True
 
 
 def set_shiny(user_id):
-    user_query_dict[user_id]['shiny'] = True
+    user_settings[user_id]['shiny'] = True
 
 
 def unset_shiny(user_id):
-    user_query_dict[user_id]['shiny'] = False
+    user_settings[user_id]['shiny'] = False
 
 
-def hide_missingno(user_id):
-    user_query_dict[user_id]['is_missingno_found'] = True
+def is_shiny_unlocked(user_id):
+    return user_settings[user_id]['is_shiny_unlocked'] is True
+
+
+def unlock_shiny(user_id):
+    user_settings[user_id]['is_shiny_unlocked'] = True
 
 
 if __name__ == '__main__':

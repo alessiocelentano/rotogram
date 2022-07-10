@@ -11,7 +11,7 @@ def is_shiny_keyword(pokemon_name):
     return pokemon_name == const.SHINY_KEYWORD
 
 
-async def load_shiny_page(app, inline_query, is_shiny_unlocked=False):
+async def load_shiny_page(app, inline_query, is_shiny_unlocked):
     await asyncio.sleep(3)
     await app.edit_inline_text(
         inline_message_id=inline_query.inline_message_id,

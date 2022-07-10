@@ -6,7 +6,7 @@ import script
 import const
 
 
-def get_datapage(pokemon_name, is_expanded=False):
+def get_datapage(pokemon_name, is_expanded):
     return InlineKeyboardMarkup([
         [expand_reduce(pokemon_name, is_expanded)],
         [movepool(pokemon_name)]

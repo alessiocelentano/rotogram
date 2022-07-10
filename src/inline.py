@@ -33,7 +33,7 @@ def get_matching_pokemon(message_content):
     return list(dict.fromkeys(beginning_list + end_list + any_position_list))
 
 
-def create_inline_query_results(match_list, is_shiny=False):
+def get_query_results(match_list, is_shiny_setted):
     results = list()
     for pokemon_name in match_list:
         if pokemon_name == const.SHINY_KEYWORD: return show_shiny_query()
@@ -42,8 +42,8 @@ def create_inline_query_results(match_list, is_shiny=False):
         name = get_pokemon_name(pokemon, species)
         genus = get_english_genus(species.genera)
         typing = get_formatted_typing(pokemon)
-        thumb_url = get_thumb_url(pokemon, is_shiny=is_shiny)
-        reply_markup = markup.get_datapage(name)
+        thumb_url = get_thumb_url(pokemon, is_shiny=is_shiny_setted)
+        reply_markup = markup.get_datapage(name, is_expanded=False)
         results.append(
             InlineQueryResultArticle(
                 title=name,

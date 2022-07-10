@@ -6,12 +6,12 @@ from script import add_movepool_title, add_movepool_line
 import const
 
 
-def get_text(pokemon, current_page):
+def get_text(pokemon, current_page, is_shiny_setted):
     text = ''
     total_pages = ceil(len(pokemon.moves) / const.MOVE_PER_PAGE)
     last_element_of_page = current_page * const.MOVE_PER_PAGE
     first_element_of_page = last_element_of_page - const.MOVE_PER_PAGE
-    artwork = get_thumb_url(pokemon)
+    artwork = get_thumb_url(pokemon, is_shiny_setted)
     text += add_movepool_title(current_page, total_pages, artwork)
 
     for i in range(first_element_of_page, last_element_of_page):

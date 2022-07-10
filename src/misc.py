@@ -44,7 +44,7 @@ def get_formatted_typing(pokemon):
     return ' / '.join(types).title()
 
 
-def get_thumb_url(pokemon, is_shiny=False):
+def get_thumb_url(pokemon, is_shiny):
     thumb_url = pokemon.sprites.front_default
     if not thumb_url:
         return None

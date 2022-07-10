@@ -7,14 +7,14 @@ import script
 import const
 
 
-def get_text(pokemon, is_expanded=False, is_shiny=False):
+def get_text(pokemon, is_expanded, is_shiny_setted):
     species = pokemon_client.get_pokemon_species(pokemon.species.name).pop()
     data = dict()
     data['name'] = get_pokemon_name(pokemon, species)
-    data['artwork_link'] = get_thumb_url(pokemon, is_shiny)
+    data['artwork_link'] = get_thumb_url(pokemon, is_shiny_setted)
     data['types'] = get_formatted_typing(pokemon)
     data['abilities'] = get_formatted_abilities(pokemon)
-    data['hidden_ability'] = get_formatted_abilities(pokemon, hidden_ability=True)
+    data['hidden_ability'] = get_formatted_abilities(pokemon, is_hidden=True)
     types = [t.type.name for t in pokemon.types]
     data['primary_type'] = types[0]
     data['secondary_type'] = types[1] if len(types) > 1 else 'no'
@@ -39,16 +39,16 @@ def get_text(pokemon, is_expanded=False, is_shiny=False):
     return script.pokemon_page(data, is_expanded)
 
 
-def get_formatted_abilities(pokemon, hidden_ability=False):
-    abilities = get_abilities(pokemon, hidden_ability)
+def get_formatted_abilities(pokemon, is_hidden=False):
+    abilities = get_abilities(pokemon, is_hidden)
     return ' / '.join(abilities)
 
 
-def get_abilities(pokemon, hidden_ability=False):
+def get_abilities(pokemon, is_hidden):
     ability_list = list()
     for ability in pokemon.abilities:
         ability_text = ability.ability.name.title().replace('-', ' ')
-        if hidden_ability == ability.is_hidden:
+        if is_hidden and ability.is_hidden:
             ability_list.append(ability_text)
     return ability_list
 
