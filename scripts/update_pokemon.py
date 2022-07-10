@@ -6,9 +6,12 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 FILE_PATH = f'{PROJECT_ROOT}/src/pokemon.txt'
 
 
-def update_pokemon():
-    content = ''
-    pokemon_id = 1
+def update_pokemon(pokemon_id=1, content=''):
+    # Starting ID is 1 because if new alternative forms are
+    # added, we have to iterate again all Pokémons
+
+    # An infinite loop is used we can't say how many
+    # Pokémons there are every new generation
     while True:
         try:
             content += add_pokemon(pokemon_id)
@@ -16,15 +19,16 @@ def update_pokemon():
         except Exception:
             print('Operation completed')
             break
+
     with open(FILE_PATH, 'w') as f:
         f.write(content)
 
 
-def add_pokemon(pokemon_id):
-    text = ''
+def add_pokemon(pokemon_id, text=''):
     species = pokepy.V2Client().get_pokemon_species(pokemon_id).pop()
-    text += species.name + '\n'
-    print(f'Adding {species.name}')
+    for variety in species.varieties:
+        text += variety.pokemon.name + '\n'
+        print(f'Adding {variety.pokemon.name}')
     return text
 
 
