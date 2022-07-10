@@ -70,23 +70,25 @@ async def inline_search(client, inline_query):
 @client.on_chosen_inline_result()
 async def create_page(app, inline_query):
     store_user_data(inline_query.from_user.id)
-    species_name = user_query_dict[inline_query.from_user.id][inline_query.result_id]
+    pokemon_name = user_query_dict[inline_query.from_user.id][inline_query.result_id]
     is_shiny = user_query_dict[inline_query.from_user.id]['shiny']
 
     try:
-        species = pokemon_client.get_pokemon_species(species_name).pop()
-        pokemon = get_default_pokemon_from_species(species)
+        pokemon = pokemon_client.get_pokemon(pokemon_name).pop()
     except Exception:
-        if is_shiny_keyword(species_name):
+        if is_shiny_keyword(pokemon_name):
             await load_shiny_page(app, inline_query, is_shiny_unlocked(inline_query.from_user.id))
         else:
-            script.pokemon_not_found()
+            await app.edit_inline_text(
+                inline_message_id=inline_query.inline_message_id,
+                text=script.pokemon_not_found
+            )
         return
 
     await app.edit_inline_text(
         inline_message_id=inline_query.inline_message_id,
-        text=datapage.get_text(species, pokemon, is_expanded=False, is_shiny=is_shiny),
-        reply_markup=markup.get_datapage(species.name, is_expanded=False)
+        text=datapage.get_text(pokemon, is_expanded=False, is_shiny=is_shiny),
+        reply_markup=markup.get_datapage(pokemon_name, is_expanded=False)
     )
 
 
@@ -95,23 +97,22 @@ async def expand(app, query):
     store_user_data(query.from_user.id)
 
     # first value (underscore) is useless, it's just used to call expand()
-    _, is_expanded, species_name = re.split('/', query.data)
+    _, is_expanded, pokemon_name = re.split('/', query.data)
     is_expanded = int(is_expanded)
     is_shiny = user_query_dict[query.from_user.id]['shiny']
 
     try:
-        species = pokemon_client.get_pokemon_species(species_name).pop()
-        pokemon = get_default_pokemon_from_species(species)
+        pokemon = pokemon_client.get_pokemon(pokemon_name).pop()
     except Exception:
-        if is_shiny_keyword(species_name):
+        if is_shiny_keyword(pokemon_name):
             await load_shiny_page(app, query)
             return
 
     await app.answer_callback_query(query.id)  # Delete the loading circle
     await app.edit_inline_text(
         inline_message_id=query.inline_message_id,
-        text=datapage.get_text(species, pokemon, is_expanded=is_expanded, is_shiny=is_shiny),
-        reply_markup=markup.get_datapage(species_name, is_expanded=is_expanded)
+        text=datapage.get_text(pokemon, is_expanded=is_expanded, is_shiny=is_shiny),
+        reply_markup=markup.get_datapage(pokemon_name, is_expanded=is_expanded)
     )
 
 
@@ -119,10 +120,9 @@ async def expand(app, query):
 async def get_movepool(app, query):
     store_user_data(query.from_user.id)
 
-    _, current_page, species_name = re.split('/', query.data)
+    _, current_page, pokemon_name = re.split('/', query.data)
     current_page = int(current_page)
-    species = pokemon_client.get_pokemon_species(species_name).pop()
-    pokemon = get_default_pokemon_from_species(species)
+    pokemon = pokemon_client.get_pokemon(pokemon_name).pop()
 
     await app.answer_callback_query(query.id)  # Delete the loading circle
     await app.edit_inline_text(

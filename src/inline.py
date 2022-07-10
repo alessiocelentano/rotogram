@@ -6,8 +6,8 @@ from client import pokemon_client
 import markup
 from shiny import show_shiny_query
 from misc import (get_english_genus, get_english_name_of,
-                  get_default_pokemon_from_species,
-                  get_formatted_typing, get_thumb_url)
+                  get_pokemon_name, get_formatted_typing,
+                  get_thumb_url)
 import script
 import const
 
@@ -37,9 +37,9 @@ def create_inline_query_results(match_list, is_shiny=False):
     results = list()
     for pokemon_name in match_list:
         if pokemon_name == const.SHINY_KEYWORD: return show_shiny_query()
-        species = pokemon_client.get_pokemon_species(pokemon_name).pop()
-        pokemon = get_default_pokemon_from_species(species)
-        name = get_english_name_of(species)
+        pokemon = pokemon_client.get_pokemon(pokemon_name).pop()
+        species = pokemon_client.get_pokemon_species(pokemon.species.name).pop()
+        name = get_pokemon_name(pokemon, species)
         genus = get_english_genus(species.genera)
         typing = get_formatted_typing(pokemon)
         thumb_url = get_thumb_url(pokemon, is_shiny=is_shiny)

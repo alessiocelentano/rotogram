@@ -7,8 +7,8 @@ import script
 import const
 
 
-def is_shiny_keyword(species_name):
-    return species_name == const.SHINY_KEYWORD
+def is_shiny_keyword(pokemon_name):
+    return pokemon_name == const.SHINY_KEYWORD
 
 
 async def load_shiny_page(app, inline_query, is_shiny_unlocked=False):

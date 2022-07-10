@@ -9,6 +9,15 @@ with open(PKMN_LIST_PATH) as f:
 
 CACHE_TIME = 3
 MOVE_PER_PAGE = 5
+# Key: PokéAPI form name
+# Value: Rotogram form name
+MAIN_ALTERNATIVE_FORMS = {
+    'alola': 'Alolan',
+    'galar': 'Galarian',
+    'hisui': 'Hisuian',
+    'mega': 'Mega',
+    'gmax': 'Gigantamax'
+}
 SHINY_KEYWORD = 'missingno'
 SHINY_PAGE_TITLE = 'MissingNo'
 SHINY_PAGE_TYPING = 'Bird / Normal'

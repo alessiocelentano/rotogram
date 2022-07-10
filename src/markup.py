@@ -6,10 +6,10 @@ import script
 import const
 
 
-def get_datapage(species_name, is_expanded=False):
+def get_datapage(pokemon_name, is_expanded=False):
     return InlineKeyboardMarkup([
-        [expand_reduce(species_name, is_expanded)],
-        [movepool(species_name)]
+        [expand_reduce(pokemon_name, is_expanded)],
+        [movepool(pokemon_name)]
     ])
 
 
@@ -53,7 +53,6 @@ def accept_shiny():
     return InlineKeyboardMarkup([
         [accept_shiny_button()],
     ])
-
 
 
 # === BUTTONS ===

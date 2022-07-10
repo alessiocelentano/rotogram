@@ -1,14 +1,16 @@
 from client import pokemon_client
 
 from misc import (get_english_genus, get_english_name_of,
-                  get_thumb_url, get_formatted_typing)
+                  get_pokemon_name, get_thumb_url,
+                  get_formatted_typing)
 import script
 import const
 
 
-def get_text(species, pokemon, is_expanded=False, is_shiny=False):
+def get_text(pokemon, is_expanded=False, is_shiny=False):
+    species = pokemon_client.get_pokemon_species(pokemon.species.name).pop()
     data = dict()
-    data['name'] = get_english_name_of(species)
+    data['name'] = get_pokemon_name(pokemon, species)
     data['artwork_link'] = get_thumb_url(pokemon, is_shiny)
     data['types'] = get_formatted_typing(pokemon)
     data['abilities'] = get_formatted_abilities(pokemon)

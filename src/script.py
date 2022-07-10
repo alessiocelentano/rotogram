@@ -35,6 +35,7 @@ accept_shiny_button = f'{const.TICK} ACCEPT GIFT'
 set_shiny_command = 'Shiny images setted successfully!'
 unset_shiny_command = 'Shiny images unsetted successfully!'
 no_evolutions = '<i>It is not known to evolve into or from any other Pokémon</i>\n'
+pokemon_not_found = 'Ooops! Pokémon not found, try again.'
 
 shedinja_method = '''\
 evolve Nincada having one Poké Ball in bag and one empty slot in party
