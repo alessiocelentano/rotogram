@@ -21,26 +21,33 @@ shiny_accepted = f'''
 You accepted a strange gift.
 It contains a message:
 
-"<i>Yo trainer, try to search some Pokémon on Rotogram with this new item.
+'<i>Yo trainer, try to search some Pokémon on Rotogram with this new item.
 It contains a command called /toggle_shiny.
 Follow me on @rotogram for more news like this.
 
 with {const.HEART} ,
-- the developer</i>"
+- the developer</i>'
 '''
 
 loading = f'{const.LOADING_CIRCLE}  Loading...'
 shiny_page_loading = f'{const.GLYPH_NOT_FOUND} L?ad?ng...?'
+set_shiny = f'Shiny thumbnails enabled successfully! {const.SHINE}'
+unset_shiny = f'Shiny thumbnails disabled {const.X}'
+no_evolutions = '<i>It is not known to evolve into or from any other Pokémon</i>'
+pokemon_not_found = 'Ooops! Pokémon not found, try again.'
+movepool_title = '<a href="{}">{}</a> <u><b>Movepool ({}/{})</b></u>\n'
+move = '''
+– <b>{name}</b> – (<i>{class}</i>)
+<b>Type</b>: {type} {emoji}
+<b>Power</b>: {power} | <b>Accuracy</b>: {accuracy}
+'''
+
 reduce = f'{const.MINUS}  Reduce'
 expand = f'{const.PLUS}  Expand'
 movepool = f'{const.SWORDS}  Moves'
 location = f'{const.HOUSE}  Locations'
 back = f'{const.BACK} Back'
 accept_shiny_button = f'{const.TICK} ACCEPT GIFT'
-set_shiny = f'Shiny thumbnails enabled successfully! {const.SHINE}'
-unset_shiny = f'Shiny thumbnails disabled {const.X}'
-no_evolutions = '<i>It is not known to evolve into or from any other Pokémon</i>\n'
-pokemon_not_found = 'Ooops! Pokémon not found, try again.'
 
 shedinja_method = '''\
 evolve Nincada having one Poké Ball in bag and one empty slot in party
@@ -62,54 +69,52 @@ urshifu_method = '''\
 interact with Scroll of Darkness/Waters
 '''
 
+pokemon_page = '''
+<b><u>{pokemon_full_name}</u></b> <a href="{artwork_url}">{emoji1}{emoji2}</a>
+<b>{type_section_name}</b>: {typing}
+<b>{ability_section_name}</b>: {abilities}\
+{hidden_ability_section_name}{hidden_ability}
 
-def pokemon_page(data, is_expanded=False):
-    # Just check one variable. If that line is not empty, expand_data has to be prompted
-    expand_text = get_expand_data(data) if is_expanded else ''
-    type_title = 'Types' if '/' in data['types'] else 'Type'
-    ability_title = 'Abilities' if '/' in data['abilities'] else 'Ability'
-    hidden_ability_line = f'\n<b>Hidden Ability</b>: {data["hidden_ability"]}' if data['hidden_ability'] else ''
-    return f'''
-<b><u>{data['name']}</u></b> <a href='{data['artwork_link']}'>\
-{const.TYPE_EMOJI[data['primary_type']]}</a> {const.TYPE_EMOJI[data['secondary_type']]}
-<b>{type_title}</b>: {data["types"]}
-<b>{ability_title}</b>: {data['abilities']}\
-{hidden_ability_line}\n
 <b><u>Evolutions</u></b>
-{data['evolution_family']}\
-{data['alternative_forms']}\
-{expand_text}
+{evolution_family}\
+{alternative_forms}
+
 <b><u>Base stats</u></b>
-{data['stats']['hp']} HP {data['stats_rating']['hp']}
-{data['stats']['attack']} ATK {data['stats_rating']['attack']}
-{data['stats']['defense']} DEF {data['stats_rating']['defense']}
-{data['stats']['special-attack']} SPA {data['stats_rating']['special-attack']}
-{data['stats']['special-defense']} SPD {data['stats_rating']['special-defense']}
-{data['stats']['speed']} SPE {data['stats_rating']['speed']}
+{stats}
 '''
 
+pokemon_page_expanded = '''
+<b><u>{pokemon_full_name}</u></b> <a href="{artwork_url}">{emoji1}{emoji2}</a>
+<b>{type_section_name}</b>: {typing}
+<b>{ability_section_name}</b>: {abilities}\
+{hidden_ability_section_name}{hidden_ability}
 
-def get_expand_data(data):
-    return f'''
+<b><u>Evolutions</u></b>
+{evolution_family}\
+{alternative_forms}
+
 <u><b>Pokédex data</b></u>
-<b>Species</b>: {data["genus"]}
-<b>National Pokedex Number</b>: {data["dex_number"]}
-<b>Height</b>: {data["height"]}
-<b>Weight</b>: {data["weight"]}
-<b>Gender (male/female)</b>: {data["gender_percentage"]}\n
-<u><b>Game data</b></u>
-<b>Base friendship</b>: {data["base_friendship"]}
-<b>EV yield</b>: {data["ev_yield_text"]}
-<b>Catch rate</b>: {data["catch_rate"]}
-<b>Growth rate</b>: {data["growth_rate"]}
-<b>Egg groups</b>: {data["egg_groups_text"]}
-<b>Egg cycles</b>: {data["egg_cycles"]}
-'''
+<b>Species</b>: {genus}
+<b>National Pokedex Number</b>: {dex_number}
+<b>Height</b>: {height}
+<b>Weight</b>: {weight}
+<b>Gender (male/female)</b>: {gender_percentage}
 
+<u><b>Game data</b></u>
+<b>Base friendship</b>: {base_friendship}
+<b>EV yield</b>: {ev_yield}
+<b>Catch rate</b>: {catch_rate}
+<b>Growth rate</b>: {growth_rate}
+<b>Egg groups</b>: {egg_groups}
+<b>Egg cycles</b>: {egg_cycles}
+
+<b><u>Base stats</u></b>
+{stats}
+'''
 
 shiny_page = f'''
 <b><u>{const.SHINY_PAGE_TITLE}</u></b> <a href='{const.SHINY_PAGE_THUMB_URL}'>\
-{const.TYPE_EMOJI["bird"]}</a> {const.TYPE_EMOJI["normal"]}\n
+{const.TYPE_EMOJI['bird']}</a> {const.TYPE_EMOJI['normal']}\n
 <b><u>Evolutions</u></b>
 <i>This Pokémon does not even exist</i>\n
 <b><u>Base stats</u></b>
@@ -118,16 +123,4 @@ shiny_page = f'''
 0 DEF {const.BLACK_CIRCLE * 10}
 6 SPCL {const.BLACK_CIRCLE * 1}
 29 SPE {const.BLACK_CIRCLE * 2}
-'''
-
-
-def add_movepool_title(current_page, total_pages, artwork):
-    return f' <a href=\'{artwork}\'>{const.RED_SPARK}</a> <u><b>Movepool ({current_page}/{total_pages})</b></u>\n'
-
-
-def add_movepool_line(name, class_, type_, power, accuracy):
-    return f'''
-– <b>{name}</b> – (<i>{class_}</i>)
-<b>Type</b>: {type_} {const.TYPE_EMOJI[type_.lower()]}
-<b>Power</b>: {power} | <b>Accuracy</b>: {accuracy}
 '''

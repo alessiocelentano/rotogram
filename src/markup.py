@@ -6,20 +6,19 @@ import script
 import const
 
 
-def get_datapage(pokemon_name, is_expanded):
+def datapage_markup(pokemon_name, is_expanded=False):
     return InlineKeyboardMarkup([
         [expand_reduce(pokemon_name, is_expanded)],
         [movepool(pokemon_name)]
     ])
 
 
-def get_movepool(pokemon, current_page):
+def movepool_markup(pokemon, current_page):
     total_pages = ceil(len(pokemon.moves) / const.MOVE_PER_PAGE)
     markup_list = [[]]
 
     # Create a page index that display, when possible:
     # First page, previous page, current page, next page, last page
-
     if current_page-1 > 1:
         markup_list[0].append(begin_page(pokemon.name))
     if current_page != 1:
@@ -38,6 +37,7 @@ def get_movepool(pokemon, current_page):
 
 
 def dummy_prompt():
+    # It's used for an useless botton when accessing to the shiny page
     return InlineKeyboardMarkup([
         [dummy_expand_reduce()],
     ])

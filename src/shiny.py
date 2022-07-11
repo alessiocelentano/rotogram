@@ -13,21 +13,24 @@ def is_shiny_keyword(pokemon_name):
 
 async def load_shiny_page(app, inline_query, is_shiny_unlocked):
     await asyncio.sleep(3)
+
     await app.edit_inline_text(
         inline_message_id=inline_query.inline_message_id,
         text=f'{script.loading}?',
         reply_markup=markup.dummy_prompt()
     )
     await asyncio.sleep(3)
+
     await app.edit_inline_text(
         inline_message_id=inline_query.inline_message_id,
-        text=f'{script.shiny_page_loading}',
+        text=script.shiny_page_loading,
         reply_markup=markup.dummy_prompt()
     )
     await asyncio.sleep(3)
+
     await app.edit_inline_text(
         inline_message_id=inline_query.inline_message_id,
-        text=f'{script.shiny_page}',
+        text=script.shiny_page,
         reply_markup=markup.shiny_prompt() if not is_shiny_unlocked else None
     )
 

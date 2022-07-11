@@ -65,5 +65,5 @@ TYPE_EMOJI = {
     'rock': '\U0001FAA8',
     'poison': '\u2620',
     'bird': '\U0001F426',
-    'no': ''
+    None: ''
 }
