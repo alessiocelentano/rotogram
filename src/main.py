@@ -1,3 +1,4 @@
+import json
 import re
 import uvloop
 
@@ -15,7 +16,8 @@ import const
 
 uvloop.install()
 client = Client(const.SESSION_NAME)
-user_settings = {}
+with open(const.USER_SETTINGS_PATH) as f:
+    user_settings = json.load(f)
 user_query_results = {}
 
 
@@ -25,7 +27,7 @@ async def start(Client, message):
     it shows a brief description of the bot and the usage'''
 
     user_id = message.from_user.id
-    if user_id not in user_settings:
+    if str(user_id) not in user_settings:
         create_user_settings(user_id)
 
     if is_shiny_unlocked(user_id):
@@ -44,7 +46,7 @@ async def toggle_shiny(Client, message):
     '''set/unset the Pokémon shiny form for the thumbnail'''
 
     user_id = message.from_user.id
-    if user_id not in user_settings:
+    if str(user_id) not in user_settings:
         create_user_settings(user_id)
 
     if is_shiny_unlocked(user_id):
@@ -70,7 +72,7 @@ async def inline_search(Client, inline_query):
 
     user_id = inline_query.from_user.id
     query_message = inline_query.query
-    if user_id not in user_settings:
+    if str(user_id) not in user_settings:
         create_user_settings(user_id)
 
     if not inline.has_minimum_characters(query_message):
@@ -95,7 +97,7 @@ async def create_page(app, inline_query):
     result_id = inline_query.result_id
     message_id = inline_query.inline_message_id
     pokemon_name = user_query_results[user_id][result_id]
-    if user_id not in user_settings:
+    if str(user_id) not in user_settings:
         create_user_settings(user_id)
 
     if shiny.is_shiny_keyword(pokemon_name):
@@ -118,7 +120,7 @@ async def expand(app, query):
 
     user_id = query.from_user.id
     message_id = query.inline_message_id
-    if user_id not in user_settings:
+    if str(user_id) not in user_settings:
         create_user_settings(user_id)
 
     # first value (underscore) is useless, it's just used to call expand()
@@ -142,7 +144,7 @@ async def show_movepool(app, query):
 
     user_id = query.from_user.id
     message_id = query.inline_message_id
-    if user_id not in user_settings:
+    if str(user_id) not in user_settings:
         create_user_settings(user_id)
 
     # first value (underscore) is useless, it's just used to call get_movepool()
@@ -165,7 +167,7 @@ async def show_shiny_page(app, query):
 
     user_id = query.from_user.id
     message_id = query.inline_message_id
-    if user_id not in user_settings:
+    if str(user_id) not in user_settings:
         create_user_settings(user_id)
 
     await app.answer_callback_query(query.id)  # Delete the loading circle
@@ -182,7 +184,7 @@ async def accept_shiny(app, query):
 
     user_id = query.from_user.id
     message_id = query.inline_message_id
-    if user_id not in user_settings:
+    if str(user_id) not in user_settings:
         create_user_settings(user_id)
 
     unlock_shiny(user_id)
@@ -200,30 +202,41 @@ def store_user_query_results(query_results, match_list, user_id):
 
 
 def create_user_settings(user_id):
-    user_settings[user_id] = {
+    # user_id is stored as string because json.dump() would generate
+    # duplicate if we use int, since it would eventually converted in a string
+    user_settings[str(user_id)] = {
         'shiny': False,
         'is_shiny_unlocked': False
     }
+    dump_user_settings()
 
 
 def is_shiny_setted(user_id):
-    return user_settings[user_id]['shiny'] is True
+    return user_settings[str(user_id)]['shiny'] is True
 
 
 def set_shiny(user_id):
-    user_settings[user_id]['shiny'] = True
+    user_settings[str(user_id)]['shiny'] = True
+    dump_user_settings()
 
 
 def unset_shiny(user_id):
-    user_settings[user_id]['shiny'] = False
+    user_settings[str(user_id)]['shiny'] = False
+    dump_user_settings()
 
 
 def is_shiny_unlocked(user_id):
-    return user_settings[user_id]['is_shiny_unlocked'] is True
+    return user_settings[str(user_id)]['is_shiny_unlocked'] is True
 
 
 def unlock_shiny(user_id):
-    user_settings[user_id]['is_shiny_unlocked'] = True
+    user_settings[str(user_id)]['is_shiny_unlocked'] = True
+    dump_user_settings()
+
+
+def dump_user_settings():
+    with open(const.USER_SETTINGS_PATH, 'w') as f:
+       json.dump(user_settings, f, indent=4)
 
 
 if __name__ == '__main__':

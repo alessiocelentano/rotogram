@@ -4,6 +4,7 @@ import os
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 SESSION_NAME = 'Rotogram'
 PKMN_LIST_PATH = f'{PROJECT_ROOT}/src/pokemon.txt'
+USER_SETTINGS_PATH = f'{PROJECT_ROOT}/src/user_settings.json'
 with open(PKMN_LIST_PATH) as f:
     POKEMON_LIST = f.read()
 
