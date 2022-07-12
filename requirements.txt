@@ -1,3 +1,4 @@
-Pyrogram==1.2.9
-TgCrypto==1.2.2
+uvloop==0.16.0
+TgCrypto==1.2.3
+Pyrogram==2.0.30
 pokepy==0.4.0
