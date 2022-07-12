@@ -6,7 +6,7 @@ import const
 
 
 def get_datapage_text(pokemon, is_expanded, is_shiny_setted=False):
-    species = pokemon_client.get_pokemon_species(pokemon.species.name).pop()
+    species = pokemon_client().get_pokemon_species(pokemon.species.name).pop()
 
     data_dict = {
         'pokemon_full_name': data.get_pokemon_full_name(pokemon, species),

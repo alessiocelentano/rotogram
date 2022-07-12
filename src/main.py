@@ -1,4 +1,5 @@
 import re
+import uvloop
 
 from pokepy import V2Client as pokemon_client
 from pyrogram import Client, filters
@@ -12,6 +13,7 @@ import script
 import const
 
 
+uvloop.install()
 client = Client(const.SESSION_NAME)
 user_settings = {}
 user_query_results = {}
@@ -100,7 +102,7 @@ async def create_page(app, inline_query):
         await shiny.load_shiny_page(app, inline_query, is_shiny_unlocked(user_id))
         return
 
-    pokemon = pokemon_client.get_pokemon(pokemon_name).pop()
+    pokemon = pokemon_client().get_pokemon(pokemon_name).pop()
 
     await app.edit_inline_text(
         inline_message_id=message_id,
@@ -123,7 +125,7 @@ async def expand(app, query):
     _, is_expanded, pokemon_name = re.split('/', query.data)
     is_expanded = int(is_expanded)
 
-    pokemon = pokemon_client.get_pokemon(pokemon_name).pop()
+    pokemon = pokemon_client().get_pokemon(pokemon_name).pop()
 
     await app.answer_callback_query(query.id)  # Delete the loading circle
     await app.edit_inline_text(
@@ -147,7 +149,7 @@ async def show_movepool(app, query):
     _, current_page, pokemon_name = re.split('/', query.data)
     current_page = int(current_page)
 
-    pokemon = pokemon_client.get_pokemon(pokemon_name).pop()
+    pokemon = pokemon_client().get_pokemon(pokemon_name).pop()
 
     await app.answer_callback_query(query.id)  # Delete the loading circle
     await app.edit_inline_text(

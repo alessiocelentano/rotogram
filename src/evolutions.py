@@ -7,12 +7,12 @@ import script
 def get_chain(species):
     chain_url = species.evolution_chain.url
     chain_id = chain_url.split('/').pop(-2)
-    chain = pokemon_client.get_evolution_chain(chain_id).pop().chain
+    chain = pokemon_client().get_evolution_chain(chain_id).pop().chain
     return chain
 
 
 def chain_to_text(stage, searched_stage_name, stage_index=1):
-    species = pokemon_client.get_pokemon_species(stage.species.name).pop()
+    species = pokemon_client().get_pokemon_species(stage.species.name).pop()
     methods = get_evolution_method(stage.evolution_details)
     stage_name = data.get_english_name(species)
     lines = []
@@ -102,19 +102,19 @@ def condition_to_text(method):
         gender_only = '[only female]' if method.gender == 1 else '[only male]'
         condition_list.append(gender_only)
     if method.item:
-        item = pokemon_client.get_item(method.item.name).pop()
+        item = pokemon_client().get_item(method.item.name).pop()
         condition_list.append(data.get_english_name(item))
     if method.held_item:
-        item = pokemon_client.get_item(method.held_item.name).pop()
+        item = pokemon_client().get_item(method.held_item.name).pop()
         condition_list.append(f'holding {data.get_english_name(item)}')
     if method.known_move:
-        move = pokemon_client.get_move(method.held_item.name).pop()
+        move = pokemon_client().get_move(method.held_item.name).pop()
         condition_list.append(f'knowing {data.get_english_name(move)}')
     if method.location:
-        location = pokemon_client.get_location(method.location.name).pop()
+        location = pokemon_client().get_location(method.location.name).pop()
         condition_list.append(f'in {data.get_english_name(location)}')
     if method.party_species:
-        species = pokemon_client.get_pokemon_species(method.party_species.name).pop()
+        species = pokemon_client().get_pokemon_species(method.party_species.name).pop()
         condition_list.append(f'with {species} in the party')
     return ' '.join(condition_list)
 

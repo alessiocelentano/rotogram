@@ -19,7 +19,7 @@ def get_movepool_page(pokemon, current_page, is_shiny_setted):
         if i >= len(pokemon.moves):
             break
 
-        move = pokemon_client.get_move(pokemon.moves[i].move.name).pop()
+        move = pokemon_client().get_move(pokemon.moves[i].move.name).pop()
         data_dict = {
             'name': data.get_english_name(move),
             'class': move.damage_class.name.title(),

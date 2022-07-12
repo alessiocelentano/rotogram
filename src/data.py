@@ -1,5 +1,3 @@
-from pokepy import V2Client as pokemon_client
-
 import evolutions
 import script
 import const
@@ -197,12 +195,16 @@ def get_egg_cycles(species):
     return species.hatch_counter
 
 
-def get_default_pokemon_from_species(species):
-    for variety in species.varieties:
-        if not variety.is_default:
-            continue
-        pokemon_name = variety.pokemon.name
-        return pokemon_client.get_pokemon(pokemon_name).pop()
+def get_english_name(species):
+    for name in species.names:
+        if name.language.name == 'en':
+            return name.name
+
+
+def get_english_genus(genus_name_list):
+    for name in genus_name_list:
+        if name.language.name == 'en':
+            return name.genus
 
 
 def prettify_name(name):
@@ -214,15 +216,3 @@ def prettify_name(name):
         name_elements.remove('gmax')
         name_elements.insert(0, 'gigantamax')
     return ' '.join(name_elements).title()
-
-
-def get_english_name(species):
-    for name in species.names:
-        if name.language.name == 'en':
-            return name.name
-
-
-def get_english_genus(genus_name_list):
-    for name in genus_name_list:
-        if name.language.name == 'en':
-            return name.genus

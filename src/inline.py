@@ -41,8 +41,8 @@ def get_query_results(match_list, is_shiny_setted):
         if pokemon_name == const.SHINY_KEYWORD:
             return shiny.show_shiny_query()
 
-        pokemon = pokemon_client.get_pokemon(pokemon_name).pop()
-        species = pokemon_client.get_pokemon_species(pokemon.species.name).pop()
+        pokemon = pokemon_client().get_pokemon(pokemon_name).pop()
+        species = pokemon_client().get_pokemon_species(pokemon.species.name).pop()
 
         genus = data.get_english_genus(species.genera)
         typing = data.get_typing(pokemon)
