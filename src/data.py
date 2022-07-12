@@ -16,10 +16,15 @@ def get_pokemon_full_name(pokemon, species):
     for form in const.MAIN_ALTERNATIVE_FORMS:
         if form not in form_name_elements:
             continue
+
         form_name = const.MAIN_ALTERNATIVE_FORMS[form]
-        mega_version = f' {form_name_elements[-1]}' if form_name_elements[-1] in ['x', 'y'] else ''
-        species_full_name = f'{form_name} {species_full_name}{mega_version.title()}'
         form_name_elements.remove(form)
+
+        if form_name_elements and form_name_elements[-1] in ['x', 'y']:
+            mega_version = form_name_elements.pop()
+            species_full_name = f'{form_name} {species_full_name} {mega_version.title()}'
+        else:
+            species_full_name = f'{form_name} {species_full_name}'
 
     if form_name_elements:
         return f'{species_full_name} ({" ".join(form_name_elements).title()})'
