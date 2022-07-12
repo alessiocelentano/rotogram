@@ -21,7 +21,7 @@ def get_movepool_page(pokemon, current_page, is_shiny_setted):
 
         move = pokemon_client().get_move(pokemon.moves[i].move.name).pop()
         data_dict = {
-            'name': data.get_english_name(move),
+            'name': data.get_english_name(move.names),
             'class': move.damage_class.name.title(),
             'type': move.type.name.title(),
             'emoji': const.TYPE_EMOJI[move.type.name],

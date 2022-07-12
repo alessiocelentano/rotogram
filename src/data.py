@@ -4,7 +4,7 @@ import const
 
 
 def get_pokemon_full_name(pokemon, species):
-    species_full_name = get_english_name(species)
+    species_full_name = get_english_name(species.names)
 
     pokemon_name_elements = pokemon.name.split('-')
     species_name_elements = species.name.split('-')
@@ -59,14 +59,17 @@ def get_ability_list(pokemon, is_hidden):
 
     for ability in pokemon.abilities:
         if is_hidden is ability.is_hidden:
-            ability_full_name = prettify_name(ability.ability.name)
-            ability_list.append(ability_full_name)
+            ability_list.append(ability.ability.name)
 
     return ability_list
 
 
 def abilities_to_text(ability_list):
-    return " / ".join(ability_list)
+    ability_with_deep_link_list = []
+    for ability in ability_list:
+        url = f'<a href="https://t.me/{const.BOT_USERNAME}?start=ability-{ability}">{prettify_name(ability)}</a>'
+        ability_with_deep_link_list.append(url)
+    return ' / '.join(ability_with_deep_link_list)
 
 
 def get_evolution_chain(species):
@@ -195,16 +198,40 @@ def get_egg_cycles(species):
     return species.hatch_counter
 
 
-def get_english_name(species):
-    for name in species.names:
+def get_ability_page_text(ability):
+    ability_dict = {
+        'name': get_english_name(ability.names),
+        'generation': prettify_name(ability.generation.name),
+        'description': get_english_ability_effect(ability.effect_entries),
+        'pokemon_list': get_pokemon_list_text(ability.pokemon),
+        'ability_emoji': const.BUTTON,
+        'description_emoji': const.EYE,
+        'pokemon_list_emoji': const.POKEMON
+    }
+    return script.ability_page.format(**ability_dict)
+
+
+def get_pokemon_list_text(pokemon_list):
+    url = '<a href="https://t.me/{}?start=pokemon/{}">{}</a>'
+    return ', '.join([url.format(const.BOT_USERNAME, pokemon.pokemon.name, prettify_name(pokemon.pokemon.name)) for pokemon in pokemon_list])
+
+
+def get_english_name(name_list):
+    for name in name_list:
         if name.language.name == 'en':
             return name.name
 
-
-def get_english_genus(genus_name_list):
-    for name in genus_name_list:
+    
+def get_english_genus(name_list):
+    for name in name_list:
         if name.language.name == 'en':
             return name.genus
+
+
+def get_english_ability_effect(name_list):
+    for name in name_list:
+        if name.language.name == 'en':
+            return name.effect
 
 
 def prettify_name(name):
@@ -215,4 +242,9 @@ def prettify_name(name):
     if 'gmax' in name_elements:
         name_elements.remove('gmax')
         name_elements.insert(0, 'gigantamax')
+    if 'generation' in name_elements:
+        name_elements[0] = name_elements[0].title()
+        name_elements[1] = name_elements[1].upper()
+        return ' '.join(name_elements)
+
     return ' '.join(name_elements).title()

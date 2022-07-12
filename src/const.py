@@ -3,6 +3,7 @@ import os
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 SESSION_NAME = 'Rotogram'
+BOT_USERNAME = 'rotogrambot'
 PKMN_LIST_PATH = f'{PROJECT_ROOT}/src/pokemon.txt'
 USER_SETTINGS_PATH = f'{PROJECT_ROOT}/src/user_settings.json'
 with open(PKMN_LIST_PATH) as f:
@@ -44,6 +45,9 @@ X = '\u274C'
 HEART = '\u2764'
 BACK = '\U0001F519'
 SHINE = '\u2728'
+BUTTON = '\U0001F518'
+EYE = '\U0001F441' + '\uFE0F' + '\u200D' + '\U0001F5E8' + '\uFE0F'
+POKEMON = '\U0001F432'
 SPACE_INVADER = '\U0001F47E'
 GLYPH_NOT_FOUND = '\u25A1'
 TYPE_EMOJI = {

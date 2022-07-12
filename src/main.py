@@ -5,6 +5,7 @@ import uvloop
 from pokepy import V2Client as pokemon_client
 from pyrogram import Client, filters
 
+import data
 import inline
 import datapage
 import movepool
@@ -30,14 +31,25 @@ async def start(Client, message):
     if str(user_id) not in user_settings:
         create_user_settings(user_id)
 
-    if is_shiny_unlocked(user_id):
-        text = script.start_shiny_unlocked
+    if len(message.command) == 1:
+        # Regular /start
+        if is_shiny_unlocked(user_id):
+            text = script.start_shiny_unlocked
+        else:
+            text = script.start
+        is_preview_hidden = False
     else:
-        text = script.start
+        # Link to data (e.g.: ability, move, another Pokémon) page
+        key, value = message.command[1].split('-', maxsplit=1)
+        if key == 'ability':
+            ability = pokemon_client().get_ability(value).pop()
+            text = data.get_ability_page_text(ability)
+        is_preview_hidden = True
 
     await Client.send_message(
         chat_id=user_id,
-        text=text
+        text=text,
+        disable_web_page_preview=is_preview_hidden
     )
 
 
@@ -105,10 +117,11 @@ async def create_page(app, inline_query):
         return
 
     pokemon = pokemon_client().get_pokemon(pokemon_name).pop()
+    is_expanded = False
 
     await app.edit_inline_text(
         inline_message_id=message_id,
-        text=datapage.get_datapage_text(pokemon, is_shiny_setted(user_id)),
+        text=datapage.get_datapage_text(pokemon, is_expanded, is_shiny_setted(user_id)),
         reply_markup=markup.datapage_markup(pokemon_name)
     )
 
@@ -236,7 +249,7 @@ def unlock_shiny(user_id):
 
 def dump_user_settings():
     with open(const.USER_SETTINGS_PATH, 'w') as f:
-       json.dump(user_settings, f, indent=4)
+        json.dump(user_settings, f, indent=4)
 
 
 if __name__ == '__main__':

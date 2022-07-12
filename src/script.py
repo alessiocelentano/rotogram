@@ -140,3 +140,14 @@ shiny_page = f'''
 6 SPCL {const.BLACK_CIRCLE * 1}
 29 SPE {const.BLACK_CIRCLE * 2}
 '''
+
+ability_page = '''
+{ability_emoji} <b><u>{name}</u></b>
+<i>Introduced in {generation}</i>
+
+{description_emoji} <b><u>Description</u></b>
+{description}
+
+{pokemon_list_emoji} <b><u>List of Pokémon</u></b>
+{pokemon_list}
+'''

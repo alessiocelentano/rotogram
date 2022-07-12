@@ -14,7 +14,7 @@ def get_chain(species):
 def chain_to_text(stage, searched_stage_name, stage_index=1):
     species = pokemon_client().get_pokemon_species(stage.species.name).pop()
     methods = get_evolution_method(stage.evolution_details)
-    stage_name = data.get_english_name(species)
+    stage_name = data.get_english_name(species.names)
     lines = []
 
     if has_evolution(stage):
@@ -103,16 +103,16 @@ def condition_to_text(method):
         condition_list.append(gender_only)
     if method.item:
         item = pokemon_client().get_item(method.item.name).pop()
-        condition_list.append(data.get_english_name(item))
+        condition_list.append(data.get_english_name(item.names))
     if method.held_item:
         item = pokemon_client().get_item(method.held_item.name).pop()
-        condition_list.append(f'holding {data.get_english_name(item)}')
+        condition_list.append(f'holding {data.get_english_name(item.names)}')
     if method.known_move:
         move = pokemon_client().get_move(method.held_item.name).pop()
-        condition_list.append(f'knowing {data.get_english_name(move)}')
+        condition_list.append(f'knowing {data.get_english_name(move.names)}')
     if method.location:
         location = pokemon_client().get_location(method.location.name).pop()
-        condition_list.append(f'in {data.get_english_name(location)}')
+        condition_list.append(f'in {data.get_english_name(location.names)}')
     if method.party_species:
         species = pokemon_client().get_pokemon_species(method.party_species.name).pop()
         condition_list.append(f'with {species} in the party')
