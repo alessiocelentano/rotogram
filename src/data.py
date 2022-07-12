@@ -18,9 +18,13 @@ def get_pokemon_full_name(pokemon, species):
             continue
         form_name = const.MAIN_ALTERNATIVE_FORMS[form]
         mega_version = f' {form_name_elements[-1]}' if form_name_elements[-1] in ['x', 'y'] else ''
-        return f'{form_name} {species_full_name}{mega_version.title()}'
+        species_full_name = f'{form_name} {species_full_name}{mega_version.title()}'
+        form_name_elements.remove(form)
 
-    return f'{species_full_name} ({" ".join(form_name_elements).title()})'
+    if form_name_elements:
+        return f'{species_full_name} ({" ".join(form_name_elements).title()})'
+    else:
+        return species_full_name
 
 
 def get_home_thumb_url(pokemon, is_shiny):
@@ -101,7 +105,7 @@ def alternative_forms_to_text(alternative_forms_list):
     if not alternative_forms_list:
         return ''
     lines.append('\n\n<u><b>Alternative form(s)</b></u>')
-    lines.append(', '.join([prettify_name(form.name) for form in alternative_forms_list]))
+    lines.append(', '.join([add_pokemon_link(pokemon, prettify_name(pokemon.name)) for pokemon in alternative_forms_list]))
     return '\n'.join(lines)
 
 
@@ -212,8 +216,18 @@ def get_ability_page_text(ability):
 
 
 def get_pokemon_list_text(pokemon_list):
-    url = '<a href="https://t.me/{}?start=pokemon/{}">{}</a>'
-    return ', '.join([url.format(const.BOT_USERNAME, pokemon.pokemon.name, prettify_name(pokemon.pokemon.name)) for pokemon in pokemon_list])
+    words = []
+    for pokemon in pokemon_list:
+        pokemon = pokemon.pokemon
+        name_displayed = prettify_name(pokemon.name)  # TODO: make it equivalent to the line below
+        # name_displayed = get_pokemon_full_name(pokemon, species)
+        words.append(add_pokemon_link(pokemon, name_displayed))
+    return ', '.join(words)
+
+
+def add_pokemon_link(pokemon, name_displayed):
+    url = '<a href="https://t.me/{}?start=pokemon-{}">{}</a>'
+    return url.format(const.BOT_USERNAME, pokemon.name, name_displayed)
 
 
 def get_english_name(name_list):
@@ -246,5 +260,4 @@ def prettify_name(name):
         name_elements[0] = name_elements[0].title()
         name_elements[1] = name_elements[1].upper()
         return ' '.join(name_elements)
-
     return ' '.join(name_elements).title()

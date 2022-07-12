@@ -31,24 +31,34 @@ async def start(Client, message):
     if str(user_id) not in user_settings:
         create_user_settings(user_id)
 
+    is_preview_hidden = False
+    reply_markup = None
+
     if len(message.command) == 1:
         # Regular /start
         if is_shiny_unlocked(user_id):
             text = script.start_shiny_unlocked
         else:
             text = script.start
-        is_preview_hidden = False
     else:
         # Link to data (e.g.: ability, move, another Pokémon) page
         key, value = message.command[1].split('-', maxsplit=1)
+
         if key == 'ability':
+            is_preview_hidden = True
             ability = pokemon_client().get_ability(value).pop()
             text = data.get_ability_page_text(ability)
-        is_preview_hidden = True
+
+        if key == 'pokemon':
+            is_expanded = False
+            pokemon = pokemon_client().get_pokemon(value).pop()
+            text = datapage.get_datapage_text(pokemon, is_expanded, is_shiny_setted(user_id))
+            reply_markup = markup.datapage_markup(pokemon.name)
 
     await Client.send_message(
         chat_id=user_id,
         text=text,
+        reply_markup=reply_markup,
         disable_web_page_preview=is_preview_hidden
     )
 

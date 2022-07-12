@@ -12,20 +12,32 @@ def get_chain(species):
 
 
 def chain_to_text(stage, searched_stage_name, stage_index=1):
-    species = pokemon_client().get_pokemon_species(stage.species.name).pop()
-    methods = get_evolution_method(stage.evolution_details)
-    stage_name = data.get_english_name(species.names)
     lines = []
 
     if has_evolution(stage):
-        for stage in stage.evolves_to:
-            lines.append(chain_to_text(stage, searched_stage_name, stage_index=stage_index+1))
+        for next_stage in stage.evolves_to:
+            lines.append(chain_to_text(next_stage, searched_stage_name, stage_index=stage_index+1))
+
+    # species_full_name is used in the evolution "tree" text
+    species = pokemon_client().get_pokemon_species(stage.species.name).pop()
+    species_full_name = data.get_english_name(species.names)
+
+    if species.name == searched_stage_name:
+        # when Pokémon is underlines, we don't need to add the link
+        # we are already on the Pokémon page
+        species_full_name = species_full_name.join(['<u>', '</u>'])
+    else:
+        # default_pokemon is used for the link
+        # (we have to specify a Pokémon, not a species)
+        default_pokemon_name = species.varieties[0].pokemon.name
+        default_pokemon = pokemon_client().get_pokemon(default_pokemon_name).pop()
+
+        species_full_name = data.add_pokemon_link(default_pokemon, species_full_name)
 
     arrow_prefix = get_arrows_prefix(stage_index)
-    if species.name == searched_stage_name:
-        stage_name = stage_name.join(['<u>', '</u>'])
+    methods = get_evolution_method(stage.evolution_details)
 
-    return '\n'.join([f'{arrow_prefix}{stage_name} {methods}'] + lines)
+    return '\n'.join([f'{arrow_prefix}{species_full_name} {methods}'] + lines)
 
 
 def has_evolution(species):
