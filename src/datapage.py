@@ -1,4 +1,4 @@
-from client import pokemon_client
+from pokepy import V2Client as pokemon_client
 
 import data
 import script

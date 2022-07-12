@@ -1,8 +1,8 @@
 import re
 
+from pokepy import V2Client as pokemon_client
 from pyrogram.types import InlineQueryResultArticle, InputTextMessageContent
 
-from client import pokemon_client
 import data
 import markup
 import shiny

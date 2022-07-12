@@ -1,4 +1,4 @@
-from client import pokemon_client
+from pokepy import V2Client as pokemon_client
 
 import evolutions
 import script
@@ -97,7 +97,8 @@ def get_alternative_forms_list(species, pokemon):
 
 def alternative_forms_to_text(alternative_forms_list):
     lines = []
-    if not alternative_forms_list: return ''
+    if not alternative_forms_list:
+        return ''
     lines.append('\n\n<u><b>Alternative form(s)</b></u>')
     lines.append(', '.join([prettify_name(form.name) for form in alternative_forms_list]))
     return '\n'.join(lines)
@@ -198,7 +199,8 @@ def get_egg_cycles(species):
 
 def get_default_pokemon_from_species(species):
     for variety in species.varieties:
-        if not variety.is_default: continue
+        if not variety.is_default:
+            continue
         pokemon_name = variety.pokemon.name
         return pokemon_client.get_pokemon(pokemon_name).pop()
 
@@ -222,4 +224,5 @@ def get_english_name(species):
 
 def get_english_genus(genus_name_list):
     for name in genus_name_list:
-        if name.language.name == 'en': return name.genus
+        if name.language.name == 'en':
+            return name.genus

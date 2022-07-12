@@ -1,4 +1,5 @@
-from client import pokemon_client
+from pokepy import V2Client as pokemon_client
+
 import data
 import script
 
@@ -47,7 +48,8 @@ def get_evolution_method_list(evolution_details):
 
 
 def evolution_to_text(method_list):
-    if not method_list: return ''
+    if not method_list:
+        return ''
     return '({})'.format(' / '.join(method_list))
 
 

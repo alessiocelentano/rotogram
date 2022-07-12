@@ -5,24 +5,38 @@ start = f'''
 {const.ZAP} <b><u>What is Rotogram?</u></b>
 Rotogram is your detailed and always up-to-date Pokémon bot. \
 You can check infos about every specie \
-as quickly as possible, without ever leaving Telegram\n
+as quickly as possible, without ever leaving Telegram
+
 {const.TOOL} <b><u>Usage</u></b>
-Just write Pokemon name after @rotogrambot (e.g.: @rotogrambot Rotom)\n
+Just write Pokemon name after @rotogrambot (e.g.: @rotogrambot Rotom)
+
 @alessiocelentano | \
 <a href='t.me/rotogram'>Follow us</a> | \
 <a href='github.com/alessiocelentano/rotogram'>GitHub</a>
 '''
 start_shiny_unlocked = f'''
+{const.ZAP} <b><u>What is Rotogram?</u></b>
+Rotogram is your detailed and always up-to-date Pokémon bot. \
+You can check infos about every specie \
+as quickly as possible, without ever leaving Telegram
+
+{const.TOOL} <b><u>Usage</u></b>
+Just write Pokemon name after @rotogrambot (e.g.: @rotogrambot Rotom)
+
 {const.SPACE_INVADER} <b>...?</b>
 You have a strange item... it has one command:
 /toggle_shiny
+
+@alessiocelentano | \
+<a href='t.me/rotogram'>Follow us</a> | \
+<a href='github.com/alessiocelentano/rotogram'>GitHub</a>
 '''
 shiny_accepted = f'''
 You accepted a strange gift.
 It contains a message:
 
 '<i>Yo trainer, try to search some Pokémon on Rotogram with this new item.
-It contains a command called /toggle_shiny.
+It contains a command called /toggle_shiny. Use it on @rotogrambot chat.
 Follow me on @rotogram for more news like this.
 
 with {const.HEART} ,
@@ -114,9 +128,11 @@ pokemon_page_expanded = '''
 
 shiny_page = f'''
 <b><u>{const.SHINY_PAGE_TITLE}</u></b> <a href='{const.SHINY_PAGE_THUMB_URL}'>\
-{const.TYPE_EMOJI['bird']}</a> {const.TYPE_EMOJI['normal']}\n
+{const.TYPE_EMOJI['bird']}</a> {const.TYPE_EMOJI['normal']}
+
 <b><u>Evolutions</u></b>
-<i>This Pokémon does not even exist</i>\n
+<i>This Pokémon does not even exist</i>
+
 <b><u>Base stats</u></b>
 33 HP {const.BLACK_CIRCLE * 2}
 136 ATK {const.BLACK_CIRCLE * 6}

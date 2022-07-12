@@ -1,8 +1,8 @@
 import re
 
-from pyrogram import filters
+from pokepy import V2Client as pokemon_client
+from pyrogram import Client, filters
 
-from client import client, pokemon_client
 import inline
 import datapage
 import movepool
@@ -12,12 +12,13 @@ import script
 import const
 
 
+client = Client(const.SESSION_NAME)
 user_settings = {}
 user_query_results = {}
 
 
 @client.on_message(filters.command('start'))
-async def start(client, message):
+async def start(Client, message):
     '''/start command:
     it shows a brief description of the bot and the usage'''
 
@@ -25,18 +26,19 @@ async def start(client, message):
     if user_id not in user_settings:
         create_user_settings(user_id)
 
-    text = script.start
     if is_shiny_unlocked(user_id):
-        text += script.start_shiny_unlocked
+        text = script.start_shiny_unlocked
+    else:
+        text = script.start
 
-    await client.send_message(
+    await Client.send_message(
         chat_id=user_id,
         text=text
     )
 
 
 @client.on_message(filters.command('toggle_shiny'))
-async def toggle_shiny(client, message):
+async def toggle_shiny(Client, message):
     '''set/unset the Pokémon shiny form for the thumbnail'''
 
     user_id = message.from_user.id
@@ -51,14 +53,14 @@ async def toggle_shiny(client, message):
             set_shiny(user_id)
             text = script.set_shiny
 
-        await client.send_message(
+        await Client.send_message(
             chat_id=user_id,
             text=text
         )
 
 
 @client.on_inline_query()
-async def inline_search(client, inline_query):
+async def inline_search(Client, inline_query):
     '''Search Pokémon via inline mode.
     It shows one or more query results based on the input.
     e.g.:
