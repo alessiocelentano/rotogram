@@ -1,4 +1,5 @@
 import re
+import numpy as np
 
 from pokepy import V2Client as pokemon_client
 from pyrogram.types import InlineQueryResultArticle, InputTextMessageContent
@@ -27,11 +28,21 @@ def get_matching_pokemon(message_content):
     if message_content == const.SHINY_KEYWORD:
         return [const.SHINY_KEYWORD]
 
-    beginning_list = re.findall(f'^-*{message_content}.*$', const.POKEMON_LIST, flags=re.MULTILINE)
-    end_list = re.findall(f'^.*{message_content}-*$', const.POKEMON_LIST, flags=re.MULTILINE)
-    any_position_list = re.findall(f'^.*{message_content}.*$', const.POKEMON_LIST, flags=re.MULTILINE)
+    match_list = []
+    words = message_content.split(' ')
 
-    return list(dict.fromkeys(beginning_list + end_list + any_position_list))
+    for word in words:
+        beginning_list = re.findall(f'^-*{word}.*$', const.POKEMON_LIST, flags=re.MULTILINE)
+        end_list = re.findall(f'^.*{word}-*$', const.POKEMON_LIST, flags=re.MULTILINE)
+        any_position_list = re.findall(f'^.*{word}.*$', const.POKEMON_LIST, flags=re.MULTILINE)
+
+        match = list(dict.fromkeys(beginning_list + end_list + any_position_list))
+        if not match_list:
+            # Reference for intersection
+            match_list = match
+        else:
+            match_list = list(filter(lambda m: m in match, match_list))
+        return match_list
 
 
 def get_query_results(match_list, is_shiny_setted):
