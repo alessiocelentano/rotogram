@@ -16,14 +16,14 @@ import const
 
 
 uvloop.install()
-client = Client(const.SESSION_NAME)
+app = Client(const.SESSION_NAME)
 with open(const.USER_SETTINGS_PATH) as f:
     user_settings = json.load(f)
 user_query_results = {}
 
 
-@client.on_message(filters.command('start'))
-async def start(Client, message):
+@app.on_message(filters.command('start'))
+async def start(client, message):
     '''/start command:
     it shows a brief description of the bot and the usage'''
 
@@ -55,7 +55,7 @@ async def start(Client, message):
             text = datapage.get_datapage_text(pokemon, is_expanded, is_shiny_setted(user_id))
             reply_markup = markup.datapage_markup(pokemon.name)
 
-    await Client.send_message(
+    await client.send_message(
         chat_id=user_id,
         text=text,
         reply_markup=reply_markup,
@@ -63,8 +63,8 @@ async def start(Client, message):
     )
 
 
-@client.on_message(filters.command('toggle_shiny'))
-async def toggle_shiny(Client, message):
+@app.on_message(filters.command('toggle_shiny'))
+async def toggle_shiny(client, message):
     '''set/unset the Pokémon shiny form for the thumbnail'''
 
     user_id = message.from_user.id
@@ -79,14 +79,14 @@ async def toggle_shiny(Client, message):
             set_shiny(user_id)
             text = script.set_shiny
 
-        await Client.send_message(
+        await client.send_message(
             chat_id=user_id,
             text=text
         )
 
 
-@client.on_inline_query()
-async def inline_search(Client, inline_query):
+@app.on_inline_query()
+async def inline_search(client, inline_query):
     '''Search Pokémon via inline mode.
     It shows one or more query results based on the input.
     e.g.:
@@ -111,8 +111,8 @@ async def inline_search(Client, inline_query):
     )
 
 
-@client.on_chosen_inline_result()
-async def create_page(app, inline_query):
+@app.on_chosen_inline_result()
+async def create_page(client, inline_query):
     '''Create page of chosen Pokémon'''
 
     user_id = inline_query.from_user.id
@@ -129,15 +129,15 @@ async def create_page(app, inline_query):
     pokemon = pokemon_client().get_pokemon(pokemon_name).pop()
     is_expanded = False
 
-    await app.edit_inline_text(
+    await client.edit_inline_text(
         inline_message_id=message_id,
         text=datapage.get_datapage_text(pokemon, is_expanded, is_shiny_setted(user_id)),
         reply_markup=markup.datapage_markup(pokemon_name)
     )
 
 
-@client.on_callback_query(filters.create(lambda _, __, query: 'infos' in query.data))
-async def expand(app, query):
+@app.on_callback_query(filters.create(lambda _, __, query: 'infos' in query.data))
+async def expand(client, query):
     '''Expand/Reduce button:
     get more/less data (such as Pokédex and other game data)'''
 
@@ -152,16 +152,22 @@ async def expand(app, query):
 
     pokemon = pokemon_client().get_pokemon(pokemon_name).pop()
 
-    await app.answer_callback_query(query.id)  # Delete the loading circle
-    await app.edit_inline_text(
+    # Page is created by a link
+    if message_id is None:
+        return await query.message.edit_text(
+            text=datapage.get_datapage_text(pokemon, is_expanded, is_shiny_setted(user_id)),
+            reply_markup=markup.datapage_markup(pokemon_name, is_expanded)
+        )
+    await client.answer_callback_query(query.id)  # Delete the loading circle
+    await client.edit_inline_text(
         inline_message_id=message_id,
         text=datapage.get_datapage_text(pokemon, is_expanded, is_shiny_setted(user_id)),
         reply_markup=markup.datapage_markup(pokemon_name, is_expanded)
     )
 
 
-@client.on_callback_query(filters.create(lambda _, __, query: 'movepool' in query.data))
-async def show_movepool(app, query):
+@app.on_callback_query(filters.create(lambda _, __, query: 'movepool' in query.data))
+async def show_movepool(client, query):
     '''Movepool button:
     show all moves and their main parameters that a Pokémon can learn'''
 
@@ -176,16 +182,22 @@ async def show_movepool(app, query):
 
     pokemon = pokemon_client().get_pokemon(pokemon_name).pop()
 
-    await app.answer_callback_query(query.id)  # Delete the loading circle
-    await app.edit_inline_text(
+    # Page is created by a link
+    if message_id is None:
+        return await query.message.edit_text(
+            text = movepool.get_movepool_page(pokemon, current_page, is_shiny_setted(user_id)),
+            reply_markup = markup.movepool_markup(pokemon, current_page)
+        )
+    await client.answer_callback_query(query.id)  # Delete the loading circle
+    await client.edit_inline_text(
         inline_message_id=message_id,
         text=movepool.get_movepool_page(pokemon, current_page, is_shiny_setted(user_id)),
         reply_markup=markup.movepool_markup(pokemon, current_page)
     )
 
 
-@client.on_callback_query(filters.create(lambda _, __, query: 'shiny_prompt' == query.data))
-async def show_shiny_page(app, query):
+@app.on_callback_query(filters.create(lambda _, __, query: 'shiny_prompt' == query.data))
+async def show_shiny_page(client, query):
     '''Show the hidden page for unlock shiny thumbnails'''
 
     user_id = query.from_user.id
@@ -193,16 +205,16 @@ async def show_shiny_page(app, query):
     if str(user_id) not in user_settings:
         create_user_settings(user_id)
 
-    await app.answer_callback_query(query.id)  # Delete the loading circle
-    await app.edit_inline_text(
+    await client.answer_callback_query(query.id)  # Delete the loading circle
+    await client.edit_inline_text(
         inline_message_id=message_id,
         text='???',
         reply_markup=markup.accept_shiny()
     )
 
 
-@client.on_callback_query(filters.create(lambda _, __, query: 'accept_shiny' == query.data))
-async def accept_shiny(app, query):
+@app.on_callback_query(filters.create(lambda _, __, query: 'accept_shiny' == query.data))
+async def accept_shiny(client, query):
     '''Unlock shiny thumbnails'''
 
     user_id = query.from_user.id
@@ -212,7 +224,7 @@ async def accept_shiny(app, query):
 
     unlock_shiny(user_id)
 
-    await app.edit_inline_text(
+    await client.edit_inline_text(
         inline_message_id=message_id,
         text=script.shiny_accepted
     )
@@ -263,4 +275,4 @@ def dump_user_settings():
 
 
 if __name__ == '__main__':
-    client.run()
+    app.run()
