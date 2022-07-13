@@ -151,3 +151,16 @@ ability_page = '''
 {pokemon_list_emoji} <b><u>List of Pokémon</u></b>
 {pokemon_list}
 '''
+
+move_page = '''
+{move_emoji} <b><u>{name}</u></b>
+<i>Introduced in {generation}</i>
+
+{data_emoji} <b><u>Data</u></b>
+<b>Type</b>: {type} {type_emoji}
+<b>Category</b>: {class}
+<b>Power</b>: {power} | <b>Accuracy</b>: {accuracy} | <b>PP</b>: {pp}
+
+{description_emoji} <b><u>Description</u></b>
+{description}
+'''

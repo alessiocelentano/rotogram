@@ -3,19 +3,22 @@ import os
 import pokepy
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
-FILE_PATH = f'{PROJECT_ROOT}/src/pokemon.txt'
+FILE_PATH = f'{PROJECT_ROOT}/src/names/pokemon.txt'
 
 
-def update_pokemon(pokemon_id=1, content=''):
+def main():
+    update()
+
+
+def update(id_=1, content=''):
     # Starting ID is 1 because if new alternative forms are
-    # added, we have to iterate again all Pokémons
-
+    # added, we have to iterate again all Pokémons.
     # An infinite loop is used we can't say how many
     # Pokémons there are every new generation
     while True:
         try:
-            content += add_pokemon(pokemon_id)
-            pokemon_id += 1
+            content += add_pokemon(id_)
+            id_ += 1
         except Exception:
             print('Operation completed')
             break
@@ -33,4 +36,4 @@ def add_pokemon(pokemon_id, text=''):
 
 
 if __name__ == '__main__':
-    update_pokemon()
+    main()

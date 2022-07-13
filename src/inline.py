@@ -34,10 +34,11 @@ def get_matching_pokemon(message_content):
         # We don't just use word in const.POKEMON_LIST for give an order
         beginning_list = re.findall(f'^-*{word}.*$', const.POKEMON_LIST, flags=re.MULTILINE)
         end_list = re.findall(f'^.*{word}-*$', const.POKEMON_LIST, flags=re.MULTILINE)
-        
-        match = list(dict.fromkeys(beginning_list + end_list))
+        any_position = re.findall(f'^.*{word}.*$', const.POKEMON_LIST, flags=re.MULTILINE)
+
+        match = list(dict.fromkeys(beginning_list + end_list + any_position))
         match_list = list(filter(lambda m: not match_list or m in match_list, match))
- 
+
     # We have to set a limit on the number of queries.
     # create an instance for every Pokémon found can be really slow
     # with big match_lists

@@ -211,7 +211,7 @@ def get_ability_page_text(ability):
     ability_dict = {
         'name': get_english_name(ability.names),
         'generation': prettify_name(ability.generation.name),
-        'description': get_english_ability_effect(ability.effect_entries),
+        'description': get_english_effect(ability.effect_entries),
         'pokemon_list': get_pokemon_list_text(ability.pokemon),
         'ability_emoji': const.BUTTON,
         'description_emoji': const.EYE,
@@ -240,14 +240,14 @@ def get_english_name(name_list):
         if name.language.name == 'en':
             return name.name
 
-    
+
 def get_english_genus(name_list):
     for name in name_list:
         if name.language.name == 'en':
             return name.genus
 
 
-def get_english_ability_effect(name_list):
+def get_english_effect(name_list):
     for name in name_list:
         if name.language.name == 'en':
             return name.effect

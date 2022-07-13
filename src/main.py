@@ -8,7 +8,7 @@ from pyrogram import Client, filters
 import data
 import inline
 import datapage
-import movepool
+import moves
 import markup
 import shiny
 import script
@@ -44,16 +44,21 @@ async def start(client, message):
         # Link to data (e.g.: ability, move, another Pokémon) page
         key, value = message.command[1].split('-', maxsplit=1)
 
-        if key == 'ability':
-            is_preview_hidden = True
-            ability = pokemon_client().get_ability(value).pop()
-            text = data.get_ability_page_text(ability)
-
         if key == 'pokemon':
             is_expanded = False
             pokemon = pokemon_client().get_pokemon(value).pop()
             text = datapage.get_datapage_text(pokemon, is_expanded, is_shiny_setted(user_id))
             reply_markup = markup.datapage_markup(pokemon.name)
+
+        if key == 'ability':
+            is_preview_hidden = True
+            ability = pokemon_client().get_ability(value).pop()
+            text = data.get_ability_page_text(ability)
+
+        if key == 'move':
+            is_preview_hidden = True
+            move = pokemon_client().get_move(value).pop()
+            text = moves.get_move_page_text(move)
 
     await client.send_message(
         chat_id=user_id,
@@ -158,6 +163,7 @@ async def expand(client, query):
             text=datapage.get_datapage_text(pokemon, is_expanded, is_shiny_setted(user_id)),
             reply_markup=markup.datapage_markup(pokemon_name, is_expanded)
         )
+
     await client.answer_callback_query(query.id)  # Delete the loading circle
     await client.edit_inline_text(
         inline_message_id=message_id,
@@ -185,13 +191,14 @@ async def show_movepool(client, query):
     # Page is created by a link
     if message_id is None:
         return await query.message.edit_text(
-            text=movepool.get_movepool_page(pokemon, current_page, is_shiny_setted(user_id)),
+            text=moves.get_movepool_page(pokemon, current_page, is_shiny_setted(user_id)),
             reply_markup=markup.movepool_markup(pokemon, current_page)
         )
+
     await client.answer_callback_query(query.id)  # Delete the loading circle
     await client.edit_inline_text(
         inline_message_id=message_id,
-        text=movepool.get_movepool_page(pokemon, current_page, is_shiny_setted(user_id)),
+        text=moves.get_movepool_page(pokemon, current_page, is_shiny_setted(user_id)),
         reply_markup=markup.movepool_markup(pokemon, current_page)
     )
 
