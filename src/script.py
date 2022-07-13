@@ -98,7 +98,7 @@ pokemon_page = '''
 '''
 
 pokemon_page_expanded = '''
-<b><u>{pokemon_full_name}</u></b> <a href="{artwork_url}">{emoji1}{emoji2}</a>
+<b><u>{pokemon_full_name}</u></b> <a href="{artwork_url}">{emoji1} {emoji2}</a>
 <b>{type_section_name}</b>: {typing}
 <b>{ability_section_name}</b>: {abilities}\
 {hidden_ability_section_name}{hidden_ability}

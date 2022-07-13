@@ -1,5 +1,4 @@
 import re
-import numpy as np
 
 from pokepy import V2Client as pokemon_client
 from pyrogram.types import InlineQueryResultArticle, InputTextMessageContent
@@ -32,17 +31,17 @@ def get_matching_pokemon(message_content):
     words = message_content.split(' ')
 
     for word in words:
+        # We don't just use word in const.POKEMON_LIST for give an order
         beginning_list = re.findall(f'^-*{word}.*$', const.POKEMON_LIST, flags=re.MULTILINE)
         end_list = re.findall(f'^.*{word}-*$', const.POKEMON_LIST, flags=re.MULTILINE)
-        any_position_list = re.findall(f'^.*{word}.*$', const.POKEMON_LIST, flags=re.MULTILINE)
-
-        match = list(dict.fromkeys(beginning_list + end_list + any_position_list))
-        if not match_list:
-            # Reference for intersection
-            match_list = match
-        else:
-            match_list = list(filter(lambda m: m in match, match_list))
-        return match_list
+        
+        match = list(dict.fromkeys(beginning_list + end_list))
+        match_list = list(filter(lambda m: not match_list or m in match_list, match))
+ 
+    # We have to set a limit on the number of queries.
+    # create an instance for every Pokémon found can be really slow
+    # with big match_lists
+    return match_list[:const.QUERY_PER_SEARCH]
 
 
 def get_query_results(match_list, is_shiny_setted):

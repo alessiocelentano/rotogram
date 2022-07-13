@@ -11,6 +11,7 @@ with open(PKMN_LIST_PATH) as f:
 
 CACHE_TIME = 3
 MOVE_PER_PAGE = 5
+QUERY_PER_SEARCH = 10
 # Key: PokéAPI form name
 # Value: Rotogram form name
 MAIN_ALTERNATIVE_FORMS = {
