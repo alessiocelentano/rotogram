@@ -3,7 +3,6 @@ import asyncio
 from pyrogram.types import InlineQueryResultArticle, InputTextMessageContent
 
 import markup
-import script
 import const
 
 
@@ -16,21 +15,21 @@ async def load_shiny_page(app, inline_query, is_shiny_unlocked):
 
     await app.edit_inline_text(
         inline_message_id=inline_query.inline_message_id,
-        text=f'{script.loading}?',
+        text=f'{const.LOADING}?',
         reply_markup=markup.dummy_prompt()
     )
     await asyncio.sleep(3)
 
     await app.edit_inline_text(
         inline_message_id=inline_query.inline_message_id,
-        text=script.shiny_page_loading,
+        text=const.SHINY_PAGE_LOADING,
         reply_markup=markup.dummy_prompt()
     )
     await asyncio.sleep(3)
 
     await app.edit_inline_text(
         inline_message_id=inline_query.inline_message_id,
-        text=script.shiny_page,
+        text=const.SHINY_PAGE,
         reply_markup=markup.shiny_prompt() if not is_shiny_unlocked else None
     )
 
@@ -44,7 +43,7 @@ def show_shiny_query():
     return [InlineQueryResultArticle(
         title=name,
         description=f'{genus}\nType: {typing}',
-        input_message_content=InputTextMessageContent(script.loading),
+        input_message_content=InputTextMessageContent(const.LOADING),
         thumb_url=thumb_url,
         reply_markup=reply_markup
     )]

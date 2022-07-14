@@ -75,3 +75,167 @@ TYPE_EMOJI = {
     'bird': '\U0001F426',
     None: ''
 }
+
+START = f'''
+{ZAP} <b><u>What is Rotogram?</u></b>
+Rotogram is your detailed and always up-to-date Pokémon bot. \
+You can check infos about every specie \
+as quickly as possible, without ever leaving Telegram
+
+{TOOL} <b><u>Usage</u></b>
+Just write Pokemon name after @rotogrambot (e.g.: @rotogrambot Rotom)
+
+@alessiocelentano | \
+<a href='t.me/rotogram'>Follow us</a> | \
+<a href='github.com/alessiocelentano/rotogram'>GitHub</a>
+'''
+START_SHINY_UNLOCKED = f'''
+{ZAP} <b><u>What is Rotogram?</u></b>
+Rotogram is your detailed and always up-to-date Pokémon bot. \
+You can check infos about every specie \
+as quickly as possible, without ever leaving Telegram
+
+{TOOL} <b><u>Usage</u></b>
+Just write Pokemon name after @rotogrambot (e.g.: @rotogrambot Rotom)
+
+{SPACE_INVADER} <b>...?</b>
+You have a strange item... it has one command:
+/toggle_shiny
+
+@alessiocelentano | \
+<a href='t.me/rotogram'>Follow us</a> | \
+<a href='github.com/alessiocelentano/rotogram'>GitHub</a>
+'''
+SHINY_ACCEPTED = f'''
+You accepted a strange gift.
+It contains a message:
+
+'<i>Yo trainer, try to search some Pokémon on Rotogram with this new item.
+It contains a command called /toggle_shiny. Use it on @rotogrambot chat.
+Follow me on @rotogram for more news like this.
+
+with {HEART} ,
+- the developer</i>'
+'''
+
+LOADING = f'{LOADING_CIRCLE}  Loading...'
+SHINY_PAGE_LOADING = f'{GLYPH_NOT_FOUND} L?ad?ng...?'
+SET_SHINY = f'Shiny thumbnails enabled successfully! {SHINE}'
+UNSET_SHINY = f'Shiny thumbnails disabled {X}'
+NO_EVOLUTION = '<i>It is not known to evolve into or from any other Pokémon</i>'
+POKEMON_NOT_FOUND = 'Ooops! Pokémon not found, try again.'
+MOVEPOOL_TITLE = '<a href="{}">{}</a> <u><b>Movepool ({}/{})</b></u>\n'
+MOVE = '''
+– <b>{name}</b> – (<i>{class}</i>)
+<b>Type</b>: {type} {emoji}
+<b>Power</b>: {power} | <b>Accuracy</b>: {accuracy}
+'''
+
+REDUCE = f'{MINUS}  Reduce'
+EXPAND = f'{PLUS}  Expand'
+MOVEPOOL = f'{SWORDS}  Moves'
+LOCATION = f'{HOUSE}  Locations'
+BACK = f'{BACK} Back'
+ACCEPT_SHINY_BUTTON = f'{TICK} ACCEPT GIFT'
+
+SHEDINJA_METHOD = '''\
+evolve Nincada having one Poké Ball in bag and one empty slot in party
+'''
+MALAMAR_METHOD = '''\
+while the game system is held upside-down
+'''
+SIRFETCH_METHOD = '''\
+land three critical hits in one battle
+'''
+RUNERIGUS_METHOD = '''\
+travel under the stone bridge in Dusty Bowl after taking at least\
+49 damage from attacks without fainting
+'''
+ALCREMIE_METHOD = '''\
+while holding a Sweet when its Trainer spins and strikes a pose
+'''
+URSHIFU_METHOD = '''\
+interact with Scroll of Darkness/Waters
+'''
+
+POKEMON_PAGE = '''
+<b><u>{pokemon_full_name}</u></b> <a href="{artwork_url}">{emoji1}{emoji2}</a>
+<b>Type</b>: {typing}
+<b>Ability</b>: {abilities}\
+{hidden_ability_line}
+
+<b><u>Evolutions</u></b>
+{evolution_family}\
+{alternative_forms}
+
+<b><u>Base stats</u></b>
+{stats}
+'''
+
+POKEMON_PAGE_EXPANDED = '''
+<b><u>{pokemon_full_name}</u></b> <a href="{artwork_url}">{emoji1}{emoji2}</a>
+<b>Type</b>: {typing}
+<b>Ability</b>: {abilities}\
+{hidden_ability_line}
+
+<b><u>Evolutions</u></b>
+{evolution_family}\
+{alternative_forms}
+
+<u><b>Pokédex data</b></u>
+<b>Species</b>: {genus}
+<b>National Pokedex Number</b>: {dex_number}
+<b>Height</b>: {height}
+<b>Weight</b>: {weight}
+<b>Gender (male/female)</b>: {gender_percentage}
+
+<u><b>Game data</b></u>
+<b>Base friendship</b>: {base_friendship}
+<b>EV yield</b>: {ev_yield}
+<b>Catch rate</b>: {catch_rate}
+<b>Growth rate</b>: {growth_rate}
+<b>Egg groups</b>: {egg_groups}
+<b>Egg cycles</b>: {egg_cycles}
+
+<b><u>Base stats</u></b>
+{stats}
+'''
+
+SHINY_PAGE = f'''
+<b><u>{SHINY_PAGE_TITLE}</u></b> <a href='{SHINY_PAGE_THUMB_URL}'>\
+{TYPE_EMOJI['bird']}</a> {TYPE_EMOJI['normal']}
+
+<b><u>Evolutions</u></b>
+<i>This Pokémon does not even exist</i>
+
+<b><u>Base stats</u></b>
+33 HP {BLACK_CIRCLE * 2}
+136 ATK {BLACK_CIRCLE * 6}
+0 DEF {BLACK_CIRCLE * 10}
+6 SPCL {BLACK_CIRCLE * 1}
+29 SPE {BLACK_CIRCLE * 2}
+'''
+
+ABILITY_PAGE = '''
+{ability_emoji} <b><u>{name}</u></b>
+<i>Introduced in {generation}</i>
+
+{description_emoji} <b><u>Description</u></b>
+{description}
+
+{pokemon_list_emoji} <b><u>List of Pokémon</u></b>
+{pokemon_list}
+'''
+
+MOVE_PAGE = '''
+{move_emoji} <b><u>{name}</u></b>
+<i>Introduced in {generation}</i>
+
+{data_emoji} <b><u>Data</u></b>
+<b>Type</b>: {type} {type_emoji}
+<b>Category</b>: {class}
+<b>Power</b>: {power} | <b>Accuracy</b>: {accuracy} | <b>PP</b>: {pp}
+
+{description_emoji} <b><u>Description</u></b>
+{description}
+'''

@@ -2,7 +2,6 @@ from math import ceil
 
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-import script
 import const
 
 
@@ -60,14 +59,14 @@ def accept_shiny():
 
 def expand_reduce(species_name, is_expanded):
     return InlineKeyboardButton(
-        text=script.reduce if is_expanded else script.expand,
+        text=const.REDUCE if is_expanded else const.EXPAND,
         callback_data=f'infos/{int(not is_expanded)}/{species_name}'
     )
 
 
 def movepool(species_name):
     return InlineKeyboardButton(
-        text=script.movepool,
+        text=const.MOVEPOOL,
         callback_data=f'movepool/1/{species_name}'
         # 1 => page number, 10 moves each page (see set_moveset())
     )
@@ -96,27 +95,27 @@ def ending_page(total_pages, pokemon_name):
 
 def back(pokemon_name):
     return InlineKeyboardButton(
-        text=script.back,
+        text=const.BACK,
         callback_data=f'infos/0/{pokemon_name}'
     )
 
 
 def dummy_expand_reduce():
     return InlineKeyboardButton(
-        text=script.expand,
+        text=const.EXPAND,
         callback_data='dummy_prompt'
     )
 
 
 def shiny_page_expand_reduce():
     return InlineKeyboardButton(
-        text=script.expand,
+        text=const.EXPAND,
         callback_data='shiny_prompt'
     )
 
 
 def accept_shiny_button():
     return InlineKeyboardButton(
-        text=script.accept_shiny_button,
+        text=const.ACCEPT_SHINY_BUTTON,
         callback_data='accept_shiny'
     )

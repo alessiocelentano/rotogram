@@ -1,7 +1,7 @@
 from pokepy import V2Client as pokemon_client
 
+import const
 import data
-import script
 
 
 def get_chain(species):
@@ -69,12 +69,12 @@ def trigger_to_text(trigger):
     if trigger == 'level-up': return 'Level'
     if trigger == 'use-item': return 'Use'
     if trigger == 'trade': return 'Trade'
-    if trigger == 'shed': return script.shedinja_method
-    if trigger == 'spin': return script.alcremie_method
-    if trigger == 'tower-of-darkness': return script.urshifu_method
-    if trigger == 'tower-of-waters': return script.urshifu_method
-    if trigger == 'three-critical-hits': return script.sirfetch_method
-    if trigger == 'take-damage': return script.runerigus_method
+    if trigger == 'shed': return const.SHEDINJA_METHOD
+    if trigger == 'spin': return const.ALCREMIE_METHOD
+    if trigger == 'tower-of-darkness': return const.URSHIFU_METHOD
+    if trigger == 'tower-of-waters': return const.URSHIFU_METHOD
+    if trigger == 'three-critical-hits': return const.SIRFETCH_METHOD
+    if trigger == 'take-damage': return const.RUNERIGUS_METHOD
 
 
 def condition_to_text(method):
@@ -97,7 +97,7 @@ def condition_to_text(method):
     if method.relative_physical_stats == 0:
         condition_list.append('if Attack = Defense')
     if method.turn_upside_down:
-        condition_list.append(script.malamar_method)
+        condition_list.append(const.MALAMAR_METHOD)
     if method.time_of_day:
         time_of_day = data.prettify_name(method.time_of_day)
         condition_list.append(f'during {time_of_day}')

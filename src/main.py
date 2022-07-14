@@ -11,7 +11,6 @@ import datapage
 import moves
 import markup
 import shiny
-import script
 import const
 
 
@@ -37,9 +36,9 @@ async def start(client, message):
     if len(message.command) == 1:
         # Regular /start
         if is_shiny_unlocked(user_id):
-            text = script.start_shiny_unlocked
+            text = const.START_SHINY_UNLOCKED
         else:
-            text = script.start
+            text = const.START
     else:
         # Link to data (e.g.: ability, move, another Pokémon) page
         key, value = message.command[1].split('-', maxsplit=1)
@@ -79,10 +78,10 @@ async def toggle_shiny(client, message):
     if is_shiny_unlocked(user_id):
         if is_shiny_setted(user_id):
             unset_shiny(user_id)
-            text = script.unset_shiny
+            text = const.UNSET_SHINY
         else:
             set_shiny(user_id)
-            text = script.set_shiny
+            text = const.SET_SHINY
 
         await client.send_message(
             chat_id=user_id,
@@ -233,7 +232,7 @@ async def accept_shiny(client, query):
 
     await client.edit_inline_text(
         inline_message_id=message_id,
-        text=script.shiny_accepted
+        text=const.SHINY_ACCEPTED
     )
 
 

@@ -3,7 +3,6 @@ from math import ceil
 from pokepy import V2Client as pokemon_client
 
 import data
-import script
 import const
 
 
@@ -13,7 +12,7 @@ def get_movepool_page(pokemon, current_page, is_shiny_setted):
     first_element_of_page = last_element_of_page - const.MOVE_PER_PAGE
     artwork = data.get_home_thumb_url(pokemon, is_shiny_setted)
 
-    text = script.movepool_title.format(artwork, const.RED_SPARK, current_page, total_pages)
+    text = const.MOVEPOOL_TITLE.format(artwork, const.RED_SPARK, current_page, total_pages)
 
     for i in range(first_element_of_page, last_element_of_page):
         if i >= len(pokemon.moves):
@@ -29,7 +28,7 @@ def get_movepool_page(pokemon, current_page, is_shiny_setted):
             'emoji': const.TYPE_EMOJI[move.type.name]
         }
 
-        text += script.move.format(**data_dict)
+        text += const.MOVE.format(**data_dict)
 
     return text
 
@@ -51,7 +50,7 @@ def get_move_page_text(move):
         'description_emoji': const.EYE,
         'pokemon_list_emoji': const.POKEMON
     }
-    return script.move_page.format(**data_dict)
+    return const.MOVE_PAGE.format(**data_dict)
 
 
 def get_move_name(move):

@@ -1,7 +1,6 @@
 from pokepy import V2Client as pokemon_client
 
 import data
-import script
 import const
 
 
@@ -35,9 +34,9 @@ def get_datapage_text(pokemon, is_expanded, is_shiny_setted=False):
             'egg_groups': data.get_egg_groups(species),
             'egg_cycles': data.get_egg_cycles(species)
         }
-        return script.pokemon_page_expanded.format(**data_dict)
+        return const.POKEMON_PAGE_EXPANDED.format(**data_dict)
 
-    return script.pokemon_page.format(**data_dict)
+    return const.POKEMON_PAGE.format(**data_dict)
 
 
 def get_hidden_ability_line(pokemon):

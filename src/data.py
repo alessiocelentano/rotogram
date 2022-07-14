@@ -1,5 +1,4 @@
 import evolutions
-import script
 import const
 
 
@@ -86,7 +85,7 @@ def get_evolution_chain(species):
     if evolutions.has_evolution(chain):
         evolution_text = evolutions.chain_to_text(chain, species.name)
         return evolution_text
-    return script.no_evolutions
+    return const.NO_EVOLUTIONS
 
 
 def get_alternative_forms(species, pokemon):
@@ -216,15 +215,16 @@ def get_ability_page_text(ability):
         'ability_emoji': const.BUTTON,
         'description_emoji': const.EYE,
         'pokemon_list_emoji': const.POKEMON
+
     }
-    return script.ability_page.format(**ability_dict)
+    return const.ABILITY_PAGE.format(**ability_dict)
 
 
 def get_pokemon_list_text(pokemon_list):
     words = []
     for pokemon in pokemon_list:
         pokemon = pokemon.pokemon
-        name_displayed = prettify_name(pokemon.name)  # TODO: make it equivalent to the line below
+        name_displayed = prettify_name(pokemon.name)  # The line below is more appropriate but make the iteration very slow
         # name_displayed = get_pokemon_full_name(pokemon, species)
         words.append(add_pokemon_link(pokemon, name_displayed))
     return ', '.join(words)

@@ -6,7 +6,6 @@ from pyrogram.types import InlineQueryResultArticle, InputTextMessageContent
 import data
 import markup
 import shiny
-import script
 import const
 
 
@@ -62,7 +61,7 @@ def get_query_results(match_list, is_shiny_setted):
             InlineQueryResultArticle(
                 title=data.get_pokemon_full_name(pokemon, species),
                 description=f'{genus}\nType: {typing}',
-                input_message_content=InputTextMessageContent(script.loading),
+                input_message_content=InputTextMessageContent(const.LOADING),
                 thumb_url=data.get_home_thumb_url(pokemon, is_shiny=is_shiny_setted),
                 reply_markup=markup.datapage_markup(pokemon.name, is_expanded=False)
             )
