@@ -15,15 +15,10 @@ def get_datapage_text(pokemon, is_expanded, is_shiny_setted=False):
         'emoji1': const.TYPE_EMOJI[data.get_typing_list(pokemon)[0]],
         'emoji2': const.TYPE_EMOJI[data.get_typing_list(pokemon)[1]],
         'abilities': data.get_abilities(pokemon),
-        'hidden_ability': data.get_abilities(pokemon, is_hidden=True),
+        'hidden_ability_line': get_hidden_ability_line(pokemon),
         'evolution_family': data.get_evolution_chain(species),
         'alternative_forms': data.get_alternative_forms(species, pokemon),
-        'stats': data.get_stats(pokemon),
-    }
-    data_dict |= {
-        'type_section_name': get_type_section_name(data_dict),
-        'ability_section_name': get_ability_section_name(data_dict),
-        'hidden_ability_section_name': get_hidden_ability_section_name(data_dict)
+        'stats': data.get_stats(pokemon)
     }
 
     if is_expanded:
@@ -45,17 +40,10 @@ def get_datapage_text(pokemon, is_expanded, is_shiny_setted=False):
     return script.pokemon_page.format(**data_dict)
 
 
-def get_type_section_name(data_dict):
-    types = data_dict['typing'].split('/')
-    return 'Types' if len(types) > 1 else 'Type'
-
-
-def get_ability_section_name(data_dict):
-    abilities = data_dict['abilities'].split('/')
-    return 'Abilities' if len(abilities) > 1 else 'Ability'
-
-
-def get_hidden_ability_section_name(data_dict):
+def get_hidden_ability_line(pokemon):
     # Additional newlines are added for lines which are not always displayed
     # If they're added, we separate them from the above text
-    return '\n<b>Hidden ability</b>: ' if data_dict['hidden_ability'] else ''
+    hidden_ability = data.get_abilities(pokemon, is_hidden=True)
+    if not hidden_ability:
+        return ''
+    return f'\n<b>Hidden ability</b>: {hidden_ability}'

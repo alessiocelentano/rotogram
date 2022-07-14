@@ -85,9 +85,9 @@ interact with Scroll of Darkness/Waters
 
 pokemon_page = '''
 <b><u>{pokemon_full_name}</u></b> <a href="{artwork_url}">{emoji1}{emoji2}</a>
-<b>{type_section_name}</b>: {typing}
-<b>{ability_section_name}</b>: {abilities}\
-{hidden_ability_section_name}{hidden_ability}
+<b>Type</b>: {typing}
+<b>Ability</b>: {abilities}\
+{hidden_ability_line}
 
 <b><u>Evolutions</u></b>
 {evolution_family}\
@@ -98,10 +98,10 @@ pokemon_page = '''
 '''
 
 pokemon_page_expanded = '''
-<b><u>{pokemon_full_name}</u></b> <a href="{artwork_url}">{emoji1} {emoji2}</a>
-<b>{type_section_name}</b>: {typing}
-<b>{ability_section_name}</b>: {abilities}\
-{hidden_ability_section_name}{hidden_ability}
+<b><u>{pokemon_full_name}</u></b> <a href="{artwork_url}">{emoji1}{emoji2}</a>
+<b>Type</b>: {typing}
+<b>Ability</b>: {abilities}\
+{hidden_ability_line}
 
 <b><u>Evolutions</u></b>
 {evolution_family}\
