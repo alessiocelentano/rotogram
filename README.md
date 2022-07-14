@@ -6,7 +6,7 @@
 	</br>
 </h1>
 
-<h4 align="center">The best Telegram bot about Pokémon. Get every information in any chat!</h4>
+<h4 align="center">The best Telegram bot about Pokémon.<br>Get every information in any chat!</h4>
 
 <p align="center">
   <a href="https://t.me/rotogrambot">
@@ -24,17 +24,14 @@
 
 ## Key Features
 
-* **Every info** about Pokémon, such as base stats, typing, moveset, locations, evolutions...;
+* **Every info** about Pokémon, such as base stats, typing, movepool, evolutions...;
 * **Inline mode**: no need to add the bot in the chats, use it everywhere with the inline mode;
 * **Always up-to-date** thanks to [PokeAPI](https://github.com/PokeAPI/pokeapi)
 
 ## Download
-
-You can clone the bot:
-
 ```bash
 # Clone this repository
-$ git clone https://github.com/Nastybox/rotogram
+$ git clone https://github.com/alessiocelentano/rotogram
 
 # Go into the repository
 $ cd rotogram
@@ -42,8 +39,10 @@ $ cd rotogram
 # Install dependencies
 $ pip3 install -r requirements.txt
 
-# Create a config.ini with your api id/api hash (https://docs.pyrogram.org/topics/config-file#pyrogram)
-$ touch src/config.ini
+# Pass your API ID, API hash and bot token to Client()
+# You can eventually remove them from the code
+# More infos on: https://docs.pyrogram.org/start/setup
+$ vim src/main.py
 
 # Run the bot
 $ python3 src/main.py
