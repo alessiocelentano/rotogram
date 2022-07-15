@@ -85,7 +85,7 @@ def get_evolution_chain(species):
     if evolutions.has_evolution(chain):
         evolution_text = evolutions.chain_to_text(chain, species.name)
         return evolution_text
-    return const.NO_EVOLUTIONS
+    return const.NO_EVOLUTION
 
 
 def get_alternative_forms(species, pokemon):
