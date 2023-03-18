@@ -1,13 +1,22 @@
 import os
-
+import configparser
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
-SESSION_NAME = 'Rotogram'
-BOT_USERNAME = 'rotogrambot'
 PKMN_LIST_PATH = f'{PROJECT_ROOT}/src/pokemon.txt'
 USER_SETTINGS_PATH = f'{PROJECT_ROOT}/src/user_settings.json'
 with open(PKMN_LIST_PATH) as f:
     POKEMON_LIST = f.read()
+
+CONFIG_FILE_NAME = f'{PROJECT_ROOT}/src/config.ini'
+CONFIG_SECTION_NAME = 'rotogram'
+config = configparser.ConfigParser()
+config.read(CONFIG_FILE_NAME)
+
+API_ID = config[CONFIG_SECTION_NAME]['api_id']
+API_HASH = config[CONFIG_SECTION_NAME]['api_hash']
+BOT_TOKEN = config[CONFIG_SECTION_NAME]['bot_token']
+BOT_USERNAME = config[CONFIG_SECTION_NAME]['bot_username']
+SESSION_NAME = config[CONFIG_SECTION_NAME]['session_name']
 
 CACHE_TIME = 3
 MOVE_PER_PAGE = 5
