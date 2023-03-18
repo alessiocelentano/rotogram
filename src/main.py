@@ -15,7 +15,11 @@ import const
 
 
 uvloop.install()
-app = Client(const.SESSION_NAME)
+app = Client(const.SESSION_NAME,
+    api_id=const.API_ID,
+    api_hash=const.API_HASH,
+    bot_token=const.BOT_TOKEN
+)
 with open(const.USER_SETTINGS_PATH) as f:
     user_settings = json.load(f)
 user_query_results = {}
