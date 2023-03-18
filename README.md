@@ -39,10 +39,8 @@ $ cd rotogram
 # Install dependencies
 $ pip3 install -r requirements.txt
 
-# Pass your API ID, API hash and bot token to Client()
-# You can eventually remove them from the code
-# More infos on: https://docs.pyrogram.org/start/setup
-$ vim src/main.py
+# Edit config.ini with your API ID, API hash and bot token
+$ vim src/config.ini
 
 # Run the bot
 $ python3 src/main.py
