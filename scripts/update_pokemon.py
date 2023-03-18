@@ -3,7 +3,7 @@ import os
 import pokepy
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
-FILE_PATH = f'{PROJECT_ROOT}/src/names/pokemon.txt'
+FILE_PATH = f'{PROJECT_ROOT}/src/pokemon.txt'
 
 
 def main():
