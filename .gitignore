@@ -159,9 +159,9 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 
-# Pyenv
+# Pyvenv
 bin/
-pyenv.cfg
+pyvenv.cfg
 
 # Pyrogram sessions
 *.session*
