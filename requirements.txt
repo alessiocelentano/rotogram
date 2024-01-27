@@ -1,6 +1,6 @@
-uvloop==0.16.0
-TgCrypto==1.2.3
-Pyrogram==2.0.30
+uvloop==0.19.0
+TgCrypto==1.2.5
+Pyrogram==2.0.106
 pokepy==0.4.0
-urllib3==1.26.9
-requests==2.28.1
+urllib3==2.1.0
+requests==2.31.0
