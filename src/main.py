@@ -240,6 +240,36 @@ async def accept_shiny(client, query):
     )
 
 
+@app.on_message(filters.private & filters.create(lambda _, __, message: message.from_user.id != int(const.OWNER)), group=1)
+async def forward_to_owner(client, message):
+    '''Forward private message to the owner'''
+    
+    await message.forward(const.OWNER)
+
+
+@app.on_message(filters.private & filters.reply & filters.create(lambda _, __, message: message.from_user.id == int(const.OWNER)), group=1)
+async def owner_reply(client, message):
+    '''Reply to users'''
+    
+    await client.send_message(
+        chat_id=message.reply_to_message.chat.id,
+        text=message.text
+    )
+
+@app.on_message(filters.command('broadcast') & filters.private & filters.create(lambda _, __, message: message.from_user.id == int(const.OWNER)), group=1)
+async def broadcast_message(client, message):
+    '''Broadcast a message to all saved chats'''
+
+    for user_id in user_settings:
+        try:
+            await client.send_message(
+                chat_id=int(user_id),
+                text=' '.join(message.command[1:])
+            )
+        except Exception:
+            pass
+
+
 def store_user_query_results(query_results, match_list, user_id):
     user_query_results[user_id] = {}
     for result, pokemon_name in zip(query_results, match_list):

@@ -17,6 +17,7 @@ API_HASH = config[CONFIG_SECTION_NAME]['api_hash']
 BOT_TOKEN = config[CONFIG_SECTION_NAME]['bot_token']
 BOT_USERNAME = config[CONFIG_SECTION_NAME]['bot_username']
 SESSION_NAME = config[CONFIG_SECTION_NAME]['session_name']
+OWNER = config[CONFIG_SECTION_NAME]['owner_tg_id']
 
 CACHE_TIME = 3
 MOVE_PER_PAGE = 5
