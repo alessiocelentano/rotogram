@@ -27,14 +27,27 @@ user_query_results = {}
 
 @app.on_message(filters.create(lambda _, __, message: str(message.chat.id) not in chats), group=-1)
 async def new_chat(client, message):
-    add_chat(message.chat)
+    chat_id = message.chat.id
+    chat_type =  message.chat.type.value
+    chat_name = message.chat.title if message.chat.title else message.chat.first_name
+    chat_username = message.chat.username
+    add_chat(chat_id, chat_type, chat_name, chat_username)
+
+@app.on_inline_query(group=-1)
+async def new_chat(client, query):
+    chat_id = query.from_user.id
+    chat_type = 'private'
+    chat_name = query.from_user.first_name
+    chat_username = query.from_user.username
+    add_chat(chat_id, chat_type, chat_name, chat_username)
 
 
-@app.on_message(filters.private & filters.command('start', prefixes=['.', '/', '!']))
+@app.on_message(filters.command('start', prefixes=['.', '/', '!']))
 async def start(client, message):
     '''/start command:
     it shows a brief description of the bot and the usage'''
 
+    chat_id = message.chat.id
     user_id = message.from_user.id
     is_preview_hidden = False
     reply_markup = None
@@ -67,7 +80,7 @@ async def start(client, message):
             reply_markup = markup.move_markup(value, len(pokemon_list), 1)
 
     await client.send_message(
-        chat_id=user_id,
+        chat_id=chat_id,
         text=text,
         reply_markup=reply_markup,
         disable_web_page_preview=is_preview_hidden
@@ -135,7 +148,7 @@ async def scroll_move_pokemon_list(client, query):
     )
 
 
-@app.on_message(filters.private & filters.command('pics', prefixes=['.', '/', '!']))
+@app.on_message(filters.command('pics', prefixes=['.', '/', '!']))
 async def pics(client, message):
     '''Choose new Pokemon pictures'''
 
@@ -161,7 +174,7 @@ async def change_pics(client, query):
     await message.edit_text(text=const.PICS_CHANGED)
 
 
-@app.on_message(filters.private & filters.command('toggle_shiny', prefixes=['.', '/', '!']))
+@app.on_message(filters.command('toggle_shiny', prefixes=['.', '/', '!']))
 async def toggle_shiny(client, message):
     '''Set/Unset the Pokémon shiny form for the thumbnail'''
 
@@ -375,13 +388,13 @@ def store_user_query_results(query_results, match_list, user_id):
         user_query_results[user_id] |= {result.id: pokemon_name}
 
 
-def add_chat(chat):
+def add_chat(chat_id, chat_type, chat_name, chat_username):
     # user_id is stored as string because json.dump() would generate
     # duplicate if we use int, since it would eventually converted in a string
-    chats[str(chat.id)] = {
-        'type': chat.type.value,
-        'name': chat.title if chat.title else f'{chat.first_name}',
-        'username': chat.username,
+    chats[str(chat_id)] = {
+        'type': chat_type,
+        'name': chat_name,
+        'username': chat_username,
         'thumb_type': 'home',
         'shiny': False,
         'is_shiny_unlocked': False
