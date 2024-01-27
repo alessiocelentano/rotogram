@@ -264,3 +264,11 @@ MOVE_PAGE = '''
 PICS = f'''
 {PICTURE} Select the type of Pokémon pictures you want to use:
 '''
+
+POKEMON_LEARN_MOVE = '''
+{} {} learns {} {}
+'''
+
+POKEMON_DOESNT_LEARN_MOVE = '''
+{} {} doesn't learn {} {}
+'''

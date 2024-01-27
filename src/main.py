@@ -74,6 +74,30 @@ async def start(client, message):
     )
 
 
+@app.on_message(filters.command('move', prefixes=['.', '/', '!']) & filters.regex('[\.\/\!]move [a-zA-Z\-]+\s*\?\s*[a-zA-Z\-]+'))
+async def move_mon(client, message):
+    user_id = message.chat.id
+
+    move_name = message.command[1][:-1]
+    pokemon_name = message.command[2]
+    move = pokemon_client().get_move(move_name).pop()
+    pokemon = pokemon_client().get_pokemon(pokemon_name).pop()
+    species = pokemon_client().get_pokemon_species(pokemon.species.name).pop()
+
+    for m in pokemon.moves:
+        if m.move.name == move.name:
+            text = const.POKEMON_LEARN_MOVE.format(const.TICK, data.get_pokemon_full_name(pokemon, species), data.get_english_name(move.names), '')
+            break
+    else:
+        text = const.POKEMON_DOESNT_LEARN_MOVE.format(const.X, data.get_pokemon_full_name(pokemon, species), data.get_english_name(move.names), '')
+
+    await client.send_message(
+        chat_id=user_id,
+        text=text,
+        disable_web_page_preview=True
+    )
+
+
 @app.on_message(filters.command('move', prefixes=['.', '/', '!']))
 async def move(client, message):
     user_id = message.chat.id
