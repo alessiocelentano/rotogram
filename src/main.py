@@ -52,7 +52,7 @@ async def start(client, message):
         if key == 'pokemon':
             is_expanded = False
             pokemon = pokemon_client().get_pokemon(value).pop()
-            text = datapage.get_datapage_text(pokemon, is_expanded, is_shiny_setted(user_id))
+            text = datapage.get_datapage_text(pokemon, get_thumb_type(user_id), is_expanded, is_shiny_setted(user_id))
             reply_markup = markup.datapage_markup(pokemon.name)
 
         elif key == 'ability':
@@ -73,9 +73,35 @@ async def start(client, message):
     )
 
 
+@app.on_message(filters.private & filters.command('pics'))
+async def pics(client, message):
+    '''Choose new Pokemon pictures'''
+
+    user_id = message.from_user.id
+    thumb_type = chats[str(user_id)]['thumb_type']
+
+    await client.send_message(
+        chat_id=user_id,
+        text=const.PICS,
+        reply_markup=markup.pics_markup(thumb_type)
+    )
+
+
+@app.on_callback_query(filters.create(lambda _, __, query: query.data in ['official artwork', 'home', 'showdown']))
+async def change_pics(client, query):
+    '''Change Pokémon pictures'''
+
+    user_id = query.from_user.id
+    message = query.message
+
+    set_thumb_type(user_id, query.data)
+
+    await message.edit_text(text=const.PICS_CHANGED)
+
+
 @app.on_message(filters.private & filters.command('toggle_shiny'))
 async def toggle_shiny(client, message):
-    '''set/unset the Pokémon shiny form for the thumbnail'''
+    '''Set/Unset the Pokémon shiny form for the thumbnail'''
 
     user_id = message.from_user.id
 
@@ -97,6 +123,7 @@ async def command_search(client, message):
     '''Search Pokémon via command.
     e.g.: !rotom
     '''
+    user_id = message.from_user.id
     chat_id = message.chat.id
 
     try:
@@ -108,7 +135,7 @@ async def command_search(client, message):
     is_expanded = False
     await client.send_message(
         chat_id=chat_id,
-        text=datapage.get_datapage_text(pokemon, is_expanded, is_shiny_setted(chat_id)),
+        text=datapage.get_datapage_text(pokemon, get_thumb_type(user_id), is_expanded, is_shiny_setted(chat_id)),
         reply_markup=markup.datapage_markup(pokemon_name)
     )
 
@@ -155,7 +182,7 @@ async def create_page(client, inline_query):
 
     await client.edit_inline_text(
         inline_message_id=message_id,
-        text=datapage.get_datapage_text(pokemon, is_expanded, is_shiny_setted(user_id)),
+        text=datapage.get_datapage_text(pokemon, get_thumb_type(user_id), is_expanded, is_shiny_setted(user_id)),
         reply_markup=markup.datapage_markup(pokemon_name)
     )
 
@@ -177,14 +204,14 @@ async def expand(client, query):
     # Page is created by a link
     if message_id is None:
         return await query.message.edit_text(
-            text=datapage.get_datapage_text(pokemon, is_expanded, is_shiny_setted(user_id)),
+            text=datapage.get_datapage_text(pokemon, get_thumb_type(user_id), is_expanded, is_shiny_setted(user_id)),
             reply_markup=markup.datapage_markup(pokemon_name, is_expanded)
         )
 
     await client.answer_callback_query(query.id)  # Delete the loading circle
     await client.edit_inline_text(
         inline_message_id=message_id,
-        text=datapage.get_datapage_text(pokemon, is_expanded, is_shiny_setted(user_id)),
+        text=datapage.get_datapage_text(pokemon, get_thumb_type(user_id), is_expanded, is_shiny_setted(user_id)),
         reply_markup=markup.datapage_markup(pokemon_name, is_expanded)
     )
 
@@ -292,10 +319,20 @@ def add_chat(chat):
         'type': chat.type.value,
         'name': chat.title if chat.title else f'{chat.first_name}',
         'username': chat.username,
+        'thumb_type': 'home',
         'shiny': False,
         'is_shiny_unlocked': False
     }
     dump_chats()
+
+
+def set_thumb_type(user_id, thumb_type):
+    chats[str(user_id)]['thumb_type'] = thumb_type
+    dump_chats()
+
+
+def get_thumb_type(user_id):
+    return chats[str(user_id)]['thumb_type']
 
 
 def is_shiny_setted(user_id):

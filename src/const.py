@@ -63,6 +63,7 @@ GLOVE = '\U0001F94A'
 MOVE_DATA = '\U0001F522'
 SPACE_INVADER = '\U0001F47E'
 GLYPH_NOT_FOUND = '\u25A1'
+PICTURE = '\U0001F5BC'
 TYPE_EMOJI = {
     'grass': '\U0001F331',
     'fire': '\U0001F525',
@@ -116,6 +117,9 @@ You have a strange item... it has one command:
 <a href='t.me/rotogram'>Follow us</a> | \
 <a href='github.com/alessiocelentano/rotogram'>GitHub</a>
 '''
+PICS_CHANGED = f'''
+{TICK} Pokémon pictures changed successfully!
+'''
 SHINY_ACCEPTED = f'''
 You accepted a strange gift.
 It contains a message:
@@ -145,6 +149,9 @@ REDUCE = f'{MINUS}  Reduce'
 EXPAND = f'{PLUS}  Expand'
 MOVEPOOL = f'{SWORDS}  Moves'
 LOCATION = f'{HOUSE}  Locations'
+OFFICIAL_ARTWORKS = 'Official Artworks'
+HOME = 'Pokémon Home Sprites'
+SHOWDOWN = 'Pokémon Showdown Sprites'
 BACK = f'{BACK} Back'
 ACCEPT_SHINY_BUTTON = f'{TICK} ACCEPT GIFT'
 
@@ -248,4 +255,8 @@ MOVE_PAGE = '''
 
 {description_emoji} <b><u>Description</u></b>
 {description}
+'''
+
+PICS = f'''
+{PICTURE} Select the type of Pokémon pictures you want to use:
 '''

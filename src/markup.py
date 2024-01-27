@@ -35,6 +35,14 @@ def movepool_markup(pokemon, current_page):
     return InlineKeyboardMarkup(markup_list)
 
 
+def pics_markup(thumb_type):
+    return InlineKeyboardMarkup([
+        [official_artworks_button(thumb_type)],
+        [home_sprites_button(thumb_type)],
+        [showdown_sprites_button(thumb_type)]
+    ])
+
+
 def dummy_prompt():
     # It's used for an useless botton when accessing to the shiny page
     return InlineKeyboardMarkup([
@@ -97,6 +105,30 @@ def back(pokemon_name):
     return InlineKeyboardButton(
         text=const.BACK,
         callback_data=f'infos/0/{pokemon_name}'
+    )
+
+
+def official_artworks_button(thumb_type):
+    emoji = const.TICK if thumb_type == 'official artwork' else const.X
+    return InlineKeyboardButton(
+        text=f'{emoji} {const.OFFICIAL_ARTWORKS}',
+        callback_data='official artwork'
+    )
+
+
+def home_sprites_button(thumb_type):
+    emoji = const.TICK if thumb_type == 'home' else const.X
+    return InlineKeyboardButton(
+        text=f'{emoji} {const.HOME}',
+        callback_data='home'
+    )
+
+
+def showdown_sprites_button(thumb_type):
+    emoji = const.TICK if thumb_type == 'showdown' else const.X
+    return InlineKeyboardButton(
+        text=f'{emoji} {const.SHOWDOWN}',
+        callback_data='showdown'
     )
 
 

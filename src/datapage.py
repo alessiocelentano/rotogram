@@ -4,12 +4,12 @@ import data
 import const
 
 
-def get_datapage_text(pokemon, is_expanded, is_shiny_setted=False):
+def get_datapage_text(pokemon, thumb_type, is_expanded, is_shiny_setted=False):
     species = pokemon_client().get_pokemon_species(pokemon.species.name).pop()
 
     data_dict = {
         'pokemon_full_name': data.get_pokemon_full_name(pokemon, species),
-        'artwork_url': data.get_home_thumb_url(pokemon, is_shiny_setted),
+        'artwork_url': data.get_thumb_url(pokemon, thumb_type, is_shiny_setted),
         'typing': data.get_typing(pokemon),
         'emoji1': const.TYPE_EMOJI[data.get_typing_list(pokemon)[0]],
         'emoji2': const.TYPE_EMOJI[data.get_typing_list(pokemon)[1]],

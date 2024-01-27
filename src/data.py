@@ -31,14 +31,18 @@ def get_pokemon_full_name(pokemon, species):
         return species_full_name
 
 
-def get_home_thumb_url(pokemon, is_shiny):
+def get_thumb_url(pokemon, thumb_type, is_shiny):
     thumb_url = pokemon.sprites.front_default
+    shiny_text = '/shiny' if is_shiny else ''
     if not thumb_url:
         return None
-    if is_shiny:
-        return thumb_url.replace('pokemon', 'pokemon/other/home/shiny')
-    else:
-        return thumb_url.replace('pokemon', 'pokemon/other/home')
+    if thumb_type == 'official artwork':
+        return thumb_url.replace('pokemon', f'pokemon/other/official-artwork{shiny_text}')
+    if thumb_type == 'home':
+        return thumb_url.replace('pokemon', f'pokemon/other/home{shiny_text}')
+    if thumb_type == 'showdown':
+        thumb_url = thumb_url[:-3] + 'gif'
+        return thumb_url.replace('pokemon', f'pokemon/other/showdown{shiny_text}')
 
 
 def get_typing(pokemon):
