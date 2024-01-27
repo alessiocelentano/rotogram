@@ -78,8 +78,8 @@ async def start(client, message):
 async def move_mon(client, message):
     user_id = message.chat.id
 
-    move_name = message.command[1][:-1]
-    pokemon_name = message.command[2]
+    move_name = message.text.split()[1][:-1]
+    pokemon_name = message.text.split()[2]
     move = pokemon_client().get_move(move_name).pop()
     pokemon = pokemon_client().get_pokemon(pokemon_name).pop()
     species = pokemon_client().get_pokemon_species(pokemon.species.name).pop()
