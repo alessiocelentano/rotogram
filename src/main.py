@@ -74,7 +74,7 @@ async def start(client, message):
     )
 
 
-@app.on_message(filters.command('move', prefixes=['.', '/', '!']) & filters.regex('[\.\/\!]move [a-zA-Z\-]+\s*\?\s*[a-zA-Z\-]+'))
+@app.on_message(filters.regex('[\.\/\!]move [a-zA-Z\-]+\s*\?\s*[a-zA-Z\-]+'))
 async def move_mon(client, message):
     user_id = message.chat.id
 
