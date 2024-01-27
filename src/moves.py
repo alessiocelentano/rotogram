@@ -33,7 +33,7 @@ def get_movepool_page(pokemon, current_page, thumb_type, is_shiny_setted):
     return text
 
 
-def get_move_page_text(move):
+def get_move_page_text(move, page):
     data_dict = {
         'name': data.get_english_name(move.names),
         'class': move.damage_class.name.title(),
@@ -43,14 +43,14 @@ def get_move_page_text(move):
         'pp': move.pp,
         'description': data.get_english_effect(move.effect_entries),
         'generation': data.prettify_name(move.generation.name),
-        #'pokemon_list': data.get_pokemon_list_text(move.learned_by_pokemon),
+        'pokemon_list': data.get_pokemon_list_text(move.learned_by_pokemon, page),
         'type_emoji': const.TYPE_EMOJI[move.type.name],
         'move_emoji': const.GLOVE,
         'data_emoji': const.MOVE_DATA,
         'description_emoji': const.EYE,
         'pokemon_list_emoji': const.POKEMON
     }
-    return const.MOVE_PAGE.format(**data_dict)
+    return (const.MOVE_PAGE.format(**data_dict), move.learned_by_pokemon)
 
 
 def get_move_name(move):

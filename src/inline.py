@@ -44,7 +44,7 @@ def get_matching_pokemon(message_content):
     return match_list[:const.QUERY_PER_SEARCH]
 
 
-def get_query_results(match_list, is_shiny_setted):
+def get_query_results(match_list, thumb_type, is_shiny_setted):
     results = []
 
     for pokemon_name in match_list:
@@ -62,7 +62,7 @@ def get_query_results(match_list, is_shiny_setted):
                 title=data.get_pokemon_full_name(pokemon, species),
                 description=f'{genus}\nType: {typing}',
                 input_message_content=InputTextMessageContent(const.LOADING),
-                thumb_url=data.get_home_thumb_url(pokemon, is_shiny=is_shiny_setted),
+                thumb_url=data.get_thumb_url(pokemon, thumb_type, is_shiny=is_shiny_setted),
                 reply_markup=markup.datapage_markup(pokemon.name, is_expanded=False)
             )
         )

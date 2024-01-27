@@ -224,13 +224,20 @@ def get_ability_page_text(ability):
     return const.ABILITY_PAGE.format(**ability_dict)
 
 
-def get_pokemon_list_text(pokemon_list):
+def get_pokemon_list_text(pokemon_list, page):
     words = []
-    for pokemon in pokemon_list:
-        pokemon = pokemon.pokemon
-        name_displayed = prettify_name(pokemon.name)  # The line below is more appropriate but make the iteration very slow
+    start = (page - 1) * const.POKEMON_PER_MOVE_PAGE
+    i = start
+    while i < len(pokemon_list) and i < start + const.POKEMON_PER_MOVE_PAGE:
+        try:
+            # Necessary line for abilities, AttributeError with moves
+            pokemon = pokemon_list[i].pokemon
+        except AttributeError:
+            pokemon = pokemon_list[i]
+        name_displayed = prettify_name(pokemon.name)  # The line below is more appropriate but it makes the iteration very slow
         # name_displayed = get_pokemon_full_name(pokemon, species)
         words.append(add_pokemon_link(pokemon, name_displayed))
+        i += 1
     return ', '.join(words)
 
 

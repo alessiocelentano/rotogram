@@ -21,6 +21,7 @@ OWNER = config[CONFIG_SECTION_NAME]['owner_tg_id']
 
 CACHE_TIME = 3
 MOVE_PER_PAGE = 5
+POKEMON_PER_MOVE_PAGE = 50
 QUERY_PER_SEARCH = 10
 # Key: PokéAPI form name
 # Value: Rotogram form name
@@ -255,6 +256,9 @@ MOVE_PAGE = '''
 
 {description_emoji} <b><u>Description</u></b>
 {description}
+
+{pokemon_list_emoji} <b><u>List of Pokémon</u></b>
+{pokemon_list}
 '''
 
 PICS = f'''

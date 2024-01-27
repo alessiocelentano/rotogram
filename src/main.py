@@ -30,7 +30,7 @@ async def new_chat(client, message):
     add_chat(message.chat)
 
 
-@app.on_message(filters.private & filters.command('start'))
+@app.on_message(filters.private & filters.command('start', prefixes=['.', '/', '!']))
 async def start(client, message):
     '''/start command:
     it shows a brief description of the bot and the usage'''
@@ -63,7 +63,8 @@ async def start(client, message):
         elif key == 'move':
             is_preview_hidden = True
             move = pokemon_client().get_move(value).pop()
-            text = moves.get_move_page_text(move)
+            text, pokemon_list = moves.get_move_page_text(move, 1)
+            reply_markup = markup.move_markup(value, pokemon_list, 1)
 
     await client.send_message(
         chat_id=user_id,
@@ -73,7 +74,44 @@ async def start(client, message):
     )
 
 
-@app.on_message(filters.private & filters.command('pics'))
+@app.on_message(filters.command('move', prefixes=['.', '/', '!']))
+async def move(client, message):
+    user_id = message.chat.id
+
+    move_name = message.command[1]
+    move = pokemon_client().get_move(move_name).pop()
+
+    text, pokemon_list = moves.get_move_page_text(move, 1)
+    reply_markup = markup.move_markup(move_name, pokemon_list, 1)
+
+    await client.send_message(
+        chat_id=user_id,
+        text=text,
+        reply_markup=reply_markup,
+        disable_web_page_preview=True
+    )
+
+
+@app.on_callback_query(filters.create(lambda _, __, query: 'who_learn_move' in query.data))
+async def scroll_move_pokemon_list(client, query):
+    user_id = query.from_user.id
+    message_id = query.inline_message_id
+
+    _, current_page, move_name = re.split('/', query.data)
+    current_page = int(current_page)
+
+    move = pokemon_client().get_move(move_name).pop()
+    text, pokemon_list = moves.get_move_page_text(move, current_page)
+    reply_markup = markup.move_markup(move_name, pokemon_list, current_page)
+
+    return await query.message.edit_text(
+        text=text,
+        reply_markup=reply_markup,
+        disable_web_page_preview=True
+    )
+
+
+@app.on_message(filters.private & filters.command('pics', prefixes=['.', '/', '!']))
 async def pics(client, message):
     '''Choose new Pokemon pictures'''
 
@@ -99,7 +137,7 @@ async def change_pics(client, query):
     await message.edit_text(text=const.PICS_CHANGED)
 
 
-@app.on_message(filters.private & filters.command('toggle_shiny'))
+@app.on_message(filters.private & filters.command('toggle_shiny', prefixes=['.', '/', '!']))
 async def toggle_shiny(client, message):
     '''Set/Unset the Pokémon shiny form for the thumbnail'''
 
@@ -156,7 +194,7 @@ async def inline_search(client, inline_query):
         return
 
     match_list = inline.get_matching_pokemon(query_message.lower())
-    query_results = inline.get_query_results(match_list, is_shiny_setted(user_id))
+    query_results = inline.get_query_results(match_list, get_thumb_type(user_id), is_shiny_setted(user_id))
     store_user_query_results(query_results, match_list, user_id)
 
     await inline_query.answer(
@@ -292,7 +330,7 @@ async def owner_reply(client, message):
         text=message.text
     )
 
-@app.on_message(filters.command('broadcast') & filters.private & filters.create(lambda _, __, message: message.from_user.id == int(const.OWNER)), group=1)
+@app.on_message(filters.command('broadcast', prefixes=['.', '/', '!']) & filters.private & filters.create(lambda _, __, message: message.from_user.id == int(const.OWNER)), group=1)
 async def broadcast_message(client, message):
     '''Broadcast a message to all saved chats'''
     text = ' '.join(message.command[1:])
