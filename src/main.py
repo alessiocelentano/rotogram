@@ -152,11 +152,12 @@ async def scroll_move_pokemon_list(client, query):
 async def pics(client, message):
     '''Choose new Pokemon pictures'''
 
+    chat_id = message.chat.id
     user_id = message.from_user.id
     thumb_type = chats[str(user_id)]['thumb_type']
 
     await client.send_message(
-        chat_id=user_id,
+        chat_id=chat_id,
         text=const.PICS,
         reply_markup=markup.pics_markup(thumb_type)
     )
@@ -178,6 +179,7 @@ async def change_pics(client, query):
 async def toggle_shiny(client, message):
     '''Set/Unset the Pokémon shiny form for the thumbnail'''
 
+    chat_id = message.chat.id
     user_id = message.from_user.id
 
     if is_shiny_unlocked(user_id):
@@ -189,7 +191,7 @@ async def toggle_shiny(client, message):
             text = const.SET_SHINY
 
         await client.send_message(
-            chat_id=user_id,
+            chat_id=chat_id,
             text=text
         )
 
