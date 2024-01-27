@@ -92,6 +92,28 @@ async def toggle_shiny(client, message):
             text=text
         )
 
+@app.on_message(filters.regex('[\.\/\!].+'))
+async def command_search(client, message):
+    '''Search Pokémon via command.
+    e.g.: !rotom
+    '''
+    user_id = message.from_user.id
+    if str(user_id) not in user_settings:
+        create_user_settings(user_id)
+
+    try:
+        pokemon_name = message.text[1:]
+        pokemon = pokemon_client().get_pokemon(pokemon_name).pop()
+    except Exception:
+        return
+
+    is_expanded = False
+    await client.send_message(
+        chat_id=message.chat.id,
+        text=datapage.get_datapage_text(pokemon, is_expanded, is_shiny_setted(user_id)),
+        reply_markup=markup.datapage_markup(pokemon_name)
+    )
+
 
 @app.on_inline_query()
 async def inline_search(client, inline_query):
@@ -259,12 +281,13 @@ async def owner_reply(client, message):
 @app.on_message(filters.command('broadcast') & filters.private & filters.create(lambda _, __, message: message.from_user.id == int(const.OWNER)), group=1)
 async def broadcast_message(client, message):
     '''Broadcast a message to all saved chats'''
+    text = ' '.join(message.command[1:])
 
     for user_id in user_settings:
         try:
             await client.send_message(
                 chat_id=int(user_id),
-                text=' '.join(message.command[1:])
+                text=text
             )
         except Exception:
             pass
