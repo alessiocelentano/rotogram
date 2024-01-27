@@ -210,12 +210,12 @@ def get_egg_cycles(species):
     return species.hatch_counter
 
 
-def get_ability_page_text(ability):
+def get_ability_page_text(ability, page):
     ability_dict = {
         'name': get_english_name(ability.names),
         'generation': prettify_name(ability.generation.name),
         'description': get_english_effect(ability.effect_entries),
-        'pokemon_list': get_pokemon_list_text(ability.pokemon),
+        'pokemon_list': get_pokemon_list_text(ability.pokemon, page),
         'ability_emoji': const.BUTTON,
         'description_emoji': const.EYE,
         'pokemon_list_emoji': const.POKEMON

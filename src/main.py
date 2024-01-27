@@ -58,13 +58,13 @@ async def start(client, message):
         elif key == 'ability':
             is_preview_hidden = True
             ability = pokemon_client().get_ability(value).pop()
-            text = data.get_ability_page_text(ability)
+            text = data.get_ability_page_text(ability, 1)
 
         elif key == 'move':
             is_preview_hidden = True
             move = pokemon_client().get_move(value).pop()
             text, pokemon_list = moves.get_move_page_text(move, 1)
-            reply_markup = markup.move_markup(value, pokemon_list, 1)
+            reply_markup = markup.move_markup(value, len(pokemon_list), 1)
 
     await client.send_message(
         chat_id=user_id,
@@ -82,7 +82,7 @@ async def move(client, message):
     move = pokemon_client().get_move(move_name).pop()
 
     text, pokemon_list = moves.get_move_page_text(move, 1)
-    reply_markup = markup.move_markup(move_name, pokemon_list, 1)
+    reply_markup = markup.move_markup(move_name, len(pokemon_list), 1)
 
     await client.send_message(
         chat_id=user_id,
@@ -102,7 +102,7 @@ async def scroll_move_pokemon_list(client, query):
 
     move = pokemon_client().get_move(move_name).pop()
     text, pokemon_list = moves.get_move_page_text(move, current_page)
-    reply_markup = markup.move_markup(move_name, pokemon_list, current_page)
+    reply_markup = markup.move_markup(move_name, len(pokemon_list), current_page)
 
     return await query.message.edit_text(
         text=text,
@@ -273,14 +273,14 @@ async def show_movepool(client, query):
     if message_id is None:
         return await query.message.edit_text(
             text=moves.get_movepool_page(pokemon, current_page, get_thumb_type(user_id), is_shiny_setted(user_id)),
-            reply_markup=markup.movepool_markup(pokemon, current_page)
+            reply_markup=markup.movepool_markup(len(pokemon.moves), pokemon.name, current_page)
         )
 
     await client.answer_callback_query(query.id)  # Delete the loading circle
     await client.edit_inline_text(
         inline_message_id=message_id,
         text=moves.get_movepool_page(pokemon, current_page, get_thumb_type(user_id), is_shiny_setted(user_id)),
-        reply_markup=markup.movepool_markup(pokemon, current_page)
+        reply_markup=markup.movepool_markup(len(pokemon.moves), pokemon.name, current_page)
     )
 
 

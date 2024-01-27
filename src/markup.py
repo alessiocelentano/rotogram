@@ -12,48 +12,37 @@ def datapage_markup(pokemon_name, is_expanded=False):
     ])
 
 
-def movepool_markup(pokemon, current_page):
-    total_pages = ceil(len(pokemon.moves) / const.MOVE_PER_PAGE)
+def get_markup_pages(current_page, total_pages, callback_type, item):
     markup_list = [[]]
 
     # Create a page index that display, when possible:
     # First page, previous page, current page, next page, last page
     if current_page-1 > 1:
-        markup_list[0].append(begin_page('movepool', pokemon.name))
+        markup_list[0].append(begin_page(callback_type, item))
     if current_page != 1:
-        markup_list[0].append(page('movepool', current_page-1, pokemon.name))
+        markup_list[0].append(page(callback_type, current_page-1, item))
     if markup_list[0] or current_page != total_pages:
-        markup_list[0].append(page('movepool', current_page, pokemon.name, mark=True))
+        markup_list[0].append(page(callback_type, current_page, item, mark=True))
     if current_page != total_pages:
-        markup_list[0].append(page('movepool', current_page+1, pokemon.name))
+        markup_list[0].append(page(callback_type, current_page+1, item))
     if total_pages > current_page+1:
-        markup_list[0].append(ending_page('movepool', total_pages, pokemon.name))
+        markup_list[0].append(ending_page(callback_type, total_pages, item))
     if not markup_list[0]:
         markup_list.remove(markup_list[0])
 
-    markup_list.append([back(pokemon.name)])
+    return markup_list
+
+
+def movepool_markup(pokemon_moves_number, pokemon_name, current_page):
+    total_pages = ceil(pokemon_moves_number / const.MOVE_PER_PAGE)
+    markup_list = get_markup_pages(current_page, total_pages, 'movepool', pokemon_name)
+    markup_list.append([back(pokemon_name)])
     return InlineKeyboardMarkup(markup_list)
 
 
-def move_markup(move_name, pokemon_list, current_page):
-    total_pages = ceil(len(pokemon_list) / const.POKEMON_PER_MOVE_PAGE)
-    markup_list = [[]]
-
-    # Create a page index that display, when possible:
-    # First page, previous page, current page, next page, last page
-    if current_page-1 > 1:
-        markup_list[0].append(begin_page('who_learn_move', move_name))
-    if current_page != 1:
-        markup_list[0].append(page('who_learn_move', current_page-1, move_name))
-    if markup_list[0] or current_page != total_pages:
-        markup_list[0].append(page('who_learn_move', current_page, move_name, mark=True))
-    if current_page != total_pages:
-        markup_list[0].append(page('who_learn_move', current_page+1, move_name))
-    if total_pages > current_page+1:
-        markup_list[0].append(ending_page('who_learn_move', total_pages, move_name))
-    if not markup_list[0]:
-        markup_list.remove(markup_list[0])
-
+def move_markup(move_name, pokemon_number, current_page):
+    total_pages = ceil(pokemon_number / const.POKEMON_PER_MOVE_PAGE)
+    markup_list = get_markup_pages(current_page, total_pages, 'who_learn_move', move_name)
     return InlineKeyboardMarkup(markup_list)
 
 
