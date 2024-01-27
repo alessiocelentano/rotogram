@@ -233,14 +233,14 @@ async def show_movepool(client, query):
     # Page is created by a link
     if message_id is None:
         return await query.message.edit_text(
-            text=moves.get_movepool_page(pokemon, current_page, is_shiny_setted(user_id)),
+            text=moves.get_movepool_page(pokemon, current_page, get_thumb_type(user_id), is_shiny_setted(user_id)),
             reply_markup=markup.movepool_markup(pokemon, current_page)
         )
 
     await client.answer_callback_query(query.id)  # Delete the loading circle
     await client.edit_inline_text(
         inline_message_id=message_id,
-        text=moves.get_movepool_page(pokemon, current_page, is_shiny_setted(user_id)),
+        text=moves.get_movepool_page(pokemon, current_page, get_thumb_type(user_id), is_shiny_setted(user_id)),
         reply_markup=markup.movepool_markup(pokemon, current_page)
     )
 

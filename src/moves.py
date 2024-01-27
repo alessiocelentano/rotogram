@@ -6,11 +6,11 @@ import data
 import const
 
 
-def get_movepool_page(pokemon, current_page, is_shiny_setted):
+def get_movepool_page(pokemon, current_page, thumb_type, is_shiny_setted):
     total_pages = ceil(len(pokemon.moves) / const.MOVE_PER_PAGE)
     last_element_of_page = current_page * const.MOVE_PER_PAGE
     first_element_of_page = last_element_of_page - const.MOVE_PER_PAGE
-    artwork = data.get_home_thumb_url(pokemon, is_shiny_setted)
+    artwork = data.get_thumb_url(pokemon, thumb_type, is_shiny_setted)
 
     text = const.MOVEPOOL_TITLE.format(artwork, const.RED_SPARK, current_page, total_pages)
 
