@@ -118,7 +118,8 @@ async def toggle_shiny(client, message):
             text=text
         )
 
-@app.on_message(filters.regex('[\.\/\!].+'))
+
+@app.on_message(filters.regex('[\.\/\!].+') | filters.command('mon', prefixes=['.', '/', '!']))
 async def command_search(client, message):
     '''Search Pokémon via command.
     e.g.: !rotom
@@ -127,7 +128,7 @@ async def command_search(client, message):
     chat_id = message.chat.id
 
     try:
-        pokemon_name = message.text[1:]
+        pokemon_name = message.text[5:] if message.text[:4] == '.mon' else message.text[1:]
         pokemon = pokemon_client().get_pokemon(pokemon_name).pop()
     except Exception:
         return
