@@ -37,7 +37,7 @@ async def start(client, message):
     is_preview_hidden = False
     reply_markup = None
 
-    if len(message.command) == 1:
+    if len(message.command) == 1 or message.command[1] == 'start':
         # Regular /start
         if is_shiny_unlocked(user_id):
             text = const.START_SHINY_UNLOCKED
@@ -53,12 +53,12 @@ async def start(client, message):
             text = datapage.get_datapage_text(pokemon, is_expanded, is_shiny_setted(user_id))
             reply_markup = markup.datapage_markup(pokemon.name)
 
-        if key == 'ability':
+        elif key == 'ability':
             is_preview_hidden = True
             ability = pokemon_client().get_ability(value).pop()
             text = data.get_ability_page_text(ability)
 
-        if key == 'move':
+        elif key == 'move':
             is_preview_hidden = True
             move = pokemon_client().get_move(value).pop()
             text = moves.get_move_page_text(move)
