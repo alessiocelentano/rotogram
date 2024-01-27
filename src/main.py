@@ -20,20 +20,22 @@ app = Client(const.SESSION_NAME,
     api_hash=const.API_HASH,
     bot_token=const.BOT_TOKEN
 )
-with open(const.USER_SETTINGS_PATH) as f:
-    user_settings = json.load(f)
+with open(const.CHATS_PATH) as f:
+    chats = json.load(f)
 user_query_results = {}
 
 
-@app.on_message(filters.command('start'))
+@app.on_message(filters.create(lambda _, __, message: str(message.chat.id) not in chats), group=-1)
+async def new_chat(client, message):
+    add_chat(message.chat)
+
+
+@app.on_message(filters.private & filters.command('start'))
 async def start(client, message):
     '''/start command:
     it shows a brief description of the bot and the usage'''
 
     user_id = message.from_user.id
-    if str(user_id) not in user_settings:
-        create_user_settings(user_id)
-
     is_preview_hidden = False
     reply_markup = None
 
@@ -71,13 +73,11 @@ async def start(client, message):
     )
 
 
-@app.on_message(filters.command('toggle_shiny'))
+@app.on_message(filters.private & filters.command('toggle_shiny'))
 async def toggle_shiny(client, message):
     '''set/unset the Pokémon shiny form for the thumbnail'''
 
     user_id = message.from_user.id
-    if str(user_id) not in user_settings:
-        create_user_settings(user_id)
 
     if is_shiny_unlocked(user_id):
         if is_shiny_setted(user_id):
@@ -97,9 +97,7 @@ async def command_search(client, message):
     '''Search Pokémon via command.
     e.g.: !rotom
     '''
-    user_id = message.from_user.id
-    if str(user_id) not in user_settings:
-        create_user_settings(user_id)
+    chat_id = message.chat.id
 
     try:
         pokemon_name = message.text[1:]
@@ -109,8 +107,8 @@ async def command_search(client, message):
 
     is_expanded = False
     await client.send_message(
-        chat_id=message.chat.id,
-        text=datapage.get_datapage_text(pokemon, is_expanded, is_shiny_setted(user_id)),
+        chat_id=chat_id,
+        text=datapage.get_datapage_text(pokemon, is_expanded, is_shiny_setted(chat_id)),
         reply_markup=markup.datapage_markup(pokemon_name)
     )
 
@@ -124,8 +122,6 @@ async def inline_search(client, inline_query):
 
     user_id = inline_query.from_user.id
     query_message = inline_query.query
-    if str(user_id) not in user_settings:
-        create_user_settings(user_id)
 
     if not inline.has_minimum_characters(query_message):
         await inline.show_help_button(inline_query)
@@ -149,8 +145,6 @@ async def create_page(client, inline_query):
     result_id = inline_query.result_id
     message_id = inline_query.inline_message_id
     pokemon_name = user_query_results[user_id][result_id]
-    if str(user_id) not in user_settings:
-        create_user_settings(user_id)
 
     if shiny.is_shiny_keyword(pokemon_name):
         await shiny.load_shiny_page(app, inline_query, is_shiny_unlocked(user_id))
@@ -173,8 +167,6 @@ async def expand(client, query):
 
     user_id = query.from_user.id
     message_id = query.inline_message_id
-    if str(user_id) not in user_settings:
-        create_user_settings(user_id)
 
     # first value (underscore) is useless, it's just used to call expand()
     _, is_expanded, pokemon_name = re.split('/', query.data)
@@ -204,8 +196,6 @@ async def show_movepool(client, query):
 
     user_id = query.from_user.id
     message_id = query.inline_message_id
-    if str(user_id) not in user_settings:
-        create_user_settings(user_id)
 
     # first value (underscore) is useless, it's just used to call get_movepool()
     _, current_page, pokemon_name = re.split('/', query.data)
@@ -234,8 +224,6 @@ async def show_shiny_page(client, query):
 
     user_id = query.from_user.id
     message_id = query.inline_message_id
-    if str(user_id) not in user_settings:
-        create_user_settings(user_id)
 
     await client.answer_callback_query(query.id)  # Delete the loading circle
     await client.edit_inline_text(
@@ -251,8 +239,6 @@ async def accept_shiny(client, query):
 
     user_id = query.from_user.id
     message_id = query.inline_message_id
-    if str(user_id) not in user_settings:
-        create_user_settings(user_id)
 
     unlock_shiny(user_id)
 
@@ -283,7 +269,7 @@ async def broadcast_message(client, message):
     '''Broadcast a message to all saved chats'''
     text = ' '.join(message.command[1:])
 
-    for user_id in user_settings:
+    for user_id in chats:
         try:
             await client.send_message(
                 chat_id=int(user_id),
@@ -299,42 +285,45 @@ def store_user_query_results(query_results, match_list, user_id):
         user_query_results[user_id] |= {result.id: pokemon_name}
 
 
-def create_user_settings(user_id):
+def add_chat(chat):
     # user_id is stored as string because json.dump() would generate
     # duplicate if we use int, since it would eventually converted in a string
-    user_settings[str(user_id)] = {
+    chats[str(chat.id)] = {
+        'type': chat.type.value,
+        'name': chat.title if chat.title else f'{chat.first_name}',
+        'username': chat.username,
         'shiny': False,
         'is_shiny_unlocked': False
     }
-    dump_user_settings()
+    dump_chats()
 
 
 def is_shiny_setted(user_id):
-    return user_settings[str(user_id)]['shiny'] is True
+    return chats[str(user_id)]['shiny'] is True if str(user_id) in chats else False
 
 
 def set_shiny(user_id):
-    user_settings[str(user_id)]['shiny'] = True
-    dump_user_settings()
+    chats[str(user_id)]['shiny'] = True
+    dump_chats()
 
 
 def unset_shiny(user_id):
-    user_settings[str(user_id)]['shiny'] = False
-    dump_user_settings()
+    chats[str(user_id)]['shiny'] = False
+    dump_chats()
 
 
 def is_shiny_unlocked(user_id):
-    return user_settings[str(user_id)]['is_shiny_unlocked'] is True
+    return chats[str(user_id)]['is_shiny_unlocked'] is True
 
 
 def unlock_shiny(user_id):
-    user_settings[str(user_id)]['is_shiny_unlocked'] = True
-    dump_user_settings()
+    chats[str(user_id)]['is_shiny_unlocked'] = True
+    dump_chats()
 
 
-def dump_user_settings():
-    with open(const.USER_SETTINGS_PATH, 'w') as f:
-        json.dump(user_settings, f, indent=4)
+def dump_chats():
+    with open(const.CHATS_PATH, 'w') as f:
+        json.dump(chats, f, indent=4)
 
 
 if __name__ == '__main__':

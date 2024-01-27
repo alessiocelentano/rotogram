@@ -3,7 +3,7 @@ import configparser
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 PKMN_LIST_PATH = f'{PROJECT_ROOT}/src/pokemon.txt'
-USER_SETTINGS_PATH = f'{PROJECT_ROOT}/src/user_settings.json'
+CHATS_PATH = f'{PROJECT_ROOT}/src/chats.json'
 with open(PKMN_LIST_PATH) as f:
     POKEMON_LIST = f.read()
 
