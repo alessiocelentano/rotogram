@@ -33,6 +33,7 @@ async def new_chat(client, message):
     chat_username = message.chat.username
     add_chat(chat_id, chat_type, chat_name, chat_username)
 
+
 @app.on_inline_query(group=-1)
 async def new_chat(client, query):
     chat_id = query.from_user.id
@@ -175,7 +176,7 @@ async def change_pics(client, query):
     await message.edit_text(text=const.PICS_CHANGED)
 
 
-@app.on_message(filters.command('toggle_shiny', prefixes=['.', '/', '!']))
+@app.on_message(filters.command('shiny', prefixes=['.', '/', '!']))
 async def toggle_shiny(client, message):
     '''Set/Unset the Pokémon shiny form for the thumbnail'''
 
