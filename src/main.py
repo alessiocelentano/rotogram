@@ -92,8 +92,8 @@ async def start(client, message):
 async def move_mon(client, message):
     user_id = message.chat.id
 
-    move_name = message.text.split()[1][:-1]
-    pokemon_name = message.text.split()[2]
+    move_name = message.text.split()[1][:-1].lower()
+    pokemon_name = message.text.split()[2].lower()
     move = pokemon_client().get_move(move_name).pop()
     pokemon = pokemon_client().get_pokemon(pokemon_name).pop()
     species = pokemon_client().get_pokemon_species(pokemon.species.name).pop()
@@ -116,7 +116,7 @@ async def move_mon(client, message):
 async def move(client, message):
     user_id = message.chat.id
 
-    move_name = message.command[1]
+    move_name = message.command[1].lower()
     move = pokemon_client().get_move(move_name).pop()
 
     text, pokemon_list = moves.get_move_page_text(move, 1)
@@ -384,7 +384,7 @@ async def command_search(client, message):
     chat_id = message.chat.id
 
     try:
-        pokemon_name = message.text[5:] if re.match('[\.\/\!]mon', message.text[:4]) else message.text[1:]
+        pokemon_name = message.text[5:].lower() if re.match('[\.\/\!]mon', message.text[:4]) else message.text[1:].lower()
         pokemon = pokemon_client().get_pokemon(pokemon_name).pop()
     except Exception:
         return
