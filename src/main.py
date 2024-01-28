@@ -354,7 +354,7 @@ async def owner_reply(client, message):
     text = ' '.join(message.command[2:])
 
     await client.send_message(
-        chat_id=int(user_id),
+        chat_id=user_id,
         text=text
     )
 
