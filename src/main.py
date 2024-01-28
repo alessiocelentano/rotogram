@@ -334,18 +334,30 @@ async def accept_shiny(client, query):
 @app.on_message(filters.private & filters.create(lambda _, __, message: message.from_user.id != int(const.OWNER)), group=1)
 async def forward_to_owner(client, message):
     '''Forward private message to the owner'''
+
+    name = message.from_user.first_name
+    username = message.from_user.username
+    user_id = message.from_user.id
     
+    await client.send_message(
+        chat_id=const.OWNER,
+        text=const.FORWARD_MESSAGE_NOTIFICATION.format(const.MESSAGE, name, username, user_id),
+    )
     await message.forward(const.OWNER)
 
 
-@app.on_message(filters.private & filters.reply & filters.create(lambda _, __, message: message.from_user.id == int(const.OWNER)), group=1)
+@app.on_message(filters.private & filters.command('reply', prefixes=['.', '/', '!']) & filters.create(lambda _, __, message: message.from_user.id == int(const.OWNER)), group=1)
 async def owner_reply(client, message):
     '''Reply to users'''
-    
+
+    user_id = message.command[1]
+    text = ' '.join(message.command[2:])
+
     await client.send_message(
-        chat_id=message.reply_to_message.chat.id,
-        text=message.text
+        chat_id=int(user_id),
+        text=text
     )
+
 
 @app.on_message(filters.command('broadcast', prefixes=['.', '/', '!']) & filters.private & filters.create(lambda _, __, message: message.from_user.id == int(const.OWNER)), group=1)
 async def broadcast_message(client, message):

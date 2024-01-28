@@ -65,6 +65,7 @@ MOVE_DATA = '\U0001F522'
 SPACE_INVADER = '\U0001F47E'
 GLYPH_NOT_FOUND = '\u25A1'
 PICTURE = '\U0001F5BC'
+MESSAGE = '\U0001F4AC'
 TYPE_EMOJI = {
     'grass': '\U0001F331',
     'fire': '\U0001F525',
@@ -271,4 +272,9 @@ POKEMON_LEARN_MOVE = '''
 
 POKEMON_DOESNT_LEARN_MOVE = '''
 {} {} doesn't learn {} {}
+'''
+
+FORWARD_MESSAGE_NOTIFICATION = '''
+{} New message from {} ({})
+User ID: {}
 '''
