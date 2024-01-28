@@ -196,28 +196,6 @@ async def toggle_shiny(client, message):
         )
 
 
-@app.on_message(filters.regex('[\.\/\!].+') | filters.command('mon', prefixes=['.', '/', '!']))
-async def command_search(client, message):
-    '''Search Pokémon via command.
-    e.g.: !rotom
-    '''
-    user_id = message.from_user.id
-    chat_id = message.chat.id
-
-    try:
-        pokemon_name = message.text[5:] if message.text[:4] == '.mon' else message.text[1:]
-        pokemon = pokemon_client().get_pokemon(pokemon_name).pop()
-    except Exception:
-        return
-
-    is_expanded = False
-    await client.send_message(
-        chat_id=chat_id,
-        text=datapage.get_datapage_text(pokemon, get_thumb_type(user_id), is_expanded, is_shiny_setted(chat_id)),
-        reply_markup=markup.datapage_markup(pokemon_name)
-    )
-
-
 @app.on_inline_query()
 async def inline_search(client, inline_query):
     '''Search Pokémon via inline mode.
@@ -382,6 +360,28 @@ async def broadcast_message(client, message):
             )
         except Exception:
             pass
+
+
+@app.on_message(filters.command('mon', prefixes=['.', '/', '!']) | filters.regex('[\.\/\!].+'))
+async def command_search(client, message):
+    '''Search Pokémon via command.
+    e.g.: !rotom
+    '''
+    user_id = message.from_user.id
+    chat_id = message.chat.id
+
+    try:
+        pokemon_name = message.text[5:] if re.match('[\.\/\!]mon', message.text[:4]) else message.text[1:]
+        pokemon = pokemon_client().get_pokemon(pokemon_name).pop()
+    except Exception:
+        return
+
+    is_expanded = False
+    await client.send_message(
+        chat_id=chat_id,
+        text=datapage.get_datapage_text(pokemon, get_thumb_type(user_id), is_expanded, is_shiny_setted(chat_id)),
+        reply_markup=markup.datapage_markup(pokemon_name)
+    )
 
 
 def store_user_query_results(query_results, match_list, user_id):
