@@ -96,16 +96,12 @@ You can check infos about every specie \
 as quickly as possible, without ever leaving Telegram
 
 {TOOL} <b><u>Usage</u></b>
-- <b>Inline Search</b>
-<pre>@rotogrambot Rotom</pre>
-- <b>Pokémon Search</b>
-<pre>.mon Rotom</pre>
-- <b>Move Search</b>
-<pre>.move Pound</pre>
-- <b>Does Pokémon learn the move?</b>
-<pre>.move Pound? Rotom</pre>
-- <b>Change Pokémon pictures</b>
-<pre>.pics</pre>
+<pre language="Inline Search">@rotogrambot Rotom</pre>\n
+<pre language="Search Pokémon ">.mon Rotom</pre>\n
+<pre language="Search move">.move Pound</pre>\n
+<pre language="Search move in movepool">.move Pound? Rotom</pre>\n
+<pre language="Change pictures">.pics</pre>\n
+<pre language="Shiny pictures">.shiny</pre>
 
 @alessiocelentano | \
 <a href='t.me/rotogram'>Follow us</a> | \
